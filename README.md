@@ -13,3 +13,10 @@
     $ curl http://localhost:8001/ignite-worker/hi-youngest
     $ curl http://localhost:8000/ignite-worker/hi-oldest
     $ curl http://localhost:8001/ignite-worker/hi-oldest
+
+## Service deployment
+
+**NOTE** this service doesn't yet repeat, in spite of its name:
+
+    $ curl http://localhost:8001/ignite-worker/hi-all-repeated-service
+    $ curl -X DELETE http://localhost:8001/ignite-worker/hi-all-repeated-service

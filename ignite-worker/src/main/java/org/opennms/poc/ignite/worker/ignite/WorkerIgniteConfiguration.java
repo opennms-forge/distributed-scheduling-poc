@@ -2,6 +2,7 @@ package org.opennms.poc.ignite.worker.ignite;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.Ignition;
+import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
@@ -19,6 +20,7 @@ public class WorkerIgniteConfiguration {
         igniteConfiguration.setClientMode(false);
 
         this.configureClusterNodeDiscovery(igniteConfiguration);
+        this.configureDataStorage(igniteConfiguration);
 
         return igniteConfiguration;
     }
@@ -40,5 +42,12 @@ public class WorkerIgniteConfiguration {
         tcpDiscoverySpi.setIpFinder(ipFinder);
 
         igniteConfiguration.setDiscoverySpi(tcpDiscoverySpi);
+    }
+
+    private void configureDataStorage(IgniteConfiguration igniteConfiguration) {
+        DataStorageConfiguration dataStorageConfiguration = new DataStorageConfiguration();
+        dataStorageConfiguration.getDefaultDataRegionConfiguration().setPersistenceEnabled(false);
+
+        igniteConfiguration.setDataStorageConfiguration(dataStorageConfiguration);
     }
 }
