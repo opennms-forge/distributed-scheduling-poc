@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.opennms.poc</groupId>
+    <artifactId>ignite</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>docker-it</artifactId>
+  <name>Ignite POC :: Docker IT</name>
+  <description>
+    Docker build-time Integration Tests for the Ignite POC.
+  </description>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.opennms.horizon</groupId>
+        <artifactId>horizon-bom</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-picocontainer</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>false</filtering>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources-filtered</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+
+    <plugins>
+
+      <!--         -->
+      <!--  DOCKER -->
+      <!--         -->
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <configuration>
+          <skip>${skipITs}</skip>
+          <showLogs>true</showLogs>
+          <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
+          <images>
+
+            <!--                    -->
+            <!-- APPLICATION IMAGE  -->
+            <!--                    -->
+            <image>
+              <name>ignite-poc-application-it-image</name>
+              <alias>application</alias>
+              <build>
+                <from>openjdk:11-jre</from>
+<!--
+                <assembly>
+                  <targetDir>/</targetDir>
+
+                  <inline xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+                          xsi:schemaLocation="
+                                             http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
+                                             http://maven.apache.org/xsd/assembly-1.1.2.xsd
+                                             ">
+
+                    <fileSets>
+                      <fileSet>
+                        <directory>${project.build.testOutputDirectory}/...</directory>
+                        <outputDirectory>/...</outputDirectory>
+                      </fileSet>
+                    </fileSets>
+                  </inline>
+                </assembly>
+-->
+              </build>
+              <run>
+                <ports>
+                  <port>application-http-port:8181</port>
+                  <!--<port>5005:5005</port>-->
+                </ports>
+                <env>
+                  <!-- Need to make sure address=* is in the DEBUG OPTS otherwise it listens on the container's localhost only -->
+                  <JAVA_OPTS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</JAVA_OPTS>
+                </env>
+                <wait>
+                  <log>TBD888</log>
+                  <time>300000</time>
+                </wait>
+                <network>
+                  <mode>custom</mode>
+                  <name>ignite-poc-it-network</name>
+                  <alias>application</alias>
+                </network>
+              </run>
+            </image>
+
+          </images>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-before-integration-test</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>build</goal>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>stop-after-integration-test</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--                -->
+      <!-- TEST EXECUTION -->
+      <!--                -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skipITs>${skipITs}</skipITs>
+          <reuseForks>true</reuseForks>
+          <useSystemClassLoader>false</useSystemClassLoader>
+          <systemProperties>
+            <property>
+              <name>database.url</name>
+              <value>jdbc:postgresql://localhost:${postgresql.port}/opennms</value>
+            </property>
+            <property>
+              <name>keycloak.url</name>
+              <value>http://localhost:${keycloak-http.port}</value>
+            </property>
+            <property>
+              <name>application.base-url</name>
+              <value>http://localhost:${karaf-http-port}</value>
+            </property>
+          </systemProperties>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>
