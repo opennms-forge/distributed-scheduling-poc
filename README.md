@@ -20,3 +20,7 @@
 
     $ curl http://localhost:8001/ignite-worker/hi-all-repeated-service
     $ curl -X DELETE http://localhost:8001/ignite-worker/hi-all-repeated-service
+
+    **Service Startup Scale Testing**
+    $ curl 'http://localhost:8001/ignite-worker/noop-service?count=10000'
+    $ curl -X DELETE 'http://localhost:8001/ignite-worker/noop-service?count=10000'

@@ -3,12 +3,14 @@ package org.opennms.poc.ignite.worker.rest;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.services.ServiceConfiguration;
 import org.opennms.poc.ignite.worker.ignite.service.AllRepeatedService;
+import org.opennms.poc.ignite.worker.ignite.service.NoopService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -74,4 +76,45 @@ public class IgniteWorkerRestController {
         ignite.services().cancel("Hi All Repeated");
     }
 
+    @GetMapping(path = "/noop-service")
+    public String deployNoopService(@RequestParam(value = "count", defaultValue = "1") int count) {
+        int cur;
+
+        String lastServiceName = "noop-service-" + ( count - 1 );
+
+        cur = 0;
+        while (cur < count ) {
+            String serviceName = "noop-service-" + cur;
+
+            ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
+            serviceConfiguration.setName(serviceName);
+            serviceConfiguration.setService(new NoopService(lastServiceName));
+
+            serviceConfiguration.setTotalCount(1);
+            ignite.services().deployAsync(serviceConfiguration);
+
+            cur++;
+        }
+
+        String msg = "STARTED " + cur + " NO-OP SERVICE INSTANCES";
+        System.out.println(msg);
+
+        return msg;
+    }
+
+    @DeleteMapping(path = "/noop-service")
+    public String undeployNoopService(@RequestParam(value = "count", defaultValue = "1") int count) {
+        int cur;
+
+        cur = 0;
+        while (cur < count ) {
+            ignite.services().cancelAsync("noop-service-" + cur);
+            cur++;
+        }
+
+        String msg = "STOPPING " + cur + " NO-OP SERVICE INSTANCES";
+        System.out.println(msg);
+
+        return msg;
+    }
 }
