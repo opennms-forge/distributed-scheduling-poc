@@ -1,0 +1,32 @@
+{
+  "workflows": [
+    {
+      "description": "do a ping every 30 seconds, and show the different options that can be used to tune the behavior",
+      "type": "ping",
+      "cron": "5000",
+      "parameters": {
+        "host": "127.0.0.2",
+        "timeout-ms": 500,
+        "retries": 1,
+        "packet-size-bytes": 500,
+        "dscp": 0,
+        "allow-fragmentation": true
+      },
+      "uuid": "abc123"
+    },
+    {
+      "description": "build on top of a ping with a strafeping, sending multiple requests and computing stats",
+      "type": "strafeping",
+      "cron": "10000",
+      "parameters": {
+        "host": "127.0.0.2",
+        "timeout-ms": 500,
+        "retries": 1,
+        "packet-size-bytes": 500,
+        "dscp": 0,
+        "allow-fragmentation": true
+      },
+      "uuid": "xyz789"
+    }
+  ]
+}
