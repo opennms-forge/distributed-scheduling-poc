@@ -24,3 +24,13 @@
     **Service Startup Scale Testing**
     $ curl 'http://localhost:8001/ignite-worker/noop-service?count=10000'
     $ curl -X DELETE 'http://localhost:8001/ignite-worker/noop-service?count=10000'
+
+# Network Metrics Reporting
+
+**NOTE** network statistics are read directly from /proc/net/dev for Linux systems; all other systems will fail to report
+
+    # Report on all network devices using default interval (30 seconds)
+    $ java -Dpoc.network.stat.enable=true -Dserver.port=8000 -jar ignite-worker/target/ignite-worker-${PROJECT_VERSION}.jar 
+
+    # Report on devices "enp42s0", "lo" and "docker0" only every 2 seconds
+    $ java -Dpoc.network.stat.interval=2000 -Dpoc.network.stat.enable=true -Dpoc.network.stat.devs=enp42s0,lo,docker0 -Dserver.port=8000 -jar ignite-worker/target/ignite-worker-${PROJECT_VERSION}.jar 
