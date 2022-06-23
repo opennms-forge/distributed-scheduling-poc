@@ -1,21 +1,19 @@
 package org.opennms.poc.ignite.worker.rest;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteCache;
-import org.apache.ignite.IgniteTransactions;
-import org.apache.ignite.cache.query.ScanQuery;
 import org.apache.ignite.services.ServiceConfiguration;
-import org.apache.ignite.transactions.Transaction;
+import org.apache.ignite.services.ServiceDescriptor;
 import org.opennms.poc.ignite.worker.ignite.service.AllRepeatedService;
 import org.opennms.poc.ignite.worker.ignite.service.NoopService;
+import org.opennms.poc.ignite.worker.ignite.service.WorkflowService;
 import org.opennms.poc.ignite.worker.workflows.Workflow;
 import org.opennms.poc.ignite.worker.workflows.WorkflowRepository;
-import org.opennms.poc.ignite.worker.workflows.WorkflowScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.common.collect.Sets;
 
 @RestController
 @RequestMapping("/ignite-worker")
@@ -37,9 +37,6 @@ public class IgniteWorkerRestController {
 
     @Autowired
     private WorkflowRepository workflowRepository;
-
-    @Autowired
-    private WorkflowScheduler workflowScheduler;
 
     @GetMapping(path = "/hi-youngest")
     public void hiOnYoungest() {
@@ -134,33 +131,38 @@ public class IgniteWorkerRestController {
         return msg;
     }
 
+    private ServiceConfiguration toServiceConfiguration(Workflow workflow) {
+        ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
+        serviceConfiguration.setName(workflow.getUuid());
+        serviceConfiguration.setService(new WorkflowService(workflow));
+        serviceConfiguration.setTotalCount(1);
+        return serviceConfiguration;
+    }
+
     @GetMapping(path = "/load-em-up")
     public void loadEmUp() {
-        IgniteCache<String, Workflow> workflowCache = ignite.getOrCreateCache("workflows");
-
         List<Workflow> workflows = workflowRepository.getWorkflows();
-        Set<String> uuids = workflows.stream().map(Workflow::getUuid).collect(Collectors.toUnmodifiableSet());
 
-        IgniteTransactions transactions = ignite.transactions();
-        try (Transaction tx = transactions.txStart()) {
-            // Remove UUIDs that are no longer present - simulate what it would be like to sync
-            workflowCache.query(new ScanQuery<>(null))
-                    .forEach(entry -> {
-                        String uuid = (String)entry.getKey();
-                        if(!uuids.contains(uuid)){
-                            workflowCache.remove(uuid);
-                        }
-                    });
-            // Insert/update
-            workflows.forEach(w -> workflowCache.putAsync(w.getUuid(), w));
-            tx.commit();
+        // Determine which workflows are already scheduled
+        Set<String> existingUuids = ignite.services().serviceDescriptors().stream()
+                // Only consider workflow services
+                .filter(s -> s.serviceClass().equals(WorkflowService.class))
+                .map(ServiceDescriptor::name)
+                .collect(Collectors.toSet());
+
+        // Schedule workflows that are not already scheduled
+        Set<String> uuids = new HashSet<>();
+        for (Workflow workflow : workflows) {
+            if (!existingUuids.contains(workflow.getUuid())) {
+                ignite.services().deployAsync(toServiceConfiguration(workflow));
+            }
+            // collect the UUIDs as we iterate
+            uuids.add(workflow.getUuid());
         }
 
-        ignite.compute(
-                        ignite.cluster())
-                .broadcastAsync(() -> {
-                    System.out.println("ALL: worklfows are loaded and ready to go!");
-                    workflowScheduler.scheduleWorkflows();
-                });
+        // Un-schedule workflows that we're previously scheduled, and are no longer presentc
+        for (String uuid : Sets.difference(existingUuids, uuids)) {
+            ignite.services().cancelAsync(uuid);
+        }
     }
 }

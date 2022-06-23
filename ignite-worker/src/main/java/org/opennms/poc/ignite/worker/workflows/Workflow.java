@@ -1,11 +1,13 @@
 package org.opennms.poc.ignite.worker.workflows;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class Workflow {
+public class Workflow implements Serializable {
+    private static final long serialVersionUID = 0L;
 
     private String description;
     private String type;
