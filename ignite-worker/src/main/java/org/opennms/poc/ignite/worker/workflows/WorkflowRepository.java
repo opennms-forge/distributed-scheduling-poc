@@ -1,6 +1,7 @@
 package org.opennms.poc.ignite.worker.workflows;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import org.springframework.core.io.ClassPathResource;
@@ -14,7 +15,10 @@ public class WorkflowRepository {
     public List<Workflow> getWorkflows() {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(new ClassPathResource("workflows.json").getFile(), Workflows.class).getWorkflows();
+            ClassPathResource resource = new ClassPathResource("workflows.json");
+            try (InputStream inputStream = resource.getInputStream()) {
+                return objectMapper.readValue(inputStream, Workflows.class).getWorkflows();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
