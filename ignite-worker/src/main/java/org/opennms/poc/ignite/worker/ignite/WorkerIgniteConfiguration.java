@@ -2,6 +2,11 @@ package org.opennms.poc.ignite.worker.ignite;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.Ignition;
+import org.apache.ignite.cache.CacheMode;
+import org.apache.ignite.cache.CacheRebalanceMode;
+import org.apache.ignite.cache.CacheWriteSynchronizationMode;
+import org.apache.ignite.cache.PartitionLossPolicy;
+import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
@@ -21,6 +26,7 @@ public class WorkerIgniteConfiguration {
 
         this.configureClusterNodeDiscovery(igniteConfiguration);
         this.configureDataStorage(igniteConfiguration);
+        this.configureCache(igniteConfiguration);
 
         return igniteConfiguration;
     }
@@ -49,5 +55,17 @@ public class WorkerIgniteConfiguration {
         dataStorageConfiguration.getDefaultDataRegionConfiguration().setPersistenceEnabled(false);
 
         igniteConfiguration.setDataStorageConfiguration(dataStorageConfiguration);
+    }
+
+    private void configureCache(IgniteConfiguration igniteConfiguration) {
+        CacheConfiguration<?,?> cacheConfiguration = new CacheConfiguration<>("workflows");
+
+        cacheConfiguration.setCacheMode(CacheMode.PARTITIONED);
+        cacheConfiguration.setBackups(2);
+        cacheConfiguration.setRebalanceMode(CacheRebalanceMode.SYNC);
+        cacheConfiguration.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
+        cacheConfiguration.setPartitionLossPolicy(PartitionLossPolicy.READ_ONLY_SAFE);
+
+        igniteConfiguration.setCacheConfiguration(cacheConfiguration);
     }
 }
