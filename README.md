@@ -34,3 +34,7 @@
 
     # Report on devices "enp42s0", "lo" and "docker0" only every 2 seconds
     $ java -Dpoc.network.stat.interval=2000 -Dpoc.network.stat.enable=true -Dpoc.network.stat.devs=enp42s0,lo,docker0 -Dserver.port=8000 -jar ignite-worker/target/ignite-worker-${PROJECT_VERSION}.jar 
+
+# Skaffold
+
+    $ skaffold dev

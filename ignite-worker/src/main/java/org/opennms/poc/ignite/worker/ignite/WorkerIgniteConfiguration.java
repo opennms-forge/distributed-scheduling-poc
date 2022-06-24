@@ -9,14 +9,23 @@ import org.apache.ignite.cache.PartitionLossPolicy;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.kubernetes.configuration.KubernetesConnectionConfiguration;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
+import org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class WorkerIgniteConfiguration {
+
+    @Value("${poc.worker.ignite.kubernetes:false}")
+    private boolean useKubernetes;
+
+    @Value("${poc.worker.ignite.kubernetes.service-name:poc-ignite-worker}")
+    private String kubernetesServiceName;
 
     @Bean
     public IgniteConfiguration prepareIgniteConfiguration() {
@@ -24,9 +33,14 @@ public class WorkerIgniteConfiguration {
 
         igniteConfiguration.setClientMode(false);
 
-        this.configureClusterNodeDiscovery(igniteConfiguration);
-        this.configureDataStorage(igniteConfiguration);
-        this.configureCache(igniteConfiguration);
+        if (useKubernetes) {
+            configureClusterNodeDiscoveryKubernetes(igniteConfiguration);
+        } else {
+            configureClusterNodeDiscovery(igniteConfiguration);
+        }
+
+        configureDataStorage(igniteConfiguration);
+        configureCache(igniteConfiguration);
 
         return igniteConfiguration;
     }
@@ -45,6 +59,18 @@ public class WorkerIgniteConfiguration {
 
         // Using defaults for now (multicast group 228.1.2.4, port 47400)
         TcpDiscoveryMulticastIpFinder ipFinder = new TcpDiscoveryMulticastIpFinder();
+        tcpDiscoverySpi.setIpFinder(ipFinder);
+
+        igniteConfiguration.setDiscoverySpi(tcpDiscoverySpi);
+    }
+
+    private void configureClusterNodeDiscoveryKubernetes(IgniteConfiguration igniteConfiguration) {
+        TcpDiscoverySpi tcpDiscoverySpi = new TcpDiscoverySpi();
+
+        KubernetesConnectionConfiguration connectionConfiguration = new KubernetesConnectionConfiguration();
+        connectionConfiguration.setServiceName(kubernetesServiceName);
+
+        TcpDiscoveryKubernetesIpFinder ipFinder = new TcpDiscoveryKubernetesIpFinder(connectionConfiguration);
         tcpDiscoverySpi.setIpFinder(ipFinder);
 
         igniteConfiguration.setDiscoverySpi(tcpDiscoverySpi);
