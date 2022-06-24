@@ -12,7 +12,9 @@ import org.apache.ignite.services.ServiceDescriptor;
 import org.opennms.poc.ignite.worker.ignite.service.AllRepeatedService;
 import org.opennms.poc.ignite.worker.ignite.service.NoopService;
 import org.opennms.poc.ignite.worker.ignite.service.WorkflowService;
+import org.opennms.poc.ignite.worker.workflows.Network;
 import org.opennms.poc.ignite.worker.workflows.Workflow;
+import org.opennms.poc.ignite.worker.workflows.WorkflowGenerator;
 import org.opennms.poc.ignite.worker.workflows.WorkflowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,8 +142,9 @@ public class IgniteWorkerRestController {
     }
 
     @GetMapping(path = "/load-em-up")
-    public void loadEmUp() {
-        List<Workflow> workflows = workflowRepository.getWorkflows();
+    public void loadEmUp(@RequestParam(value = "size", defaultValue = "SMALL") Network.NetworkSize size) {
+        WorkflowGenerator workflowGenerator = new WorkflowGenerator(Network.ofSize(size));
+        List<Workflow> workflows = workflowGenerator.getWorkflows();
 
         // Determine which workflows are already scheduled
         Set<String> existingUuids = ignite.services().serviceDescriptors().stream()

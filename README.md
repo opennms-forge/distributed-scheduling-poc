@@ -25,6 +25,10 @@
     $ curl 'http://localhost:8001/ignite-worker/noop-service?count=10000'
     $ curl -X DELETE 'http://localhost:8001/ignite-worker/noop-service?count=10000'
 
+## Play with workflows
+
+   $ curl 'http://localhost:8001/ignite-worker/load-em-up?size=SMALL'
+
 # Network Metrics Reporting
 
 **NOTE** network statistics are read directly from /proc/net/dev for Linux systems; all other systems will fail to report
@@ -38,3 +42,5 @@
 # Skaffold
 
     $ skaffold dev
+
+
