@@ -94,4 +94,5 @@ public class WorkerIgniteConfiguration {
 
         igniteConfiguration.setCacheConfiguration(cacheConfiguration);
     }
+
 }
