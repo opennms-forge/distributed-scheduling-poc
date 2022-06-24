@@ -1,0 +1,22 @@
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: poc-distributed-scheduling
+build:
+  artifacts:
+  - image: poc-ignite-worker
+    context: ignite-worker
+    jib: {}
+    sync:
+      auto: true
+
+portForward:
+  - resourceType: deployment
+    resourceName: poc-distributed-scheduling
+    port: 8080
+    localPort: 8001
+
+deploy:
+  kubectl:
+    manifests:
+    - ./manifests/poc-distributed-scheduling.yaml
