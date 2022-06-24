@@ -1,12 +1,13 @@
 package org.opennms.poc.ignite.worker.metrics.linux;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+//import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.stereotype.Component;
+//
+//import javax.annotation.PostConstruct;
+//import javax.annotation.PreDestroy;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,7 +30,8 @@ import java.util.TreeMap;
  *       lo: 42483875821 60427385    0    0    0     0          0         0 42483875821 60427385    0    0    0     0       0          0
  *   enp42s0: 1986914701387 3096125226    0 2468    0     0          0   1341512 981280814993 2726199798    0    0    0     0       0          0
  */
-@Component
+//@Component
+@Slf4j
 public class NetworkInterfaceMetricReporterService {
     public static final int DEFAULT_REPORT_INTERVAL = 30_000;
     public static final String[] PROC_NET_DEV_FIELDS =
@@ -53,19 +55,17 @@ public class NetworkInterfaceMetricReporterService {
                     "tx-compressed"
             };
 
-    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(NetworkInterfaceMetricReporterService.class);
-
-    private Logger log = DEFAULT_LOGGER;
 
     private Thread runnerThread;
 
-    @Value("${poc.network.stat.devs:#{null}}")
+    //TODO: move to blueprint
+//    @Value("${poc.network.stat.devs:#{null}}")
     private Set<String> reportDevices;
 
-    @Value("${poc.network.stat.enable:false}")
+//    @Value("${poc.network.stat.enable:false}")
     private boolean enable;
 
-    @Value("${poc.network.stat.interval:" + DEFAULT_REPORT_INTERVAL + "}")
+//    @Value("${poc.network.stat.interval:" + DEFAULT_REPORT_INTERVAL + "}")
     private int reportInterval;
 
     private boolean shutdown = false;
@@ -77,7 +77,7 @@ public class NetworkInterfaceMetricReporterService {
 // Lifecycle
 //----------------------------------------
 
-    @PostConstruct
+//    @PostConstruct
     public void start() {
         if (! enable) {
             return;
@@ -88,7 +88,7 @@ public class NetworkInterfaceMetricReporterService {
         runnerThread.start();
     }
 
-    @PreDestroy
+//    @PreDestroy
     public void shutdown() {
         shutdown = true;
 

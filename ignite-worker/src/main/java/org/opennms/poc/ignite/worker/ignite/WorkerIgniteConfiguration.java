@@ -13,21 +13,22 @@ import org.apache.ignite.kubernetes.configuration.KubernetesConnectionConfigurat
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
 
-@Configuration
+//@Configuration
 public class WorkerIgniteConfiguration {
 
-    @Value("${poc.worker.ignite.kubernetes:false}")
+    //TODO: blueprint configs
+//    @Value("${poc.worker.ignite.kubernetes:false}")
     private boolean useKubernetes;
 
-    @Value("${poc.worker.ignite.kubernetes.service-name:poc-ignite-worker}")
+//    @Value("${poc.worker.ignite.kubernetes.service-name:poc-ignite-worker}")
     private String kubernetesServiceName;
 
-    @Bean
+//    @Bean
     public IgniteConfiguration prepareIgniteConfiguration() {
         IgniteConfiguration igniteConfiguration = new IgniteConfiguration();
 
@@ -45,8 +46,8 @@ public class WorkerIgniteConfiguration {
         return igniteConfiguration;
     }
 
-    @Bean
-    public Ignite startIgnite(@Autowired IgniteConfiguration igniteConfiguration) {
+//    @Bean
+    public Ignite startIgnite(/*@Autowired*/ IgniteConfiguration igniteConfiguration) {
         return Ignition.start(igniteConfiguration);
     }
 

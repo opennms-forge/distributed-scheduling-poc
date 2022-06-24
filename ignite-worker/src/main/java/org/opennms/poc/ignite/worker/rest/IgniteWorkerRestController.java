@@ -18,29 +18,29 @@ import org.opennms.poc.ignite.worker.workflows.WorkflowGenerator;
 import org.opennms.poc.ignite.worker.workflows.WorkflowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.web.bind.annotation.DeleteMapping;
+//import org.springframework.web.bind.annotation.GetMapping;
+//import org.springframework.web.bind.annotation.RequestMapping;
+//import org.springframework.web.bind.annotation.RequestParam;
+//import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Sets;
 
-@RestController
-@RequestMapping("/ignite-worker")
+//@RestController
+//@RequestMapping("/ignite-worker")
 public class IgniteWorkerRestController {
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(IgniteWorkerRestController.class);
 
     private Logger log = DEFAULT_LOGGER;
 
-    @Autowired
+//    @Autowired
     private Ignite ignite;
 
-    @Autowired
+//    @Autowired
     private WorkflowRepository workflowRepository;
 
-    @GetMapping(path = "/hi-youngest")
+//    @GetMapping(path = "/hi-youngest")
     public void hiOnYoungest() {
         UUID myNodeId = ignite.cluster().localNode().id();
 
@@ -51,7 +51,7 @@ public class IgniteWorkerRestController {
                 });
     }
 
-    @GetMapping(path = "/hi-oldest")
+//    @GetMapping(path = "/hi-oldest")
     public void hiOnOldest() {
         UUID myNodeId = ignite.cluster().localNode().id();
 
@@ -63,7 +63,7 @@ public class IgniteWorkerRestController {
                 });
     }
 
-    @GetMapping(path = "/hi-all")
+//    @GetMapping(path = "/hi-all")
     public void hiAll() {
         UUID myNodeId = ignite.cluster().localNode().id();
 
@@ -74,7 +74,7 @@ public class IgniteWorkerRestController {
                 });
     }
 
-    @GetMapping(path = "/hi-all-repeated-service")
+//    @GetMapping(path = "/hi-all-repeated-service")
     public void deployHiAllRepeatedService() {
         UUID myNodeId = ignite.cluster().localNode().id();
 
@@ -86,13 +86,13 @@ public class IgniteWorkerRestController {
         ignite.services().deploy(serviceConfiguration);
     }
 
-    @DeleteMapping(path = "/hi-all-repeated-service")
+//    @DeleteMapping(path = "/hi-all-repeated-service")
     public void removeHiAllRepeatedService() {
         ignite.services().cancel("Hi All Repeated");
     }
 
-    @GetMapping(path = "/noop-service")
-    public String deployNoopService(@RequestParam(value = "count", defaultValue = "1") int count) {
+//    @GetMapping(path = "/noop-service")
+    public String deployNoopService(/*@RequestParam(value = "count", defaultValue = "1")*/ int count) {
         int cur;
 
         String lastServiceName = "noop-service-" + ( count - 1 );
@@ -117,8 +117,8 @@ public class IgniteWorkerRestController {
         return msg;
     }
 
-    @DeleteMapping(path = "/noop-service")
-    public String undeployNoopService(@RequestParam(value = "count", defaultValue = "1") int count) {
+//    @DeleteMapping(path = "/noop-service")
+    public String undeployNoopService(/*@RequestParam(value = "count", defaultValue = "1")*/ int count) {
         int cur;
 
         cur = 0;
@@ -141,8 +141,8 @@ public class IgniteWorkerRestController {
         return serviceConfiguration;
     }
 
-    @GetMapping(path = "/load-em-up")
-    public void loadEmUp(@RequestParam(value = "size", defaultValue = "SMALL") Network.NetworkSize size) {
+//    @GetMapping(path = "/load-em-up")
+    public void loadEmUp(/*@RequestParam(value = "size", defaultValue = "SMALL")*/ Network.NetworkSize size) {
         WorkflowGenerator workflowGenerator = new WorkflowGenerator(Network.ofSize(size));
         List<Workflow> workflows = workflowGenerator.getWorkflows();
 

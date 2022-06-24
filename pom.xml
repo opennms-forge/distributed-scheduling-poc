@@ -24,10 +24,12 @@
         <junit.version>4.13.2</junit.version>
 
         <spring-boot.version>2.6.4</spring-boot.version>
+        <slf4j.version>1.7.33</slf4j.version>
     </properties>
 
     <modules>
         <module>ignite-worker</module>
+        <module>features</module>
         <!-- <module>docker-it</module> -->
     </modules>
 
@@ -59,6 +61,28 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>log4j-over-slf4j</artifactId>-->
+<!--            <version>${slf4j.version}</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
