@@ -7,8 +7,8 @@ import org.apache.ignite.configuration.IgniteConfiguration;
 public class IgnitionFactory {
 
     public static Ignite create(IgniteConfiguration igniteConfiguration) {
-//        return Ignition.start(igniteConfiguration);
-        return Ignition.start(new IgniteConfiguration());
+        return Ignition.start(igniteConfiguration);
+//        return Ignition.start(new IgniteConfiguration());
     }
 
 }
