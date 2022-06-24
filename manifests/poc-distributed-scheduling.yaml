@@ -53,6 +53,8 @@ spec:
     metadata:
       labels:
         run: poc-distributed-scheduling
+      annotations:
+        linkerd.io/inject: enabled
     spec:
       containers:
         - name: poc-ignite-worker
