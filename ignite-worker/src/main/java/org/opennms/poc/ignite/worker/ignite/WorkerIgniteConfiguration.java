@@ -8,6 +8,7 @@ import org.apache.ignite.cache.CacheWriteSynchronizationMode;
 import org.apache.ignite.cache.PartitionLossPolicy;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
+import org.apache.ignite.configuration.DeploymentMode;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.kubernetes.configuration.KubernetesConnectionConfiguration;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
@@ -41,6 +42,7 @@ public class WorkerIgniteConfiguration {
 
         configureDataStorage(igniteConfiguration);
         configureCache(igniteConfiguration);
+        configureCacheNoopServices(igniteConfiguration);
 
         return igniteConfiguration;
     }
@@ -84,7 +86,15 @@ public class WorkerIgniteConfiguration {
     }
 
     private void configureCache(IgniteConfiguration igniteConfiguration) {
-        CacheConfiguration<?,?> cacheConfiguration = new CacheConfiguration<>("workflows");
+        configureNamedCache(igniteConfiguration, "workflows");
+    }
+
+    private void configureCacheNoopServices(IgniteConfiguration igniteConfiguration) {
+        configureNamedCache(igniteConfiguration, "noop-services");
+    }
+
+    private void configureNamedCache(IgniteConfiguration igniteConfiguration, String name) {
+        CacheConfiguration<?,?> cacheConfiguration = new CacheConfiguration<>(name);
 
         cacheConfiguration.setCacheMode(CacheMode.PARTITIONED);
         cacheConfiguration.setBackups(2);

@@ -98,6 +98,14 @@ public class NetworkInterfaceMetricReporterService {
     }
 
 //========================================
+// API
+//----------------------------------------
+
+    public Map<String, Map<String, Long>> getCurrentDevStats() {
+        return readStats();
+    }
+
+//========================================
 // Internals
 //----------------------------------------
 

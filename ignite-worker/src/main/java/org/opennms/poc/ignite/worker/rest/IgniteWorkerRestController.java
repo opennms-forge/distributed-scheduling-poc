@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteCountDownLatch;
 import org.apache.ignite.services.ServiceConfiguration;
 import org.apache.ignite.services.ServiceDescriptor;
 import org.opennms.poc.ignite.worker.ignite.service.AllRepeatedService;
@@ -95,24 +96,62 @@ public class IgniteWorkerRestController {
     public String deployNoopService(@RequestParam(value = "count", defaultValue = "1") int count) {
         int cur;
 
+        // Create a CountDownLatch to know when all the services have finished starting
+        UUID latchUuid = UUID.randomUUID();
+        String latchName = latchUuid.toString();
+        IgniteCountDownLatch latch = ignite.countDownLatch(latchName, count, true, true);
+        long startTimestamp = System.nanoTime();
+
+        // Remember the last service name
         String lastServiceName = "noop-service-" + ( count - 1 );
 
+        // Pre-allocate
+        ServiceConfiguration[] serviceConfigs = new ServiceConfiguration[count];
         cur = 0;
-        while (cur < count ) {
+        while (cur < count) {
             String serviceName = "noop-service-" + cur;
 
-            ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
-            serviceConfiguration.setName(serviceName);
-            serviceConfiguration.setService(new NoopService(lastServiceName));
+            serviceConfigs[cur] = new ServiceConfiguration();
+            serviceConfigs[cur].setName(serviceName);
+            serviceConfigs[cur].setService(new NoopService(lastServiceName, latchName));
+            serviceConfigs[cur].setCacheName("noop-services");
+            serviceConfigs[cur].setAffinityKey(cur);
 
-            serviceConfiguration.setTotalCount(1);
-            ignite.services().deployAsync(serviceConfiguration);
+            serviceConfigs[cur].setTotalCount(1);
 
             cur++;
         }
 
-        String msg = "STARTED " + cur + " NO-OP SERVICE INSTANCES";
-        System.out.println(msg);
+        long preallocTimestamp = System.nanoTime();
+        System.out.println(
+                "ALLOCATED " + cur + " NO-OP SERVICE INSTANCES IN " + formatElapsedTime(startTimestamp, preallocTimestamp)
+        );
+
+        //
+        // Now deploy
+        //
+        cur = 0;
+        while (cur < count ) {
+            ignite.services().deployAsync(serviceConfigs[cur]);
+            cur++;
+        }
+
+        long deployAsyncTimestamp = System.nanoTime();
+
+        System.out.println(
+                "INITIATED START OF " + cur + " NO-OP SERVICE INSTANCES IN " + formatElapsedTime(startTimestamp, deployAsyncTimestamp)
+        );
+
+        //
+        // Wait for startup to complete
+        //
+        latch.await();
+
+        long finishTimestamp = System.nanoTime();
+        String msg = "COMPLETED START OF " + cur + " NO-OP SERVICE INSTANCES IN " + formatElapsedTime(startTimestamp, finishTimestamp);
+        System.out.println(
+                msg
+        );
 
         return msg;
     }
@@ -167,5 +206,17 @@ public class IgniteWorkerRestController {
         for (String uuid : Sets.difference(existingUuids, uuids)) {
             ignite.services().cancelAsync(uuid);
         }
+    }
+
+//========================================
+// Internals
+//----------------------------------------
+
+    private String formatElapsedTime(long firstTimestamp, long secondTimestamp) {
+        long diffNano = secondTimestamp - firstTimestamp;
+        long diffSec = diffNano / 1000000000L;
+        long diffRemainingMilli = ( diffNano / 1000000L ) % 1000L;
+
+        return diffSec + "s " + diffRemainingMilli + "ms";
     }
 }
