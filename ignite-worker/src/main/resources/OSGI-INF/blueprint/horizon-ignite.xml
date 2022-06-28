@@ -33,31 +33,4 @@
     </service-properties>
   </service>
 
-<!--  <bean id="serviceContext class=org.apache.ignite.internal.processors.service.ServiceContextImpl">-->
-<!--    <argument value=""/>-->
-<!--    <argument value=""/>-->
-<!--    <argument value=""/>-->
-<!--    <argument value=""/>-->
-<!--    <argument value=""/>-->
-<!--    <argument value=""/>-->
-<!--  </bean>-->
-
-<!--  <bean id="noopService" class="org.opennms.poc.ignite.worker.ignite.service.NoopService">-->
-<!--    <argument value="???"/>-->
-<!--    <argument ref="serviceContext"/>-->
-<!--  </bean>-->
-
-<!--  <bean id="workflowService" class="org.opennms.poc.ignite.worker.ignite.service.WorkflowService">-->
-<!--    <argument ref="ignite"/>-->
-<!--    <argument ref="serviceContext"/>-->
-<!--    <argument ref="workflow"/>-->
-<!--  </bean>-->
-
-<!--  <bean id="allRepeatedService" class="org.opennms.poc.ignite.worker.ignite.service.AllRepeatedService">-->
-<!--    <argument value="someUUID"/>-->
-<!--    <argument ref="ignite"/>-->
-<!--  </bean>-->
-
-<!--  <service ref="ignite" interface="org.apache.ignite.Ignite"/>-->
-
 </blueprint>
