@@ -1,13 +1,14 @@
 package org.opennms.poc.ignite.worker.ignite.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.resources.ServiceContextResource;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+//@Slf4j
+//@RequiredArgsConstructor
 public class NoopService implements Service {
     private static final long serialVersionUID = 0L;
 

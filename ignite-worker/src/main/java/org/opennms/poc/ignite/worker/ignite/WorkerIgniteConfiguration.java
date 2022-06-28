@@ -1,5 +1,8 @@
 package org.opennms.poc.ignite.worker.ignite;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
@@ -19,6 +22,8 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMultic
 //import org.springframework.context.annotation.Configuration;
 
 //@Configuration
+@Data
+@AllArgsConstructor
 public class WorkerIgniteConfiguration {
 
     //TODO: blueprint configs

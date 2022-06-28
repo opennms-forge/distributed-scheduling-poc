@@ -6,18 +6,58 @@
 
   <cm:property-placeholder persistent-id="org.opennms.poc.ignite.worker" update-strategy="reload">
     <cm:default-properties>
+      <cm:property name="useKubernetes" value="false"/>
+      <cm:property name="kubernetes.uri" value="someserver"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
+  <bean id="workflowRepository" class="org.opennms.poc.ignite.worker.workflows.WorkflowRepository"/>
 
-  <bean id="igniteConfiguration" class="org.apache.ignite.configuration.IgniteConfiguration">
-<!--         TODO: get configs in here-->
+  <bean id="workerIgniteConfiguration" class="org.opennms.poc.ignite.worker.ignite.WorkerIgniteConfiguration">
+    <argument value="${useKubernetes}"/>
+    <argument value="${kubernetes.uri}"/>
   </bean>
 
   <bean id="ignite" class="org.opennms.poc.ignite.worker.ignite.IgnitionFactory" factory-method="create">
-    <argument ref="igniteConfiguration"/>
+    <argument ref="workerIgniteConfiguration"/>
   </bean>
 
-  <service ref="ignite" interface="org.apache.ignite.Ignite"/>
+  <bean id="ignitePocRestServiceImpl" class="org.opennms.poc.ignite.worker.rest.IgniteWorkerRestControllerImpl" scope="singleton">
+    <argument ref="ignite"/>
+    <argument ref="workflowRepository"/>
+  </bean>
+
+  <service id="ignitePocRestService" ref="ignitePocRestServiceImpl" interface="org.opennms.poc.ignite.worker.rest.IgniteWorkerRestController">
+    <service-properties>
+      <entry key="osgi.jaxrs.resource" value="true"/>
+    </service-properties>
+  </service>
+
+<!--  <bean id="serviceContext class=org.apache.ignite.internal.processors.service.ServiceContextImpl">-->
+<!--    <argument value=""/>-->
+<!--    <argument value=""/>-->
+<!--    <argument value=""/>-->
+<!--    <argument value=""/>-->
+<!--    <argument value=""/>-->
+<!--    <argument value=""/>-->
+<!--  </bean>-->
+
+<!--  <bean id="noopService" class="org.opennms.poc.ignite.worker.ignite.service.NoopService">-->
+<!--    <argument value="???"/>-->
+<!--    <argument ref="serviceContext"/>-->
+<!--  </bean>-->
+
+<!--  <bean id="workflowService" class="org.opennms.poc.ignite.worker.ignite.service.WorkflowService">-->
+<!--    <argument ref="ignite"/>-->
+<!--    <argument ref="serviceContext"/>-->
+<!--    <argument ref="workflow"/>-->
+<!--  </bean>-->
+
+<!--  <bean id="allRepeatedService" class="org.opennms.poc.ignite.worker.ignite.service.AllRepeatedService">-->
+<!--    <argument value="someUUID"/>-->
+<!--    <argument ref="ignite"/>-->
+<!--  </bean>-->
+
+<!--  <service ref="ignite" interface="org.apache.ignite.Ignite"/>-->
 
 </blueprint>

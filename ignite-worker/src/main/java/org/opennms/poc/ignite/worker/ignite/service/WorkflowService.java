@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.resources.IgniteInstanceResource;
@@ -13,11 +14,13 @@ import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
 import org.opennms.poc.ignite.worker.workflows.Workflow;
 
+//@RequiredArgsConstructor
+@Slf4j
 public class WorkflowService implements Service {
     private static final long serialVersionUID = 0L;
 
     @LoggerResource
-    private IgniteLogger log;
+    private IgniteLogger igniteLogger;
 
     @IgniteInstanceResource
     private Ignite ignite;
@@ -31,16 +34,19 @@ public class WorkflowService implements Service {
 
     public WorkflowService(Workflow workflow) {
         this.workflow = Objects.requireNonNull(workflow);
+        if (serviceContext != null) log.info("############GOT SERVICE CONTEXT");
+        if (ignite != null) log.info("##########GOT IGNITION");
     }
 
     @Override
     public void init() {
-        log.info("{} SERVICE INITIALIZED", workflow.getUuid());
+        igniteLogger.info("############{} SERVICE INITIALIZED", workflow.getUuid());
+        log.info("SERVICE INITIALIZED");
     }
 
     @Override
     public void execute() {
-        log.info("{} SERVICE STARTED", workflow.getUuid());
+        igniteLogger.info("{} SERVICE STARTED", workflow.getUuid());
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -57,7 +63,7 @@ public class WorkflowService implements Service {
 
     @Override
     public void cancel() {
-        log.info("{} SERVICE STOPPED", workflow.getUuid());
+        igniteLogger.info("{} SERVICE STOPPED", workflow.getUuid());
         if (timer != null) {
             timer.cancel();
             timer = null;
