@@ -18,30 +18,17 @@ import org.opennms.poc.ignite.worker.workflows.Network;
 import org.opennms.poc.ignite.worker.workflows.Workflow;
 import org.opennms.poc.ignite.worker.workflows.WorkflowGenerator;
 import org.opennms.poc.ignite.worker.workflows.WorkflowRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.web.bind.annotation.DeleteMapping;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RequestParam;
-//import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Sets;
 
-//@RestController
-//@RequestMapping("/ignite-worker")
 @AllArgsConstructor
 @Slf4j
 public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestController {
 
-//    @Autowired
     private Ignite ignite;
 
-//    @Autowired
     private WorkflowRepository workflowRepository;
 
-//    @GetMapping(path = "/hi-youngest")
     @Override
     public void hiOnYoungest() {
         UUID myNodeId = ignite.cluster().localNode().id();
@@ -53,7 +40,6 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
                 });
     }
 
-//    @GetMapping(path = "/hi-oldest")
     @Override
     public void hiOnOldest() {
         UUID myNodeId = ignite.cluster().localNode().id();
@@ -66,7 +52,6 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
                 });
     }
 
-//    @GetMapping(path = "/hi-all")
     @Override
     public void hiAll() {
         UUID myNodeId = ignite.cluster().localNode().id();
@@ -78,7 +63,6 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
                 });
     }
 
-//    @GetMapping(path = "/hi-all-repeated-service")
     @Override
     public void deployHiAllRepeatedService() {
         UUID myNodeId = ignite.cluster().localNode().id();
@@ -91,15 +75,13 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
         ignite.services().deploy(serviceConfiguration);
     }
 
-//    @DeleteMapping(path = "/hi-all-repeated-service")
     @Override
     public void removeHiAllRepeatedService() {
         ignite.services().cancel("Hi All Repeated");
     }
 
-//    @GetMapping(path = "/noop-service")
     @Override
-    public String deployNoopService(/*@RequestParam(value = "count", defaultValue = "1")*/ int count) {
+    public String deployNoopService(int count) {
         int cur;
 
         String lastServiceName = "noop-service-" + ( count - 1 );
@@ -124,9 +106,8 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
         return msg;
     }
 
-//    @DeleteMapping(path = "/noop-service")
     @Override
-    public String undeployNoopService(/*@RequestParam(value = "count", defaultValue = "1")*/ int count) {
+    public String undeployNoopService(int count) {
         int cur;
 
         cur = 0;
@@ -149,9 +130,8 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
         return serviceConfiguration;
     }
 
-//    @GetMapping(path = "/load-em-up")
     @Override
-    public void loadEmUp(/*@RequestParam(value = "size", defaultValue = "SMALL")*/ Network.NetworkSize size) {
+    public void loadEmUp(Network.NetworkSize size) {
         WorkflowGenerator workflowGenerator = new WorkflowGenerator(Network.ofSize(size));
         List<Workflow> workflows = workflowGenerator.getWorkflows();
 

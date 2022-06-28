@@ -14,7 +14,6 @@ import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
 import org.opennms.poc.ignite.worker.workflows.Workflow;
 
-//@RequiredArgsConstructor
 @Slf4j
 public class WorkflowService implements Service {
     private static final long serialVersionUID = 0L;
