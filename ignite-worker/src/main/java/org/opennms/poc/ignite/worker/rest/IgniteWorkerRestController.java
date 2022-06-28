@@ -1,5 +1,6 @@
 package org.opennms.poc.ignite.worker.rest;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,7 +96,10 @@ public class IgniteWorkerRestController {
     }
 
     @GetMapping(path = "/noop-service")
-    public String deployNoopService(@RequestParam(value = "count", defaultValue = "1") int count) {
+    public String deployNoopService(
+            @RequestParam(value = "count", defaultValue = "1") int count,
+            @RequestParam(value = "batch", defaultValue = "false") boolean batch) {
+
         int cur;
 
         // Create a CountDownLatch to know when all the services have finished starting
@@ -132,10 +136,16 @@ public class IgniteWorkerRestController {
         //
         // Now deploy
         //
-        cur = 0;
-        while (cur < count ) {
-            ignite.services().deployAsync(serviceConfigs[cur]);
-            cur++;
+        if (batch) {
+            System.out.println("BATCH DEPLOY");
+            ignite.services().deployAllAsync(Arrays.asList(serviceConfigs));
+        } else {
+            System.out.println("INDIVIDUAL DEPLOY");
+            cur = 0;
+            while (cur < count ) {
+                ignite.services().deployAsync(serviceConfigs[cur]);
+                cur++;
+            }
         }
 
         long deployAsyncTimestamp = System.nanoTime();

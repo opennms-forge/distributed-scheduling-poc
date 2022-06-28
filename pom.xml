@@ -20,7 +20,7 @@
 
         <lombok.version>1.18.22</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
-        <ignite.version>2.13.0</ignite.version>
+        <ignite.version>2.13.0-PERF</ignite.version>
         <junit.version>4.13.2</junit.version>
 
         <spring-boot.version>2.6.4</spring-boot.version>
