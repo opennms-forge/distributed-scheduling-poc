@@ -44,3 +44,14 @@
     $ skaffold dev
 
 
+# Performance Notes
+
+* Starting 20,000 no-op services with `curl 'http://localhost:8000/ignite-worker/noop-service?count=20000'`
+  * Startup with single node taking about 30s on 1 node
+
+* Starting 50,000 no-op services with `curl 'http://localhost:8000/ignite-worker/noop-service?count=50000'`
+  * Startup with single node taking about 250s on 1 node
+
+* /test-thread-startup run with 20,000 threads
+  * STARTUP 20000 THREADS: 1s 289ms; check=20000
+

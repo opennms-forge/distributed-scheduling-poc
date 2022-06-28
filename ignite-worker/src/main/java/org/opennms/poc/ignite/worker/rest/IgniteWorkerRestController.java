@@ -1,9 +1,11 @@
 package org.opennms.poc.ignite.worker.rest;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.ignite.Ignite;
@@ -206,6 +208,33 @@ public class IgniteWorkerRestController {
         for (String uuid : Sets.difference(existingUuids, uuids)) {
             ignite.services().cancelAsync(uuid);
         }
+    }
+
+    @GetMapping(path = "/test-thread-startup")
+    public void testThreadStartup(@RequestParam(value = "count", defaultValue="10") int count) {
+        List<Thread> threads = new LinkedList<>();
+
+        AtomicInteger misc = new AtomicInteger(0);
+        long startupTimestamp = System.nanoTime();
+        int cur = 0;
+        while (cur < count) {
+            threads.add(new Thread(misc::incrementAndGet));
+            cur++;
+        }
+
+        threads.forEach(Thread::start);
+
+        threads.forEach((thread) -> {
+            try {
+                thread.join();
+            } catch (InterruptedException intExc) {
+                intExc.printStackTrace();
+            }
+        });
+
+        long finishTimestamp = System.nanoTime();
+
+        System.out.println("STARTUP " + count + " THREADS: " + formatElapsedTime(startupTimestamp, finishTimestamp) + "; check=" + misc.get());
     }
 
 //========================================
