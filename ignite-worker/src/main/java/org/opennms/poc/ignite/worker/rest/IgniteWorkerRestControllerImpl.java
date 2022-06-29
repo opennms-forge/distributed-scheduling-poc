@@ -152,7 +152,7 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
             uuids.add(workflow.getUuid());
         }
 
-        // Un-schedule workflows that we're previously scheduled, and are no longer presentc
+        // Un-schedule workflows that were previously scheduled, and are no longer presentc
         for (String uuid : Sets.difference(existingUuids, uuids)) {
             ignite.services().cancelAsync(uuid);
         }

@@ -19,7 +19,7 @@
     </feature>
 
     <feature name="ignite-core" version="${project.version}">
-        <feature>ignite-poc-rest</feature>
+        <feature version="${project.version}">ignite-poc-rest</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-cache-api/1.0.0_1</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.ignite/ignite-osgi/${ignite.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-core/${ignite.version}$DynamicImport-Package=*</bundle>
