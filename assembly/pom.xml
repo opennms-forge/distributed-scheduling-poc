@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>ignite</artifactId>
+    <groupId>org.opennms.poc</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>assembly</artifactId>
+    <name>Ignite POC :: Assembly</name>
+    <packaging>karaf-assembly</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <type>kar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>enterprise</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.poc</groupId>
+            <artifactId>ignite-worker</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.poc</groupId>
+            <artifactId>features</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- include custom resources in the distribution -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/filtered-resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>${karaf.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <installedFeatures>
+                        <feature>wrapper</feature>
+                        <feature>aries-blueprint</feature>
+                        <feature>shell-compat</feature>
+                    </installedFeatures>
+                    <startupFeatures>
+                        <feature>eventadmin</feature>
+                    </startupFeatures>
+                    <bootFeatures>
+                        <feature>wrap</feature>
+                        <feature>shell</feature>
+                        <feature>feature</feature>
+                        <feature>jaas</feature>
+                        <feature>ssh</feature>
+                        <feature>management</feature>
+                        <feature>bundle</feature>
+                        <feature>config</feature>
+                        <feature>deployer</feature>
+                        <feature>diagnostic</feature>
+                        <feature>feature</feature>
+                        <feature>instance</feature>
+                        <feature>kar</feature>
+                        <feature>log</feature>
+                        <feature>package</feature>
+                        <feature>service</feature>
+                        <feature>system</feature>
+                        <feature>scr</feature>
+                        <feature>ignite-poc</feature>
+                    </bootFeatures>
+                    <libraries>
+                    </libraries>
+                    <javase>11</javase>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

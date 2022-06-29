@@ -10,12 +10,11 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.opennms.poc</groupId>
     <artifactId>ignite-worker</artifactId>
 
     <packaging>bundle</packaging>
 
-    <name>Ignite POC ::: Worker</name>
+    <name>Ignite POC :: Worker</name>
     <description>
         Example Ignite Worker
     </description>
@@ -25,7 +24,6 @@
         <skipUTs>${skipTests}</skipUTs>
         <skipITs>${skipTests}</skipITs>
         <java.version>11</java.version>
-        <guava.version>31.0.1-jre</guava.version>
     </properties>
 
     <dependencyManagement>

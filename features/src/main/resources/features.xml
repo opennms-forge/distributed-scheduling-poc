@@ -4,15 +4,20 @@
     <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/${aries.jax.rs.whiteboard.version}/xml</repository>
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
+    <feature name="guava" description="Google Guava" version="${guava.version}">
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
+    </feature>
+
     <feature name="ignite-poc" version="${project.version}">
-        <feature>guava</feature>
-        <feature>jackson</feature>
+        <feature version="${guava.version}">guava</feature>
+        <feature>cxf-jackson</feature>
         <feature version="${project.version}">ignite</feature>
+        <feature>aries-blueprint</feature>
 
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
     </feature>
-
 
     <feature name="ignite" version="${project.version}">
         <feature version="${project.version}">ignite-core</feature>
