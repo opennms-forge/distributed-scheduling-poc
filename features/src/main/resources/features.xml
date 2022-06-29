@@ -10,7 +10,7 @@
         <feature version="${project.version}">ignite</feature>
 
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
-        <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/2.12.0</bundle>
+        <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
     </feature>
 
 
