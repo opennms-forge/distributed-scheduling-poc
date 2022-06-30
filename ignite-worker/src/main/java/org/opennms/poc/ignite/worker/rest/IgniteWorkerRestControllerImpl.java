@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.services.ServiceConfiguration;
 import org.apache.ignite.services.ServiceDescriptor;
+import org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistry;
 import org.opennms.poc.ignite.worker.ignite.service.AllRepeatedService;
 import org.opennms.poc.ignite.worker.ignite.service.NoopService;
 import org.opennms.poc.ignite.worker.ignite.service.WorkflowService;
@@ -28,6 +29,7 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
     private Ignite ignite;
 
     private WorkflowRepository workflowRepository;
+    private DetectorRegistry detectorRegistry;
 
     @Override
     public void hiOnYoungest() {
@@ -125,7 +127,7 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
     private ServiceConfiguration toServiceConfiguration(Workflow workflow) {
         ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
         serviceConfiguration.setName(workflow.getUuid());
-        serviceConfiguration.setService(new WorkflowService(workflow));
+        serviceConfiguration.setService(new WorkflowService(workflow, detectorRegistry));
         serviceConfiguration.setTotalCount(1);
         return serviceConfiguration;
     }

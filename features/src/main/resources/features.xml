@@ -14,9 +14,16 @@
         <feature>cxf-jackson</feature>
         <feature version="${project.version}">ignite</feature>
         <feature>aries-blueprint</feature>
+        <feature version="${project.version}">eos</feature>
 
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
+    </feature>
+
+    <feature name="eos" description="Savoirtech EOS Whiteboard" version="${project.version}">
+        <bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>
+        <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
+        <bundle dependency="true">mvn:com.savoirtech.eos/eos-core/${eos.version}</bundle>
     </feature>
 
     <feature name="ignite" version="${project.version}">

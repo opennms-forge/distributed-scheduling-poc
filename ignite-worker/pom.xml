@@ -79,6 +79,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.savoirtech.eos</groupId>
+            <artifactId>eos-core</artifactId>
+            <version>${eos.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>

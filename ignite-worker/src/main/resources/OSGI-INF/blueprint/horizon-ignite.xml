@@ -25,11 +25,28 @@
   <bean id="ignitePocRestServiceImpl" class="org.opennms.poc.ignite.worker.rest.IgniteWorkerRestControllerImpl" scope="singleton">
     <argument ref="ignite"/>
     <argument ref="workflowRepository"/>
+    <argument ref="detectorRegistry"/>
   </bean>
 
   <service id="ignitePocRestService" ref="ignitePocRestServiceImpl" interface="org.opennms.poc.ignite.worker.rest.IgniteWorkerRestController">
     <service-properties>
       <entry key="osgi.jaxrs.resource" value="true"/>
+    </service-properties>
+  </service>
+
+<!--  ========= Detector whiteboard and plugins ==========-->
+
+  <bean id="detectorRegistry" class="org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistry">
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+<!--  Each detector has a bean impl and publishes itself as a service with Detector Interface (determined by the whiteboard impl above)-->
+<!--  in production, detectors could each live in their own bundle and have a dedicated feature def for installing ad hoc-->
+  <bean id="sampleDetector" class="org.opennms.poc.ignite.worker.ignite.detectors.SampleDetector"/>
+
+  <service id="sampleDetectorService" ref="sampleDetector" interface="org.opennms.poc.ignite.worker.ignite.detectors.Detector">
+    <service-properties>
+      <entry key="detector.name" value="SampleDetector"/>
     </service-properties>
   </service>
 

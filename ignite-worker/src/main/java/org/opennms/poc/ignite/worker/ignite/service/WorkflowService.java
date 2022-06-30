@@ -12,6 +12,8 @@ import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.resources.ServiceContextResource;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
+import org.opennms.poc.ignite.worker.ignite.detectors.Detector;
+import org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistry;
 import org.opennms.poc.ignite.worker.workflows.Workflow;
 
 @Slf4j
@@ -28,13 +30,13 @@ public class WorkflowService implements Service {
     private ServiceContext serviceContext;
 
     private final Workflow workflow;
+    private DetectorRegistry detectorRegistry;
 
     private Timer timer;
 
-    public WorkflowService(Workflow workflow) {
+    public WorkflowService(Workflow workflow, DetectorRegistry detectorRegistry) {
         this.workflow = Objects.requireNonNull(workflow);
-        if (serviceContext != null) log.info("############GOT SERVICE CONTEXT");
-        if (ignite != null) log.info("##########GOT IGNITION");
+        this.detectorRegistry = detectorRegistry;
     }
 
     @Override
@@ -46,6 +48,11 @@ public class WorkflowService implements Service {
     @Override
     public void execute() {
         igniteLogger.info("{} SERVICE STARTED", workflow.getUuid());
+        // Use type field of workflow to map to detector? Or put it in the properties?
+
+        Detector detector = detectorRegistry.getService(workflow.getType());
+        log.info("Detector is {}", detector.toString());
+
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
