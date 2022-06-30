@@ -36,6 +36,6 @@ public interface IgniteWorkerRestController {
     String undeployNoopService(@PathParam("count") int count);
 
     @GET
-    @Path("/load-em-up/{size}")
-    void loadEmUp(@PathParam("size") Network.NetworkSize size);
+    @Path("/load-em-up")
+    public void loadEmUp(Network.NetworkSize size);
 }

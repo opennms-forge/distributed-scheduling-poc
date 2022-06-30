@@ -58,6 +58,7 @@ public class WorkflowService implements Service {
             @Override
             public void run() {
                 System.out.println("Executing workflow locally: " + workflow);
+                // Notify all the other nodes that the workflow has been executed, for demonstration purposes
                 ignite.compute(
                                 ignite.cluster())
                         .broadcastAsync(() -> {
