@@ -126,6 +126,9 @@ public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestControlle
         ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
         serviceConfiguration.setName(workflow.getUuid());
         serviceConfiguration.setService(new WorkflowService(workflow));
+        // Specifying the cache name and key for the affinity based deployment.
+        serviceConfiguration.setCacheName("workflows");
+        serviceConfiguration.setAffinityKey(workflow.getUuid());
         serviceConfiguration.setTotalCount(1);
         return serviceConfiguration;
     }
