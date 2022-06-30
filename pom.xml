@@ -30,6 +30,7 @@
         <aries.jax.rs.whiteboard.version>2.0.1</aries.jax.rs.whiteboard.version>
         <cxf.version>3.5.0</cxf.version>
         <eos.version>1.2.0</eos.version>
+        <aries.version>1.0.1</aries.version>
     </properties>
 
     <modules>

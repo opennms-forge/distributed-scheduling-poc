@@ -5,6 +5,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.aries.blueprint.annotation.Inject;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.resources.IgniteInstanceResource;
@@ -30,13 +31,14 @@ public class WorkflowService implements Service {
     private ServiceContext serviceContext;
 
     private final Workflow workflow;
+
+    @Inject(ref = "detectorRegistry")
     private DetectorRegistry detectorRegistry;
 
     private Timer timer;
 
-    public WorkflowService(Workflow workflow, DetectorRegistry detectorRegistry) {
+    public WorkflowService(Workflow workflow) {
         this.workflow = Objects.requireNonNull(workflow);
-        this.detectorRegistry = detectorRegistry;
     }
 
     @Override

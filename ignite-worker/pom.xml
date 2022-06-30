@@ -90,6 +90,18 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.annotation.api</artifactId>
+            <version>${aries.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.annotation.impl</artifactId>
+            <version>${aries.version}</version>
+        </dependency>
     </dependencies>
 
 <!--    <build>-->

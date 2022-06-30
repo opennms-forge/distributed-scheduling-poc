@@ -25,7 +25,6 @@
   <bean id="ignitePocRestServiceImpl" class="org.opennms.poc.ignite.worker.rest.IgniteWorkerRestControllerImpl" scope="singleton">
     <argument ref="ignite"/>
     <argument ref="workflowRepository"/>
-    <argument ref="detectorRegistry"/>
   </bean>
 
   <service id="ignitePocRestService" ref="ignitePocRestServiceImpl" interface="org.opennms.poc.ignite.worker.rest.IgniteWorkerRestController">
@@ -36,9 +35,17 @@
 
 <!--  ========= Detector whiteboard and plugins ==========-->
 
-  <bean id="detectorRegistry" class="org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistry">
+  <bean id="detectorRegistry" class="org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistryImpl">
     <argument ref="blueprintBundleContext"/>
   </bean>
+
+  <bean id="annotationScanner" class="org.apache.aries.blueprint.annotation.impl.BlueprintAnnotationScannerImpl">
+    <argument ref="blueprintBundleContexst"/>
+  </bean>
+
+  <service id="scannerImpl" ref="annotationScanner" interface="org.apache.aries.blueprint.annotation.service.BlueprintAnnotationScanner"/>
+
+<!--  <service id="detectorRegistry" ref="detectorRegistryImpl" interface="org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistry"/>-->
 
 <!--  Each detector has a bean impl and publishes itself as a service with Detector Interface (determined by the whiteboard impl above)-->
 <!--  in production, detectors could each live in their own bundle and have a dedicated feature def for installing ad hoc-->
