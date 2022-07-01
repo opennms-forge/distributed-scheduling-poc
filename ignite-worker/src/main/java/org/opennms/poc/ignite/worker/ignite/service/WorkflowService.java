@@ -5,7 +5,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.aries.blueprint.annotation.Inject;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.resources.IgniteInstanceResource;
@@ -14,7 +13,7 @@ import org.apache.ignite.resources.ServiceContextResource;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
 import org.opennms.poc.ignite.worker.ignite.detectors.Detector;
-import org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistry;
+import org.opennms.poc.ignite.worker.ignite.detectors.StaticDetectorRegistry;
 import org.opennms.poc.ignite.worker.workflows.Workflow;
 
 @Slf4j
@@ -32,9 +31,6 @@ public class WorkflowService implements Service {
 
     private final Workflow workflow;
 
-    @Inject(ref = "detectorRegistry")
-    private DetectorRegistry detectorRegistry;
-
     private Timer timer;
 
     public WorkflowService(Workflow workflow) {
@@ -44,7 +40,6 @@ public class WorkflowService implements Service {
     @Override
     public void init() {
         igniteLogger.info("############{} SERVICE INITIALIZED", workflow.getUuid());
-        log.info("SERVICE INITIALIZED");
     }
 
     @Override
@@ -52,7 +47,8 @@ public class WorkflowService implements Service {
         igniteLogger.info("{} SERVICE STARTED", workflow.getUuid());
         // Use type field of workflow to map to detector? Or put it in the properties?
 
-        Detector detector = detectorRegistry.getService(workflow.getType());
+        log.info("########### registered detector count {}", StaticDetectorRegistry.getRegisteredDetectorCount());
+        Detector detector = StaticDetectorRegistry.getDetector(workflow.getType());
         log.info("Detector is {}", detector.toString());
 
         timer = new Timer();
