@@ -15,6 +15,14 @@
   <properties>
   </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.opennms.poc</groupId>
+      <artifactId>ignite-worker</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
   <build>
     <resources>
       <resource>
@@ -41,6 +49,35 @@
                   <classifier>features</classifier>
                 </artifact>
               </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${karaf.version}</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>verify</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+            <phase>verify</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                <descriptor>file:${project.build.outputDirectory}/features.xml</descriptor>
+              </descriptors>
+              <javase>11</javase>
+              <framework>
+                <feature>framework</feature>
+              </framework>
+              <features>
+                <feature>ignite*</feature>
+              </features>
             </configuration>
           </execution>
         </executions>
