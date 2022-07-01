@@ -5,6 +5,22 @@
     $ java -Dserver.port=8000 -jar ignite-worker/target/ignite-worker-${PROJECT_VERSION}.jar
     $ java -Dserver.port=8001 -jar ignite-worker/target/ignite-worker-${PROJECT_VERSION}.jar
 
+# To Run in Karaf
+    First you must patch your karaf bash script to account some odd reflection that Ignite is doing. Look for this section:
+`code`
+if [ "${VERSION}" -gt "8" ]; then
+
+And then add this in there
+
+`code`
+      --add-opens java.base/java.nio=ALL-UNNAMED \
+     
+And then run these commands
+
+    ./bin/karaf
+    feature:repo-add mvn:org.opennms.poc/features/1.0.0-SNAPSHOT/xml/features
+    feature:install ignite-poc
+
 # To Exercise
 
     $ curl http://localhost:8000/ignite-worker/hi-all
