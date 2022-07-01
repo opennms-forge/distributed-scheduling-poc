@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  node1:
+    image: opennms/distributed-scheduling-poc:local
+    container_name: poc-node1
+    ports:
+      - "8000:8181"
+
+  node2:
+    image: opennms/distributed-scheduling-poc:local
+    container_name: poc-node2
+    ports:
+      - "8001:8181"

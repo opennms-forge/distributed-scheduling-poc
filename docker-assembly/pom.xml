@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>ignite</artifactId>
+    <groupId>org.opennms.poc</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>docker</artifactId>
+    <name>Ignite POC :: Docker</name>
+    <packaging>pom</packaging>
+    <description>
+        Create docker image for the application.
+    </description>
+
+    <properties>
+        <skip-docker-image-build>false</skip-docker-image-build>
+        <docker.image.tag>local</docker.image.tag>
+        <docker.image.skipPush>false</docker.image.skipPush>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opennms.poc</groupId>
+            <artifactId>assembly</artifactId>
+            <version>${project.version}</version>
+            <type>tar.gz</type>
+            <!--<classifier>tar.gz</classifier>-->
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--                                  -->
+            <!-- COPY AND UNPACK THE TGZ ASSEMBLY -->
+            <!--  FOR USE WITH THE DOCKERFILE     -->
+            <!--                                  -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.opennms.poc</groupId>
+                                    <artifactId>assembly</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- BUILD THE DOCKER IMAGE -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <skip>${skip-docker-image-build}</skip>
+                    <showLogs>true</showLogs>
+                    <images>
+                        <image>
+                            <name>opennms/distributed-scheduling-poc:local</name>
+                            <build>
+                                <dockerFileDir>app</dockerFileDir>
+                                <filter>@</filter>
+                                <assemblies>
+                                    <!-- COPY the assembly contents to the docker build directory under subdirectory "worK" -->
+                                    <assembly>
+                                        <name>work</name>
+                                        <inline>
+                                            <id>copy-archive</id>
+                                            <fileSets>
+                                                <fileSet>
+                                                    <directory>${project.build.directory}/dependency/assembly-${project.version}</directory>
+                                                    <outputDirectory>karaf</outputDirectory>
+                                                </fileSet>
+                                            </fileSets>
+                                        </inline>
+                                    </assembly>
+                                </assemblies>
+                                <tags>
+                                    <tag>${docker.image.tag}</tag>
+                                </tags>
+                                <skipPush>${docker.image.skipPush}</skipPush> <!-- only applies to the push goal - not the build goal -->
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -32,9 +32,12 @@
     </properties>
 
     <modules>
-        <module>assembly</module>
         <module>ignite-worker</module>
         <module>features</module>
+
+        <module>assembly</module>
+        <module>docker-assembly</module>
+
         <!-- <module>docker-it</module> -->
     </modules>
 
