@@ -41,7 +41,7 @@ public class WorkerIgniteConfiguration {
         return igniteConfiguration;
     }
 
-    public Ignite startIgnite(/*@Autowired*/ IgniteConfiguration igniteConfiguration) {
+    public Ignite startIgnite(IgniteConfiguration igniteConfiguration) {
         return Ignition.start(igniteConfiguration);
     }
 

@@ -70,3 +70,11 @@ And then run these commands
 
  
     $ skaffold dev
+
+# UNSOLVED
+
+* Adding linkerd containers to the ignite application pods interferes with the TcpDiscoveryKubernetesIpFinder.
+  * Nodes fail to cluster together
+  * See log errors such as:
+
+    Caused by: class org.apache.ignite.spi.IgniteSpiOperationTimeoutException: Failed to perform handshake due to timeout (consider increasing 'connectionTimeout' configuration property).
