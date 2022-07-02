@@ -9,10 +9,12 @@ import org.opennms.poc.ignite.worker.workflows.Network;
 @Path("/poc")
 public interface IgniteWorkerRestController {
 
+    @GET
+    @Path("/hi-youngest")
     void hiOnYoungest();
+
     @GET
     @Path("/hi-oldest")
-
     void hiOnOldest();
 
     @GET

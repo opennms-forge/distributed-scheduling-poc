@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: poc-ignite-worker
+  name: poc-distributed-scheduling
   labels:
     run: poc-distributed-scheduling
 spec:
   type: ClusterIP
   ports:
-    - port: 8080
+    - port: 8181
       protocol: TCP
       name: http
-    - port: 47400
-      protocol: UDP
+    - port: 47500
+      protocol: TCP
       name: ignite-discovery
   selector:
     run: poc-distributed-scheduling
@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
         - name: poc-ignite-worker
-          image: poc-ignite-worker
+          image: opennms/distributed-scheduling-poc:local
           imagePullPolicy: Never
           env:
             - name: poc_network_stat_enable
@@ -67,5 +67,9 @@ spec:
               value: "30000"
             - name: poc_worker_ignite_kubernetes
               value: "true"
+            - name: USE_KUBERNETES
+              value: "true"
+            - name: KUBERNETES_SERVICE_NAME
+              value: "poc-distributed-scheduling"
           ports:
-            - containerPort: 8080
+            - containerPort: 8181

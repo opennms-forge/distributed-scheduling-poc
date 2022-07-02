@@ -7,7 +7,7 @@
   <cm:property-placeholder persistent-id="org.opennms.poc.ignite.worker" update-strategy="reload">
     <cm:default-properties>
       <cm:property name="useKubernetes" value="false"/>
-      <cm:property name="kubernetes.uri" value="someserver"/>
+      <cm:property name="kubernetes.service-name" value="poc-distributed-scheduling"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -15,7 +15,7 @@
 
   <bean id="workerIgniteConfiguration" class="org.opennms.poc.ignite.worker.ignite.WorkerIgniteConfiguration">
     <argument value="${useKubernetes}"/>
-    <argument value="${kubernetes.uri}"/>
+    <argument value="${kubernetes.service-name}"/>
   </bean>
 
   <bean id="ignite" class="org.opennms.poc.ignite.worker.ignite.IgnitionFactory" factory-method="create">
