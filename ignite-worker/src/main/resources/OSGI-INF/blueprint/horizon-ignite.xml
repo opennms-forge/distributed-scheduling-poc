@@ -33,4 +33,30 @@
     </service-properties>
   </service>
 
+<!--  ========= Detector whiteboard and plugins ==========-->
+
+  <bean id="detectorRegistry" class="org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistryImpl">
+    <argument ref="blueprintBundleContext"/>
+    <argument ref="ignite"/>
+  </bean>
+
+<!--  Creating an instance here just to get the static fields set, but we don't really need to reference this instance -->
+  <bean id="staticDetectorRegistry" class="org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistryHolder">
+    <argument ref="blueprintBundleContext"/>
+    <argument ref="ignite"/>
+  </bean>
+
+<!--  TODO: will we need this an OSGi service anywhere now?-->
+<!--  <service id="detectorRegistry" ref="detectorRegistryImpl" interface="org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistry"/>-->
+
+<!--  Each detector has a bean impl and publishes itself as a service with Detector Interface (determined by the whiteboard impl above)-->
+<!--  in production, detectors could each live in their own bundle and have a dedicated feature def for installing ad hoc-->
+  <bean id="sampleDetector" class="org.opennms.poc.ignite.worker.ignite.detectors.SampleDetector"/>
+
+  <service id="sampleDetectorService" ref="sampleDetector" interface="org.opennms.poc.ignite.worker.ignite.detectors.Detector">
+    <service-properties>
+      <entry key="detector.name" value="SampleDetector"/>
+    </service-properties>
+  </service>
+
 </blueprint>
