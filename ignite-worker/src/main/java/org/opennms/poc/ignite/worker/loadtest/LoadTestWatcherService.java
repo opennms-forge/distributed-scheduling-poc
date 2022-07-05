@@ -3,6 +3,7 @@ package org.opennms.poc.ignite.worker.loadtest;
 import org.apache.ignite.services.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface LoadTestWatcherService extends Service {
     public static final String SERVICE_NAME = "load-test-watcher-service";

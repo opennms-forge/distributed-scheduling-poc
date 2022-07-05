@@ -8,6 +8,7 @@ import org.apache.ignite.services.ServiceConfiguration;
 import org.opennms.poc.ignite.worker.loadtest.LoadTestServiceClusterStarter;
 import org.opennms.poc.ignite.worker.loadtest.LoadTestServiceStarterJob;
 import org.opennms.poc.ignite.worker.loadtest.LoadTestWatcherService;
+import org.opennms.poc.ignite.worker.loadtest.PingMethod;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,10 +25,13 @@ public class LoadTestServiceStarterJobImpl implements LoadTestServiceStarterJob 
     @LoggerResource
     private IgniteLogger logger;
 
-    public LoadTestServiceStarterJobImpl(String prefix, int count, LoadTestServiceClusterStarter loadTestServiceClusterStarter) {
+    private PingMethod pingMethod;
+
+    public LoadTestServiceStarterJobImpl(String prefix, int count, LoadTestServiceClusterStarter loadTestServiceClusterStarter, PingMethod pingMethod) {
         this.prefix = prefix;
         this.count = count;
         this.loadTestServiceClusterStarter = loadTestServiceClusterStarter;
+        this.pingMethod = pingMethod;
     }
 
     @Override
@@ -44,7 +48,9 @@ public class LoadTestServiceStarterJobImpl implements LoadTestServiceStarterJob 
             newServices.add(serviceName);
 
             ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
-            serviceConfiguration.setService(new LoadTestServiceImpl(serviceName));
+            serviceConfiguration.setService(
+                    new LoadTestServiceImpl(serviceName, pingMethod)
+            );
             serviceConfiguration.setName(serviceName);
             serviceConfiguration.setAffinityKey(serviceName);
             // serviceConfiguration.setCacheName("TBD");

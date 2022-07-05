@@ -3,6 +3,7 @@ package org.opennms.poc.ignite.worker.rest;
 import org.apache.ignite.Ignite;
 import org.opennms.poc.ignite.worker.loadtest.LoadTestServiceClusterStarter;
 import org.opennms.poc.ignite.worker.loadtest.LoadTestWatcherService;
+import org.opennms.poc.ignite.worker.loadtest.PingMethod;
 import org.opennms.poc.ignite.worker.loadtest.impl.LoadTestServiceClusterBatchStarter;
 import org.opennms.poc.ignite.worker.loadtest.impl.LoadTestServiceClusterIndividualStarter;
 import org.opennms.poc.ignite.worker.loadtest.impl.LoadTestServiceStarterJobImpl;
@@ -40,15 +41,16 @@ public class LoadTestServiceRestController {
     public void spinUpServices(
             @PathVariable("prefix") String prefix,
             @RequestParam(value = "count", defaultValue = "1") int count,
-            @RequestParam(value = "batch", defaultValue = "false") boolean batchInd
-    ) {
+            @RequestParam(value = "batch", defaultValue = "false") boolean batchInd,
+            @RequestParam(value = "ping-method", defaultValue = "SERVICE_METHODCALL") PingMethod pingMethod
+            ) {
         LoadTestServiceClusterStarter starter;
         if (batchInd) {
             starter = new LoadTestServiceClusterBatchStarter();
         } else {
             starter = new LoadTestServiceClusterIndividualStarter();
         }
-        LoadTestServiceStarterJobImpl starterJob = new LoadTestServiceStarterJobImpl(prefix, count, starter);
+        LoadTestServiceStarterJobImpl starterJob = new LoadTestServiceStarterJobImpl(prefix, count, starter, pingMethod);
 
         //
         // Just run locally, without going through ignite at all.
@@ -60,7 +62,8 @@ public class LoadTestServiceRestController {
     public void concurrentSpinUpServices(
             @PathVariable("prefix") String prefix,
             @RequestParam(value = "count", defaultValue = "1") int count,
-            @RequestParam(value = "batch", defaultValue = "false") boolean batchInd
+            @RequestParam(value = "batch", defaultValue = "false") boolean batchInd,
+            @RequestParam(value = "ping-method", defaultValue = "SERVICE_METHODCALL") PingMethod pingMethod
     ) {
         LoadTestServiceClusterStarter starter;
         if (batchInd) {
@@ -68,7 +71,7 @@ public class LoadTestServiceRestController {
         } else {
             starter = new LoadTestServiceClusterIndividualStarter();
         }
-        LoadTestServiceStarterJobImpl starterJob = new LoadTestServiceStarterJobImpl(prefix, count, starter);
+        LoadTestServiceStarterJobImpl starterJob = new LoadTestServiceStarterJobImpl(prefix, count, starter, pingMethod);
 
         ignite.compute().broadcastAsync(starterJob);
     }

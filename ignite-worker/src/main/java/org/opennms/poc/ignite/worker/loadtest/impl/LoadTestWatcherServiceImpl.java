@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class LoadTestWatcherServiceImpl implements LoadTestWatcherService {
 
@@ -31,6 +32,8 @@ public class LoadTestWatcherServiceImpl implements LoadTestWatcherService {
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     private Map<String, Long> pingTimestamps;
+    private AtomicLong pingsByMessage = new AtomicLong(0);
+    private AtomicLong pingsByServiceCall = new AtomicLong(0);
 
     private final Object lock = new Object();
 
@@ -41,6 +44,11 @@ public class LoadTestWatcherServiceImpl implements LoadTestWatcherService {
 
         scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
         pingTimestamps = new HashMap<>();
+
+        //
+        // REGISTER for "PING" messages
+        //
+        ignite.message().remoteListen("PING", this::processPingMessage);
     }
 
     @Override
@@ -57,11 +65,8 @@ public class LoadTestWatcherServiceImpl implements LoadTestWatcherService {
 
     @Override
     public void servicePing(String serviceName) {
-        long now = System.nanoTime();
-
-        synchronized (lock) {
-            pingTimestamps.put(serviceName, now);
-        }
+        pingsByServiceCall.incrementAndGet();
+        processPingInternal(serviceName);
     }
 
     @Override
@@ -74,6 +79,24 @@ public class LoadTestWatcherServiceImpl implements LoadTestWatcherService {
 //========================================
 // Internals
 //----------------------------------------
+
+    private boolean processPingMessage(UUID node, Object serviceNameObj) {
+        pingsByMessage.incrementAndGet();
+
+        if (serviceNameObj instanceof String) {
+            processPingInternal((String) serviceNameObj);
+        }
+
+        return true;
+    }
+
+    private void processPingInternal(String serviceName) {
+        long now = System.nanoTime();
+
+        synchronized (lock) {
+            pingTimestamps.put(serviceName, now);
+        }
+    }
 
     private void runPeriodicChecks() {
         Map<String, Long> pingTimestampSnapshot;
@@ -99,7 +122,12 @@ public class LoadTestWatcherServiceImpl implements LoadTestWatcherService {
             }
         }
 
-        logger.info("Finished check; complaint-count=" + complaintCount + "; healthy-count=" + healthyCount);
+        logger.info(
+                "Finished check; complaint-count=" + complaintCount +
+                "; healthy-count=" + healthyCount +
+                "; svc-call-ping-count=" + pingsByServiceCall.get() +
+                "; ping-by-msg=" + pingsByMessage.get()
+        );
     }
 
     private void complain(long complaintCount, String msg) {
