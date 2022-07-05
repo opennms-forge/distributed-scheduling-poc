@@ -41,7 +41,7 @@
   </bean>
 
 <!--  Creating an instance here just to get the static fields set, but we don't really need to reference this instance -->
-  <bean id="staticDetectorRegistry" class="org.opennms.poc.ignite.worker.ignite.detectors.StaticDetectorRegistry">
+  <bean id="staticDetectorRegistry" class="org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistryHolder">
     <argument ref="blueprintBundleContext"/>
     <argument ref="ignite"/>
   </bean>
