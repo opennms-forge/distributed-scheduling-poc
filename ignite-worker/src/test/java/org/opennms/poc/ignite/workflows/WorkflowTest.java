@@ -13,6 +13,7 @@ import org.opennms.poc.ignite.worker.workflows.Workflow;
 import org.opennms.poc.ignite.worker.workflows.WorkflowGenerator;
 import org.opennms.poc.ignite.worker.workflows.WorkflowRepository;
 
+//TODO: convert this to junit or keep hamcrest?
 public class WorkflowTest {
 
     @Test
