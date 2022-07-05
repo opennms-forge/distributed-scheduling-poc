@@ -6,7 +6,7 @@ import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.resources.ServiceContextResource;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
-import org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistryHolder;
+import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
 
 @Slf4j
 //@RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class NoopService implements Service {
 
     public NoopService(String lastServiceName) {
         this.lastServiceName = lastServiceName;
-        log.info("############## Registered Detector count {}", DetectorRegistryHolder.getRegisteredDetectorCount());
+        log.info("############## Registered Detector count {}", OsgiServiceHolder.getRegisteredDetectorCount());
     }
 
     @Override

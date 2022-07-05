@@ -38,6 +38,7 @@
 
         <module>assembly</module>
         <module>docker-assembly</module>
+        <module>plugins</module>
 
         <!-- <module>docker-it</module> -->
     </modules>

@@ -13,9 +13,9 @@ import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.resources.ServiceContextResource;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
-import org.opennms.poc.ignite.worker.ignite.detectors.Detector;
-import org.opennms.poc.ignite.worker.ignite.detectors.DetectorRegistryHolder;
+import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
 import org.opennms.poc.ignite.worker.workflows.Workflow;
+import org.opennms.poc.plugin.api.ServiceDetector;
 
 @Slf4j
 public class WorkflowService implements Service {
@@ -48,8 +48,8 @@ public class WorkflowService implements Service {
         igniteLogger.info("{} SERVICE STARTED", workflow.getUuid());
         // Use type field of workflow to map to detector? Or put it in the properties?
 
-        log.info("########### registered detector count {}", DetectorRegistryHolder.getRegisteredDetectorCount());
-        Optional<Detector> detector = DetectorRegistryHolder.getDetector(workflow.getType());
+        log.info("########### registered detector count {}", OsgiServiceHolder.getRegisteredDetectorCount());
+        Optional<ServiceDetector> detector = OsgiServiceHolder.getDetector(workflow.getType());
         log.info("Detector is {}", detector.isPresent() ? detector.toString():"NOT FOUND");
 
         timer = new Timer();
