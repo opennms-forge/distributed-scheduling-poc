@@ -1,8 +1,8 @@
-package org.opennms.poc.plugin;
+package org.opennms.poc.snmp;
 
 import org.opennms.poc.plugin.api.ServiceDetector;
 
-public class SampleDetector implements ServiceDetector {
+public class SnmpDetector implements ServiceDetector {
 
     @Override
     public void init() {

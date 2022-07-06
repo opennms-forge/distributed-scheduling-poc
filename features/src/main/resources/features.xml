@@ -27,17 +27,18 @@
     </feature>
 
     <feature name="ignite" version="${project.version}">
+        <feature version="${project.version}">rest-utils</feature>
         <feature version="${project.version}">ignite-core</feature>
     </feature>
 
     <feature name="ignite-core" version="${project.version}">
-        <feature version="${project.version}">ignite-poc-rest</feature>
+        <bundle>mvn:org.opennms.poc/api/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-cache-api/1.0.0_1</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.ignite/ignite-osgi/${ignite.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-core/${ignite.version}$DynamicImport-Package=*</bundle>
     </feature>
 
-    <feature name="ignite-poc-rest" version="${project.version}">
+    <feature name="rest-utils" version="${project.version}">
 
         <feature>cxf</feature>
         <feature>cxf-jaxrs</feature>
@@ -51,5 +52,13 @@
         <feature>aries-jax-rs-whiteboard-jackson</feature>
         <bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
 
+    </feature>
+
+    <feature name="snmp-plugins" description="OpenNMS SNMP Plugins" version="${project.version}">
+        <bundle>mvn:org.opennms.poc/SNMP/${project.version}</bundle>
+    </feature>
+
+    <feature name="icmp-plugins" description="OpenNMS ICMP Plugins" version="${project.version}">
+        <bundle>mvn:org.opennms.poc/ICMP/${project.version}</bundle>
     </feature>
 </features>

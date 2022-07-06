@@ -1,0 +1,27 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns:camel="http://camel.apache.org/schema/blueprint"
+  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <cm:property-placeholder persistent-id="org.opennms.plugins.snmp" update-strategy="reload">
+    <cm:default-properties>
+
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <service id="snmpDetectorService" interface="org.opennms.poc.plugin.api.ServiceDetector">
+    <bean class="org.opennms.poc.snmp.SnmpDetector"/>
+    <service-properties>
+      <entry key="detector.name" value="SNMPDetector"/>
+    </service-properties>
+  </service>
+
+  <service id="snmpMonitorService" interface="org.opennms.poc.plugin.api.ServiceMonitor">
+    <bean class="org.opennms.poc.snmp.SnmpMonitor"/>
+    <service-properties>
+      <entry key="monitor.name" value="SNMPMonitor"/>
+    </service-properties>
+  </service>
+
+</blueprint>
