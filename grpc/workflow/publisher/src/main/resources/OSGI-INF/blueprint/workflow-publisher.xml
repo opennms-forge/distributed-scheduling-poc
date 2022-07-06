@@ -1,0 +1,19 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns:camel="http://camel.apache.org/schema/blueprint"
+  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <reference id="publisher" interface="org.opennms.core.ipc.twin.api.TwinPublisher" filter="(strategy=grpc)" />
+
+  <bean id="workflowPublisher" class="org.opennms.poc.ignite.grpc.publisher.internal.GrpcWorkflowPublisher" init-method="start">
+    <argument ref="publisher" />
+  </bean>
+
+  <service ref="workflowPublisher" interface="org.opennms.poc.ignite.grpc.publisher.WorkflowPublisher">
+    <service-properties>
+      <entry key="strategy" value="grpc" />
+    </service-properties>
+  </service>
+
+</blueprint>
