@@ -9,6 +9,7 @@ import org.opennms.poc.ignite.worker.loadtest.LoadTestWatcherService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +75,16 @@ public class LoadTestWatcherServiceImpl implements LoadTestWatcherService {
         synchronized (lock) {
             serviceNames.forEach((name) -> pingTimestamps.put(name, null));
         }
+    }
+
+    @Override
+    public Map<String, Long> getPingTimestamps() {
+        Map<String, Long> result = new TreeMap<>();
+        synchronized (lock) {
+            result.putAll(pingTimestamps);
+        }
+
+        return result;
     }
 
 //========================================

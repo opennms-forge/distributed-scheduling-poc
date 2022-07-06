@@ -26,13 +26,46 @@ public class LoadTestServiceStarterJobImpl implements LoadTestServiceStarterJob 
     private IgniteLogger logger;
 
     private PingMethod pingMethod;
+    private boolean rethrowTaskExceptions = false;
 
-    public LoadTestServiceStarterJobImpl(String prefix, int count, LoadTestServiceClusterStarter loadTestServiceClusterStarter, PingMethod pingMethod) {
+    public LoadTestServiceStarterJobImpl(
+            String prefix,
+            int count,
+            LoadTestServiceClusterStarter loadTestServiceClusterStarter,
+            PingMethod pingMethod,
+            boolean rethrowTaskExceptions) {
+
         this.prefix = prefix;
         this.count = count;
         this.loadTestServiceClusterStarter = loadTestServiceClusterStarter;
         this.pingMethod = pingMethod;
+        this.rethrowTaskExceptions = rethrowTaskExceptions;
     }
+
+//========================================
+// Getters and Setters
+//  NOTE: for local use only (not when used as an Ignite Job)
+//----------------------------------------
+
+    public IgniteLogger getLogger() {
+        return logger;
+    }
+
+    public void setLogger(IgniteLogger logger) {
+        this.logger = logger;
+    }
+
+    public Ignite getIgnite() {
+        return ignite;
+    }
+
+    public void setIgnite(Ignite ignite) {
+        this.ignite = ignite;
+    }
+
+//========================================
+// Processing
+//----------------------------------------
 
     @Override
     public void run() {
@@ -49,7 +82,7 @@ public class LoadTestServiceStarterJobImpl implements LoadTestServiceStarterJob 
 
             ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
             serviceConfiguration.setService(
-                    new LoadTestServiceImpl(serviceName, pingMethod)
+                    new LoadTestServiceImpl(serviceName, pingMethod, rethrowTaskExceptions)
             );
             serviceConfiguration.setName(serviceName);
             serviceConfiguration.setAffinityKey(serviceName);
