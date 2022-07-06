@@ -13,6 +13,7 @@
   <name>Ignite POC :: Features</name>
 
   <properties>
+    <opennms.version>30.0.0</opennms.version>
   </properties>
 
   <dependencies>
@@ -24,17 +25,17 @@
     <dependency>
       <groupId>org.opennms.poc.plugins</groupId>
       <artifactId>api</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opennms.poc.plugins</groupId>
       <artifactId>ICMP</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opennms.poc.plugins</groupId>
       <artifactId>SNMP</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -101,6 +102,7 @@
               </framework>
               <features>
                 <feature>ignite*</feature>
+                <feature>poc-grpc*</feature>
               </features>
             </configuration>
           </execution>
