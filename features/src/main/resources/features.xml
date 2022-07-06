@@ -3,7 +3,7 @@
 <!--    <repository>mvn:org.apache.ignite/ignite-osgi-karaf/2.12.0/xml/features</repository>-->
     <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/${aries.jax.rs.whiteboard.version}/xml</repository>
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
-    <repository>mvn:org.apache.karaf.features/spring/${karaf.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.assemblies/features/${opennms-horizon.version}/xml/features</repository>
 
     <feature name="guava" description="Google Guava" version="${project.version}">
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
@@ -25,6 +25,39 @@
         <bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
         <bundle dependency="true">mvn:com.savoirtech.eos/eos-core/${eos.version}</bundle>
+    </feature>
+
+    <feature name="poc-grpc-horizon" description="Horizon gRPC apis" version="${project.version}">
+        <details>Import of Horizon gRPC apis.</details>
+        <feature>shell</feature>
+        <feature>aries-blueprint</feature>
+        <feature>horizon-grpc</feature>
+    </feature>
+
+    <feature name="poc-grpc-ipc-twin" description="Digital twin api with gRPC channel" version="${project.version}">
+        <feature>jackson</feature>
+        <feature>guava</feature>
+        <feature version="${project.version}">poc-grpc-horizon</feature>
+
+        <!-- shallow copy of horizon dependencies -->
+        <bundle>mvn:org.opennms.horizon.3rdparty/json-patch-osgi/${opennms-horizon.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.3rdparty/jackson-coreutils-osgi/${opennms-horizon.version}</bundle>
+        <bundle>mvn:com.github.fge/msg-simple/1.1</bundle>
+        <bundle>mvn:com.github.fge/btf/1.2</bundle>
+        <bundle>mvn:com.google.code.findbugs/jsr305/3.0.2</bundle>
+
+        <bundle>mvn:com.google.protobuf/protobuf-java/3.16.1</bundle>
+        <!-- /copy -->
+
+        <bundle>mvn:org.opennms.core.ipc.twin/api/${opennms-horizon.version}</bundle>
+        <bundle>mvn:org.opennms.core.ipc.twin/common/${opennms-horizon.version}</bundle>
+        <bundle>mvn:org.opennms.core.ipc.twin.grpc/common/${opennms-horizon.version}</bundle>
+        <bundle>mvn:org.opennms.core.ipc.twin.grpc/publisher/${opennms-horizon.version}</bundle>
+    </feature>
+
+    <feature name="poc-grpc" description="gRPC communication layer" version="${project.version}">
+        <details>All-in-one feature to activate gRPC functionality.</details>
+        <feature version="${project.version}">poc-grpc-ipc-twin</feature>
     </feature>
 
     <feature name="ignite" version="${project.version}">
