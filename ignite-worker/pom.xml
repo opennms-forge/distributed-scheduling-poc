@@ -23,7 +23,6 @@
         <skipTests>false</skipTests>
         <skipUTs>${skipTests}</skipUTs>
         <skipITs>${skipTests}</skipITs>
-        <java.version>11</java.version>
     </properties>
 
     <dependencies>
