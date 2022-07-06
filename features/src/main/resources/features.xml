@@ -37,6 +37,7 @@
     <feature name="poc-grpc-ipc-twin" description="Digital twin api with gRPC channel" version="${project.version}">
         <feature>jackson</feature>
         <feature>guava</feature>
+        <feature version="${opennms-horizon.version}">horizon-tracing</feature>
         <feature version="${project.version}">poc-grpc-horizon</feature>
 
         <!-- shallow copy of horizon dependencies -->
@@ -53,11 +54,28 @@
         <bundle>mvn:org.opennms.core.ipc.twin/common/${opennms-horizon.version}</bundle>
         <bundle>mvn:org.opennms.core.ipc.twin.grpc/common/${opennms-horizon.version}</bundle>
         <bundle>mvn:org.opennms.core.ipc.twin.grpc/publisher/${opennms-horizon.version}</bundle>
+        <bundle>mvn:org.opennms.core.ipc.twin.grpc/subscriber/${opennms-horizon.version}</bundle>
+    </feature>
+
+    <feature name="poc-grpc-workflow" version="${project.version}">
+        <feature version="${project.version}">poc-grpc-ipc-twin</feature>
+
+        <bundle>mvn:org.opennms.poc.grpc.workflow/model/${project.version}</bundle>
+        <bundle>mvn:org.opennms.poc.grpc.workflow/publisher/${project.version}</bundle>
+        <bundle>mvn:org.opennms.poc.grpc.workflow/subscriber/${project.version}</bundle>
+    </feature>
+
+    <feature name="poc-grpc-workflow-injector" version="${project.version}">
+        <feature version="${project.version}">poc-grpc-workflow</feature>
+
+        <bundle>mvn:org.opennms.poc.grpc.workflow/injector/${project.version}</bundle>
     </feature>
 
     <feature name="poc-grpc" description="gRPC communication layer" version="${project.version}">
         <details>All-in-one feature to activate gRPC functionality.</details>
         <feature version="${project.version}">poc-grpc-ipc-twin</feature>
+        <feature version="${project.version}">poc-grpc-workflow</feature>
+        <feature version="${project.version}">poc-grpc-workflow-injector</feature>
     </feature>
 
     <feature name="ignite" version="${project.version}">
