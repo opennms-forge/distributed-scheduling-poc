@@ -9,6 +9,8 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
+  <bean id="pingerFactory" class="org.opennms.netmgt.icmp.PingerFactoryImpl"/>
+
   <service id="icmpDetectorService" interface="org.opennms.poc.plugin.api.ServiceDetector">
     <bean class="org.opennms.poc.icmp.IcmpDetector"/>
     <service-properties>
@@ -17,7 +19,9 @@
   </service>
 
   <service id="icmpMonitorService" interface="org.opennms.poc.plugin.api.ServiceMonitor">
-    <bean class="org.opennms.poc.icmp.IcmpMonitor"/>
+    <bean class="org.opennms.poc.icmp.IcmpMonitor">
+      <argument ref="pingerFactory"/>
+    </bean>
     <service-properties>
       <entry key="monitor.name" value="ICMPMonitor"/>
     </service-properties>
