@@ -30,15 +30,17 @@
         <aries.jax.rs.whiteboard.version>2.0.1</aries.jax.rs.whiteboard.version>
         <cxf.version>3.5.0</cxf.version>
         <eos.version>1.2.0</eos.version>
+        <spring.version>5.3.14_1</spring.version>
+        <hibernate.version>5.4.32.Final</hibernate.version>
     </properties>
 
     <modules>
         <module>ignite-worker</module>
+        <module>plugins</module>
         <module>features</module>
 
         <module>assembly</module>
         <module>docker-assembly</module>
-        <module>plugins</module>
 
         <!-- <module>docker-it</module> -->
     </modules>

@@ -69,7 +69,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.poc</groupId>
+            <groupId>org.opennms.poc.plugins</groupId>
             <artifactId>api</artifactId>
             <version>${project.version}</version>
         </dependency>
