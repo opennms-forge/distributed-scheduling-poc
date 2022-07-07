@@ -5,7 +5,6 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import java.net.InetAddress;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.opennms.netmgt.icmp.PingConstants;
 import org.opennms.netmgt.icmp.PingerFactory;
 import org.opennms.netmgt.provision.rpc.relocate.ParameterMap;
@@ -15,12 +14,15 @@ import org.opennms.poc.plugin.api.PollStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RequiredArgsConstructor
 public class IcmpMonitor extends AbstractServiceMonitor {
     private static final Logger LOG = LoggerFactory.getLogger(IcmpMonitor.class);
 
     private Supplier<PingerFactory> pingerFactory;
 
+    public IcmpMonitor(PingerFactory pingerFactoryDelegate) {
+        pingerFactory = Suppliers.memoize(() -> pingerFactoryDelegate);
+    }
+    
     @Override
     public PollStatus poll(MonitoredService svc, Map<String, Object> parameters) {
         Number rtt = null;
