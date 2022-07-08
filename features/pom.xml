@@ -36,6 +36,14 @@
       <artifactId>SNMP</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.opennms.horizon.assemblies</groupId>
+      <artifactId>features</artifactId>
+      <version>${opennms-horizon.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
   </dependencies>
 
   <build>
@@ -84,6 +92,7 @@
               <descriptors>
                 <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
                 <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                <descriptor>mvn:org.opennms.horizon.assemblies/features/${opennms-horizon.version}/xml/features</descriptor>
                 <descriptor>file:${project.build.outputDirectory}/features.xml</descriptor>
               </descriptors>
               <javase>11</javase>

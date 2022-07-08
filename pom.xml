@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <guava.version>31.0.1-jre</guava.version>
-        <karaf.version>4.3.7</karaf.version>
+        <karaf.version>4.3.6</karaf.version>
         <lombok.version>1.18.22</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <ignite.version>2.13.0</ignite.version>
@@ -32,6 +32,7 @@
         <eos.version>1.2.0</eos.version>
         <spring.version>5.3.14_1</spring.version>
         <hibernate.version>5.4.32.Final</hibernate.version>
+        <opennms-horizon.version>0.1.0-SNAPSHOT</opennms-horizon.version>
     </properties>
 
     <modules>
@@ -64,6 +65,16 @@
                 <version>${lombok.version}</version>
                 <optional>true</optional>
             </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>
@@ -73,23 +84,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <pluginManagement>
