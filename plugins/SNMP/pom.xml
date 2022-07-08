@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>plugins</artifactId>
+    <groupId>org.opennms.poc.plugins</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>SNMP</artifactId>
+  <packaging>bundle</packaging>
+  <name>Ignite POC :: Plugins :: SNMP</name>
+
+  <properties>
+      <java.version>11</java.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.opennms.poc.plugins</groupId>
+      <artifactId>api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opennms.horizon.snmp</groupId>
+      <artifactId>api</artifactId>
+      <version>${opennms-horizon.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opennms.horizon.events</groupId>
+      <artifactId>api</artifactId>
+      <version>${opennms-horizon.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opennms.horizon.provision</groupId>
+      <artifactId>service</artifactId>
+      <version>${opennms-horizon.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.googlecode.concurrent-locks</groupId>
+      <artifactId>concurrent-locks</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+
+</project>
