@@ -5,7 +5,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.opennms.poc.ignite.grpc.model.WorkflowTwin;
+import org.opennms.poc.ignite.model.workflows.Workflow;
 
 @Path("/injector/workflow")
 @Produces(MediaType.APPLICATION_JSON)
@@ -13,6 +13,6 @@ import org.opennms.poc.ignite.grpc.model.WorkflowTwin;
 public interface WorkflowInjector {
 
   @POST
-  void inject(WorkflowTwin model);
+  void inject(Workflow model);
 
 }

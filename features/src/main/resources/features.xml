@@ -16,6 +16,7 @@
         <feature version="${project.version}">ignite</feature>
         <feature>aries-blueprint</feature>
         <feature version="${project.version}">eos</feature>
+        <feature version="${project.version}">ignite-poc-model</feature>
 
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
@@ -57,10 +58,14 @@
         <bundle>mvn:org.opennms.core.ipc.twin.grpc/subscriber/${opennms-horizon.version}</bundle>
     </feature>
 
+    <feature name="ignite-poc-model" description="POC Model" version="${project.version}">
+        <bundle>mvn:org.opennms.poc/model/${project.version}</bundle>
+    </feature>
+
     <feature name="poc-grpc-workflow" version="${project.version}">
         <feature version="${project.version}">poc-grpc-ipc-twin</feature>
+        <feature version="${project.version}">ignite-poc-model</feature>
 
-        <bundle>mvn:org.opennms.poc.grpc.workflow/model/${project.version}</bundle>
         <bundle>mvn:org.opennms.poc.grpc.workflow/publisher/${project.version}</bundle>
         <bundle>mvn:org.opennms.poc.grpc.workflow/subscriber/${project.version}</bundle>
     </feature>

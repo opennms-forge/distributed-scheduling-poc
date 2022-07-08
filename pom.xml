@@ -37,6 +37,7 @@
     </properties>
 
     <modules>
+        <module>model</module>
         <module>grpc</module>
         <module>ignite-worker</module>
         <module>plugins</module>

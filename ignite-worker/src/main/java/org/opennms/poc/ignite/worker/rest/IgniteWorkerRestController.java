@@ -4,7 +4,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import org.opennms.poc.ignite.worker.workflows.Network;
+import org.opennms.poc.ignite.model.workflows.Network;
 
 @Path("/poc")
 public interface IgniteWorkerRestController {

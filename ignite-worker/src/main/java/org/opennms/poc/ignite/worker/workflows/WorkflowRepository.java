@@ -7,6 +7,8 @@ import java.util.List;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.opennms.poc.ignite.model.workflows.Workflow;
+import org.opennms.poc.ignite.model.workflows.Workflows;
 
 public class WorkflowRepository {
 

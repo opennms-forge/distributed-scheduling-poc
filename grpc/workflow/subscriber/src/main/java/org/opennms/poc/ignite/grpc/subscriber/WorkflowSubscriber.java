@@ -2,9 +2,13 @@ package org.opennms.poc.ignite.grpc.subscriber;
 
 import java.util.function.Consumer;
 import org.opennms.core.ipc.twin.api.TwinSubscriber;
-import org.opennms.poc.ignite.grpc.model.WorkflowTwin;
+import org.opennms.poc.ignite.model.workflows.Workflow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class WorkflowSubscriber implements Consumer<WorkflowTwin> {
+public class WorkflowSubscriber implements Consumer<Workflow> {
+
+  private final Logger logger = LoggerFactory.getLogger(WorkflowSubscriber.class);
 
   private final TwinSubscriber twinSubscriber;
 
@@ -13,12 +17,12 @@ public class WorkflowSubscriber implements Consumer<WorkflowTwin> {
   }
 
   public void start() {
-    twinSubscriber.subscribe("workflow", WorkflowTwin.class, this);
+    twinSubscriber.subscribe("workflow", Workflow.class, this);
   }
 
   @Override
-  public void accept(WorkflowTwin workflowTwin) {
-    System.out.println("Received workflow twin " + workflowTwin);
+  public void accept(Workflow workflowTwin) {
+    logger.info(">> Received workflow twin {}", workflowTwin);
   }
 
 }

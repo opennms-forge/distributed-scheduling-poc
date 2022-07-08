@@ -3,8 +3,8 @@ package org.opennms.poc.ignite.grpc.injector.internal.rest;
 import java.io.IOException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import org.opennms.poc.ignite.grpc.model.WorkflowTwin;
 import org.opennms.poc.ignite.grpc.publisher.WorkflowPublisher;
+import org.opennms.poc.ignite.model.workflows.Workflow;
 
 public class DigitalTwinWorkflowInjector implements WorkflowInjector {
 
@@ -15,7 +15,7 @@ public class DigitalTwinWorkflowInjector implements WorkflowInjector {
   }
 
   @Override
-  public void inject(WorkflowTwin model) {
+  public void inject(Workflow model) {
     try {
       publisher.publish(model);
     } catch (IOException e) {

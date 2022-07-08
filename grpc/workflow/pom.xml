@@ -18,7 +18,6 @@
     <description>Workflow grpc support</description>
 
     <modules>
-        <module>model</module>
         <module>publisher</module>
         <module>subscriber</module>
         <module>injector</module>
