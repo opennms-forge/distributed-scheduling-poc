@@ -15,7 +15,7 @@
     <packaging>bundle</packaging>
 
     <name>Ignite POC :: gRPC :: Workflow :: Injector</name>
-    <description>This is a mock which allows to inject a worflow to a running worker.</description>
+    <description>This is a mock which allows to inject a workflow to a running worker.</description>
 
     <dependencies>
         <dependency>
@@ -24,10 +24,9 @@
             <version>${opennms-horizon.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.poc.grpc.workflow</groupId>
+            <groupId>org.opennms.poc</groupId>
             <artifactId>model</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -38,8 +37,7 @@
         <dependency>
             <groupId>org.opennms.poc.grpc.workflow</groupId>
             <artifactId>publisher</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

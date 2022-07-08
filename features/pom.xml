@@ -24,7 +24,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.opennms.poc.grpc.workflow</groupId>
+      <groupId>org.opennms.poc</groupId>
       <artifactId>model</artifactId>
       <version>${project.version}</version>
     </dependency>

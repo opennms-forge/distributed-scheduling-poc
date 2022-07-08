@@ -24,10 +24,9 @@
             <version>${opennms-horizon.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.poc.grpc.workflow</groupId>
+            <groupId>org.opennms.poc</groupId>
             <artifactId>model</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
