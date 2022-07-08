@@ -12,14 +12,14 @@ public class OsgiServiceHolder {
     private static DetectorRegistry detectorRegistry;
     private static MonitorRegistry monitorRegistry;
 
-    public OsgiServiceHolder(BundleContext bundleContext, Ignite ignite) {
-        init(bundleContext, ignite);
+    public OsgiServiceHolder(BundleContext bundleContext) {
+        init(bundleContext);
     }
 
-    public static void init(BundleContext bundleContext, Ignite ignite) {
+    public static void init(BundleContext bundleContext) {
         log.info("Creating an instance of the StaticDetectorRegistry for initialization. Don't do this twice!");
-        detectorRegistry = new DetectorRegistryImpl(bundleContext, ignite);
-        monitorRegistry = new MonitorRegistryImpl(bundleContext, ignite);
+        detectorRegistry = new DetectorRegistryImpl(bundleContext);
+        monitorRegistry = new MonitorRegistryImpl(bundleContext);
     }
 
     public static Optional<ServiceDetector> getDetector(String name) {

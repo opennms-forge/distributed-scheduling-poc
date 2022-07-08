@@ -10,10 +10,9 @@ import org.osgi.framework.BundleContext;
 @Slf4j
 public class DetectorRegistryImpl extends KeyedWhiteboard<String, ServiceDetector> implements DetectorRegistry, Service {
 
-    public static final String IGNITE_SERVICE_NAME = "detectorRegistry";
     public static final String PLUGIN_IDENTIFIER = "detector.name";
 
-    public DetectorRegistryImpl(BundleContext bundleContext, Ignite ignite) {
+    public DetectorRegistryImpl(BundleContext bundleContext) {
         super(bundleContext, ServiceDetector.class, (svc, props) -> props.getProperty(PLUGIN_IDENTIFIER));
     }
 

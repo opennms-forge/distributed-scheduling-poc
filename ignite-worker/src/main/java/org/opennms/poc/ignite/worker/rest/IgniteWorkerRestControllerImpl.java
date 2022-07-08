@@ -25,6 +25,7 @@ import com.google.common.collect.Sets;
 @Slf4j
 public class IgniteWorkerRestControllerImpl implements IgniteWorkerRestController {
 
+    //TODO: should this be injected through ignite annotation?
     private Ignite ignite;
 
     private WorkflowRepository workflowRepository;
