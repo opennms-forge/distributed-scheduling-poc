@@ -5,23 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.poc.grpc</groupId>
-        <artifactId>workflow</artifactId>
+        <groupId>org.opennms.poc</groupId>
+        <artifactId>ignite</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.opennms.poc.grpc.workflow</groupId>
     <artifactId>model</artifactId>
+
     <packaging>bundle</packaging>
 
-    <name>Ignite POC :: gRPC :: Workflow :: Model</name>
+    <name>Ignite POC :: Model</name>
+    <description>
+        Model for PoC.
+    </description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.opennms.poc</groupId>
-            <artifactId>ignite-worker</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
 </project>

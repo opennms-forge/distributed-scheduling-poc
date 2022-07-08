@@ -14,7 +14,7 @@ import org.apache.ignite.resources.ServiceContextResource;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
 import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
-import org.opennms.poc.ignite.worker.workflows.Workflow;
+import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.plugin.api.ServiceDetector;
 
 @Slf4j

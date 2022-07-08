@@ -1,4 +1,4 @@
-package org.opennms.poc.ignite.worker.workflows;
+package org.opennms.poc.ignite.model.workflows;
 
 import java.util.LinkedList;
 import java.util.List;

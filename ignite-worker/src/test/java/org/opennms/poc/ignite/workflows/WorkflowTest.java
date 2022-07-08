@@ -8,8 +8,8 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 import org.junit.Test;
-import org.opennms.poc.ignite.worker.workflows.Network;
-import org.opennms.poc.ignite.worker.workflows.Workflow;
+import org.opennms.poc.ignite.model.workflows.Network;
+import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.worker.workflows.WorkflowGenerator;
 import org.opennms.poc.ignite.worker.workflows.WorkflowRepository;
 

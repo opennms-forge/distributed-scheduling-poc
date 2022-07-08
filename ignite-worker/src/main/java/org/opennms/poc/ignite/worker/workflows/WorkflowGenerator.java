@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.ImmutableMap;
+import org.opennms.poc.ignite.model.workflows.Network;
+import org.opennms.poc.ignite.model.workflows.Workflow;
 
 public class WorkflowGenerator {
 

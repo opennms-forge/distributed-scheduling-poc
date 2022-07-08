@@ -14,8 +14,8 @@ import org.apache.ignite.services.ServiceDescriptor;
 import org.opennms.poc.ignite.worker.ignite.service.AllRepeatedService;
 import org.opennms.poc.ignite.worker.ignite.service.NoopService;
 import org.opennms.poc.ignite.worker.ignite.service.WorkflowService;
-import org.opennms.poc.ignite.worker.workflows.Network;
-import org.opennms.poc.ignite.worker.workflows.Workflow;
+import org.opennms.poc.ignite.model.workflows.Network;
+import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.worker.workflows.WorkflowGenerator;
 import org.opennms.poc.ignite.worker.workflows.WorkflowRepository;
 
