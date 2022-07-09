@@ -15,6 +15,10 @@ import org.apache.ignite.kubernetes.configuration.KubernetesConnectionConfigurat
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
+import org.opennms.poc.ignite.worker.ignite.classloader.CompoundClassLoader;
+import org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl;
+
+import java.util.Arrays;
 
 @Data
 @AllArgsConstructor
@@ -36,7 +40,10 @@ public class WorkerIgniteConfiguration {
         }
 
         configureDataStorage(igniteConfiguration);
-        configureCache(igniteConfiguration);
+        configureCache(igniteConfiguration, "workflows");
+        configureCache(igniteConfiguration, WorkflowLifecycleManagerImpl.WORKFLOW_SERVICE_CACHE_NAME);
+
+        configureClassLoader(igniteConfiguration);
 
         return igniteConfiguration;
     }
@@ -48,6 +55,17 @@ public class WorkerIgniteConfiguration {
 //========================================
 // Internals
 //----------------------------------------
+
+    private void configureClassLoader(IgniteConfiguration igniteConfiguration) {
+        // Required for OSGI, otherwise ignite has trouble finding our application classes for (un)marshalling.  Need
+        //  a composite class loader to make sure ignite can still find its own internals as well.
+
+        CompoundClassLoader compoundClassLoader =
+                new CompoundClassLoader(this,
+                        Arrays.asList(this.getClass().getClassLoader(), Ignite.class.getClassLoader()));
+
+        igniteConfiguration.setClassLoader(compoundClassLoader);
+    }
 
     private void configureClusterNodeDiscovery(IgniteConfiguration igniteConfiguration) {
         TcpDiscoverySpi tcpDiscoverySpi = new TcpDiscoverySpi();
@@ -78,8 +96,8 @@ public class WorkerIgniteConfiguration {
         igniteConfiguration.setDataStorageConfiguration(dataStorageConfiguration);
     }
 
-    private void configureCache(IgniteConfiguration igniteConfiguration) {
-        CacheConfiguration<?,?> cacheConfiguration = new CacheConfiguration<>("workflows");
+    private void configureCache(IgniteConfiguration igniteConfiguration, String cacheName) {
+        CacheConfiguration<?,?> cacheConfiguration = new CacheConfiguration<>(cacheName);
 
         cacheConfiguration.setCacheMode(CacheMode.PARTITIONED);
         cacheConfiguration.setBackups(2);
@@ -89,5 +107,4 @@ public class WorkerIgniteConfiguration {
 
         igniteConfiguration.setCacheConfiguration(cacheConfiguration);
     }
-
 }

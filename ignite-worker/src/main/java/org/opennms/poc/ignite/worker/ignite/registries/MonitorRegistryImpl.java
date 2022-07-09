@@ -2,13 +2,11 @@ package org.opennms.poc.ignite.worker.ignite.registries;
 
 import com.savoirtech.eos.pattern.whiteboard.KeyedWhiteboard;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ignite.Ignite;
-import org.apache.ignite.services.Service;
 import org.opennms.poc.plugin.api.ServiceMonitor;
 import org.osgi.framework.BundleContext;
 
 @Slf4j
-public class MonitorRegistryImpl extends KeyedWhiteboard<String, ServiceMonitor> implements MonitorRegistry, Service {
+public class MonitorRegistryImpl extends KeyedWhiteboard<String, ServiceMonitor> implements MonitorRegistry {
 
     public static final String PLUGIN_IDENTIFIER = "monitor.name";
 

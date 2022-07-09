@@ -1,0 +1,31 @@
+{
+  "workflows": [
+    {
+      "description": "Monitor localhost ping",
+      "type": "ICMPMonitor",
+      "cron": "5000",
+      "parameters": {
+          "host": "127.0.0.1"
+      },
+      "uuid": "2c509798-1f62-47b2-b1f2-473a693da0af"
+    },
+    {
+      "description": "Monitor localhost ping 2",
+      "type": "ICMPMonitor",
+      "cron": "5000",
+      "parameters": {
+          "host": "127.0.0.2"
+      },
+      "uuid": "ac07c7ef-981b-436b-96e6-d603961a7e86"
+    },
+    {
+      "description": "Monitor localhost ping 3",
+      "type": "ICMPMonitor",
+      "cron": "5000",
+      "parameters": {
+          "host": "127.0.0.3"
+      },
+      "uuid": "4a3c39a7-cd76-4fc7-83e4-30bf6029c0cd"
+    }
+  ]
+}

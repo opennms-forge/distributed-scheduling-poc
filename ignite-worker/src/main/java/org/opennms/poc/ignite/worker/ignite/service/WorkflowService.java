@@ -17,7 +17,11 @@ import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
 import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.plugin.api.ServiceDetector;
 
+/**
+ * @see org.opennms.poc.ignite.worker.workflows.impl.WorkflowExecutorIgniteService
+ */
 @Slf4j
+@Deprecated
 public class WorkflowService implements Service {
     private static final long serialVersionUID = 0L;
 

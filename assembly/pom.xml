@@ -127,6 +127,8 @@
                         <feature>horizon-provision</feature>
                         <feature>ignite-poc</feature>
                         <feature>poc-grpc</feature>
+                        <feature>icmp-plugins</feature>
+                        <feature>snmp-plugins</feature>
                     </bootFeatures>
                     <libraries>
                     </libraries>
