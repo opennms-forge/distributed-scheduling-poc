@@ -1,0 +1,3 @@
+#!/bin/bash
+
+kubectl exec -it deployment.apps/poc-distributed-scheduling -- sh -c "echo 'admin=admin,admin,ssh' >>/opt/karaf/etc/users.properties"
