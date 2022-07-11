@@ -4,10 +4,12 @@
   xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
   xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
-  <reference id="subscriber" interface="org.opennms.core.ipc.twin.api.TwinSubscriber" filter="(strategy=grpc)" />
+  <bean id="subscriber" class="org.opennms.poc.ignite.grpc.subscriber.LoggingWorkflowSubscriber" />
 
-  <bean class="org.opennms.poc.ignite.grpc.subscriber.WorkflowSubscriber" init-method="start">
-    <argument ref="subscriber" />
-  </bean>
+  <service ref="subscriber" interface="org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener">
+    <service-properties>
+      <entry key="subscriber.key" value="workflow" />
+    </service-properties>
+  </service>
 
 </blueprint>

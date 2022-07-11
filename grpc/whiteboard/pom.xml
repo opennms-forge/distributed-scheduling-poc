@@ -6,19 +6,20 @@
 
     <parent>
         <groupId>org.opennms.poc</groupId>
-        <artifactId>ignite</artifactId>
+        <artifactId>grpc</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>grpc</artifactId>
+    <groupId>org.opennms.poc.grpc</groupId>
+    <artifactId>whiteboard</artifactId>
     <packaging>pom</packaging>
 
-    <name>Ignite POC :: gRPC</name>
-    <description>GRPC handlers</description>
+    <name>Ignite POC :: gRPC :: Whiteboard</name>
+    <description>Whiteboard for gRPC interactions.</description>
 
     <modules>
-        <module>workflow</module>
-        <module>whiteboard</module>
+        <module>api</module>
+        <module>core</module>
     </modules>
 
 </project>

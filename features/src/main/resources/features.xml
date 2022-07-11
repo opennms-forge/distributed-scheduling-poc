@@ -62,7 +62,21 @@
         <bundle>mvn:org.opennms.poc/model/${project.version}</bundle>
     </feature>
 
+    <feature name="poc-grpc-messaging-api" description="Messaging API" version="${project.version}">
+        <bundle>mvn:org.opennms.poc.grpc.whiteboard/api/${project.version}</bundle>
+    </feature>
+
+    <feature name="poc-grpc-messaging-core" version="${project.version}">
+        <feature version="${project.version}">poc-grpc-messaging-api</feature>
+        <feature version="${project.version}">poc-grpc-ipc-twin</feature>
+        <feature version="${project.version}">ignite-poc-model</feature>
+        <feature version="${project.version}">eos</feature>
+
+        <bundle>mvn:org.opennms.poc.grpc.whiteboard/core/${project.version}</bundle>
+    </feature>
+
     <feature name="poc-grpc-workflow" version="${project.version}">
+        <feature version="${project.version}">poc-grpc-messaging-api</feature>
         <feature version="${project.version}">poc-grpc-ipc-twin</feature>
         <feature version="${project.version}">ignite-poc-model</feature>
 
@@ -81,6 +95,7 @@
         <feature version="${project.version}">poc-grpc-ipc-twin</feature>
         <feature version="${project.version}">poc-grpc-workflow</feature>
         <feature version="${project.version}">poc-grpc-workflow-injector</feature>
+        <feature version="${project.version}">poc-grpc-messaging-core</feature>
     </feature>
 
     <feature name="ignite" version="${project.version}">
