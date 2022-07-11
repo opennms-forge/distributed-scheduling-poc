@@ -72,7 +72,7 @@ public class WorkflowGenerator {
     }
 
     /**
-     * Cartersian product of nodes, interfaces & services
+     * Cartesian product of nodes, interfaces & services
      *
      * @return list of services computed from network topology
      */
