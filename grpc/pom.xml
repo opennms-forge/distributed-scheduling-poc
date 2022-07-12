@@ -17,6 +17,7 @@
     <description>GRPC handlers</description>
 
     <modules>
+        <module>contract</module>
         <module>workflow</module>
         <module>whiteboard</module>
     </modules>
