@@ -14,6 +14,6 @@ public interface MessageListener<T> extends Consumer<T> {
 
   Class<T> getType();
 
-  String SUBSCRIBER_KEY = "subscriber.key";
+  String MESSAGE_LISTENER_TOPIC = "message.listener.topic";
 
 }

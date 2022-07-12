@@ -8,7 +8,7 @@
 
   <service ref="subscriber" interface="org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener">
     <service-properties>
-      <entry key="subscriber.key" value="workflow" />
+      <entry key="message.listener.topic" value="workflow" />
     </service-properties>
   </service>
 

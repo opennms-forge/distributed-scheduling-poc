@@ -1,6 +1,6 @@
 package org.opennms.poc.ignite.grpc.whiteboard.internal;
 
-import static org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener.SUBSCRIBER_KEY;
+import static org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener.MESSAGE_LISTENER_TOPIC;
 
 import com.savoirtech.eos.pattern.whiteboard.AbstractWhiteboard;
 import com.savoirtech.eos.util.ServiceProperties;
@@ -26,7 +26,7 @@ public class GrpcWhiteboard extends AbstractWhiteboard<MessageListener, Closeabl
   @Override
   protected Closeable addService(MessageListener service, ServiceProperties props) {
     Class<?> payload = service.getType();
-    String subscriberKey = props.getProperty(SUBSCRIBER_KEY);
+    String subscriberKey = props.getProperty(MESSAGE_LISTENER_TOPIC);
 
     if (payload == null) {
       logger.warn("Subscriber {} does not specify proper payload type, ignoring", service);
@@ -40,7 +40,7 @@ public class GrpcWhiteboard extends AbstractWhiteboard<MessageListener, Closeabl
     return twinSubscriber.subscribe(subscriberKey, payload, new Consumer() {
       @Override
       public void accept(Object message) {
-        if (message != null && payload.isInstance(message)) {
+        if (payload.isInstance(message)) {
           service.accept(message);
         } else {
           logger.warn("Message {} is not a valid object required by subscriber {}.", message, subscriberKey);
