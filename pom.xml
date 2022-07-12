@@ -34,6 +34,9 @@
         <spring.version>5.3.14_1</spring.version>
         <hibernate.version>5.4.32.Final</hibernate.version>
         <opennms-horizon.version>0.1.0-SNAPSHOT</opennms-horizon.version>
+        <opennms.tracker.version>0.7</opennms.tracker.version>
+        <commons.io.version>2.11.0</commons.io.version>
+        <commons.lang.version>2.6</commons.lang.version>
     </properties>
 
     <modules>

@@ -28,11 +28,6 @@
       <artifactId>api</artifactId>
       <version>${opennms-horizon.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.opennms.horizon.provision</groupId>
-      <artifactId>service</artifactId>
-      <version>${opennms-horizon.version}</version>
-    </dependency>
 
   </dependencies>
 
