@@ -1,56 +1,13 @@
 package org.opennms.poc.icmp;
 
+import java.util.concurrent.CompletableFuture;
 import org.opennms.poc.plugin.api.ServiceDetector;
+import org.opennms.poc.plugin.api.ServiceDetectorRequest;
+import org.opennms.poc.plugin.api.ServiceDetectorResults;
 
 public class IcmpDetector implements ServiceDetector {
-
     @Override
-    public void init() {
-
-    }
-
-    @Override
-    public String getServiceName() {
+    public CompletableFuture<ServiceDetectorResults> detect(ServiceDetectorRequest request) {
         return null;
-    }
-
-    @Override
-    public void setServiceName(String serviceName) {
-
-    }
-
-    @Override
-    public int getPort() {
-        return 0;
-    }
-
-    @Override
-    public void setPort(int port) {
-
-    }
-
-    @Override
-    public int getTimeout() {
-        return 0;
-    }
-
-    @Override
-    public void setTimeout(int timeout) {
-
-    }
-
-    @Override
-    public String getIpMatch() {
-        return null;
-    }
-
-    @Override
-    public void setIpMatch(String ipMatch) {
-
-    }
-
-    @Override
-    public void dispose() {
-
     }
 }

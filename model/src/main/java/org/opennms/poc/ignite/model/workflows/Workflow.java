@@ -13,6 +13,7 @@ public class Workflow implements Serializable {
     private String type;
     private Map<String,String> parameters = new LinkedHashMap<>();
     private String uuid;
+    String cron;
 
     public String getDescription() {
         return description;

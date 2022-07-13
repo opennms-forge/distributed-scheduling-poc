@@ -50,7 +50,7 @@ public interface MonitoredService {
      *
      * @return the ipAddr string
      */
-    InetAddress getIpAddr();
+    String getIpAddr();
 
     /**
      * Returns the nodeId of the node that this service is associated with.
