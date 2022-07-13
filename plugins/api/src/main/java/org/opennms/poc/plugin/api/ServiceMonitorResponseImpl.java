@@ -28,4 +28,10 @@ public class ServiceMonitorResponseImpl implements ServiceMonitorResponse{
     }
 
     public static ServiceMonitorResponse unknown() { return builder().status(Status.Unknown).build();}
+    public static ServiceMonitorResponse down() { return builder().status(Status.Down).build();}
+
+    public static ServiceMonitorResponse up() { return builder().status(Status.Up).build();}
+    public static ServiceMonitorResponse unresponsive() { return builder().status(Status.Unresponsive).build();}
+
+
 }

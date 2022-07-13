@@ -5,6 +5,7 @@ import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.services.Service;
 import org.opennms.horizon.core.lib.IPAddress;
+import org.opennms.horizon.plugin.api.v2.ServiceMonitorResponse;
 import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
 import org.opennms.poc.plugin.api.MonitoredService;
@@ -77,10 +78,11 @@ public class WorkflowExecutorIgniteService implements Service {
                 MonitoredService monitoredService = configureMonitoredService();
 
                 //noinspection unchecked - getParameters() returns Map<String, String>; poll wants Map<String, Object>
-                PollStatus pollStatus = monitor.poll(monitoredService, (Map) workflow.getParameters());
+//                PollStatus pollStatus = monitor.poll(monitoredService, (Map) workflow.getParameters());
 
+                monitor.poll(monitoredService ,(Map) workflow.getParameters()).whenComplete((serviceMonitorResponse, exception ) -> logger.info("POLL STATUS: " + ((ServiceMonitorResponse)serviceMonitorResponse).getStatus()));
                 // TBD: REMOVE the json mapping
-                logger.info("POLL STATUS: " + new ObjectMapper().writeValueAsString(pollStatus));
+//                logger.info("POLL STATUS: " + new ObjectMapper().writeValueAsString(pollStatus));
             } else {
                 logger.info("Skipping service monitor execution; monitor not found: monitor=" + workflow.getType());
             }

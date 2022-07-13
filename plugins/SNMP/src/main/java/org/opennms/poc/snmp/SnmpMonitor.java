@@ -30,31 +30,16 @@ package org.opennms.poc.snmp;
 
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-//
-//import org.opennms.core.utils.InetAddressUtils;
-//import org.opennms.core.utils.ParameterMap;
-//import org.opennms.core.utils.PropertiesUtils;
-//import org.opennms.core.utils.TimeoutTracker;
-//import org.opennms.netmgt.poller.MonitoredService;
-//import org.opennms.netmgt.poller.PollStatus;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import javax.security.auth.callback.Callback;
 import org.opennms.horizon.core.lib.InetAddressUtils;
-import org.opennms.horizon.core.lib.PropertiesUtils;
 import org.opennms.horizon.core.lib.timeout.TimeoutTracker;
 import org.opennms.netmgt.snmp.SnmpAgentConfig;
 import org.opennms.netmgt.snmp.SnmpObjId;
 import org.opennms.netmgt.snmp.SnmpUtils;
-import org.opennms.netmgt.snmp.SnmpValue;
 import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ParameterMap;
-import org.opennms.poc.plugin.api.PollStatus;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.poc.plugin.api.ServiceMonitorResponseImpl;
@@ -171,13 +156,9 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
                     }
                 }
 
-//            SnmpUtils.getAsync(....)    .thenApply(() -> logic below) 
-//                SnmpValue result = SnmpUtils.get(agentConfig, snmpObjectId);
-
             future = SnmpUtils.getAsync(agentConfig, (SnmpObjId[]) Arrays.asList(snmpObjectId).toArray()).
                 thenApply(result -> {
 
-//                    PollStatus status = PollStatus.unavailable();
                     Status status = Status.Unknown;
 
                     if (result[0] != null) {
@@ -185,20 +166,16 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
                         LOG.debug("poll: SNMP poll succeeded, addr={} oid={} value={}", hostAddress, oid, result);
 
                         if (meetsCriteria(result[0], operator, operand)) {
-//                            status = PollStatus.available(tracker.elapsedTimeInMillis());
                             status = Status.Up;
                         } else {
-//                            status = PollStatus.unavailable(PropertiesUtils.substitute(reasonTemplate, svcParams));
                             status = Status.Down;
                         }
                     } else {
                         String reason = "SNMP poll failed, addr=" + hostAddress + " oid=" + oid;
                         LOG.debug(reason);
-//                        status = PollStatus.unavailable(reason);
                         status = Status.Unknown;
                     }
 
-//                    return status;
                     return status;
                 });
 

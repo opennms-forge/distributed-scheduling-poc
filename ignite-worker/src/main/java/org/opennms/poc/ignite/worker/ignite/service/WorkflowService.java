@@ -65,15 +65,6 @@ public class WorkflowService implements Service {
         Optional<ServiceDetector> detector = OsgiServiceHolder.getDetector(workflow.getType());
         log.info("Detector is {}", detector.isPresent() ? detector.toString():"NOT FOUND");
         Optional<ServiceMonitor> serviceMonitor = OsgiServiceHolder.getMonitor("blah");
-//        for each task in workflow
-//                ExecuterService -> new Runnable {
-//                      Future = ServiceMonitor.poll(....);
-//
-//        reschedule when done
-//                       how to terminate runaway future?
-//        }
-
-//        ExecutorService executorService = Executors.newFixedThreadPool(10);
 
         for (int i=0;i< 5;i++) {
             serviceMonitor.get().poll(null ,null).whenComplete((serviceMonitorResponse, exception ) -> log.info("got a response") );
