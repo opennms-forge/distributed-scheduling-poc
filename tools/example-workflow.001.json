@@ -1,0 +1,13 @@
+{
+  "workflows": [
+    {
+      "description": "Monitor localhost ping",
+      "type": "ICMPMonitor",
+      "cron": "5000",
+      "parameters": {
+          "host": "127.0.0.1"
+      },
+      "uuid": "59572742-f853-46ac-872f-2b1f3785b7e5"
+    }
+  ]
+}

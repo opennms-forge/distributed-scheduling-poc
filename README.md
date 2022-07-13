@@ -78,3 +78,16 @@ And then run these commands
   * See log errors such as:
 
     Caused by: class org.apache.ignite.spi.IgniteSpiOperationTimeoutException: Failed to perform handshake due to timeout (consider increasing 'connectionTimeout' configuration property).
+
+# Service Execution from Workflow Twin Publishing
+
+    $ skaffold dev
+
+    # Wait for Twin GRPC startup
+
+The following log message indicates Twin GRPC has started:
+
+    [poc-ignite-worker] 00:46:34.914 INFO  [Blueprint Extender: 2] Started Twin gRPC Subscriber at location cloud with systemId 0ddba11
+
+    $ cd tools
+    $ ./post-workflow

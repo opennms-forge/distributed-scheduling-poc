@@ -8,6 +8,7 @@
     <cm:default-properties>
       <cm:property name="useKubernetes" value="false"/>
       <cm:property name="kubernetes.service-name" value="poc-distributed-scheduling"/>
+      <cm:property name="workflowSchedulerThreadCount" value="20"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -45,12 +46,27 @@
 <!--    <argument ref="ignite"/>-->
 <!--  </bean>-->
 
+  <bean id="workflowScheduledThreadPoolExecutor" class="java.util.concurrent.ScheduledThreadPoolExecutor">
+    <argument value="${workflowSchedulerThreadCount}" type="java.lang.Integer"/>
+  </bean>
+
 <!--  Creating an instance here just to get the static fields set, but we don't really need to reference this instance -->
   <bean id="osgiServiceHolder" class="org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder">
     <argument ref="blueprintBundleContext"/>
+    <argument ref="workflowScheduledThreadPoolExecutor"/>
+  </bean>
+
+  <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl">
+    <property name="ignite" ref="ignite"/>
   </bean>
 
 <!--  TODO: will we need this as an OSGi service anywhere now?-->
 <!--  <service id="detectorRegistry" ref="detectorRegistryImpl" interface="org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry"/>-->
+
+  <service ref="workflowLifecycleManager" interface="org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener">
+    <service-properties>
+      <entry key="message.listener.topic" value="workflow" />
+    </service-properties>
+  </service>
 
 </blueprint>

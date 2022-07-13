@@ -71,5 +71,7 @@ spec:
               value: "true"
             - name: KUBERNETES_SERVICE_NAME
               value: "poc-distributed-scheduling"
+            - name: JAVA_TOOL_OPTIONS	# Advertise to Skaffold that this is a JVM-based container (for debugging support)
+              value: ""
           ports:
             - containerPort: 8181
