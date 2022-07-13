@@ -11,6 +11,7 @@ public class Workflow implements Serializable {
 
     private String description;
     private String type;
+    private String cron;
     private Map<String,String> parameters = new LinkedHashMap<>();
     private String uuid;
 
