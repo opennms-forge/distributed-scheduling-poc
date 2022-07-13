@@ -56,6 +56,15 @@ spec:
       annotations:
         linkerd.io/inject: enabled
     spec:
+      initContainers:
+      - name: init-sysctl
+        image: busybox
+        command:
+        - sysctl
+        - -w
+        - net.ipv4.ping_group_range=0 429496729
+        securityContext:
+          privileged: true
       containers:
         - name: poc-ignite-worker
           image: opennms/distributed-scheduling-poc:local
