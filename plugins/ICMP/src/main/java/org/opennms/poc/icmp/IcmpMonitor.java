@@ -21,6 +21,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
     private Supplier<PingerFactory> pingerFactory;
 
     public IcmpMonitor(PingerFactory pingerFactoryDelegate) {
+        //TODO: setPigerFactory(pingerFactoryDelegate); ????
         pingerFactory = Suppliers.memoize(() -> pingerFactoryDelegate);
     }
     
@@ -34,6 +35,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                 @Override
                 public void handleResponse(InetAddress inetAddress, EchoPacket response) {
                     double responseTimeMicros = Math.round(response.elapsedTime(TimeUnit.MICROSECONDS));
+                    //TODO: set the responseTimeMicros into the response properties?
                     future.complete(ServiceMonitorResponseImpl.up());
                 }
 
