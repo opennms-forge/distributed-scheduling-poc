@@ -24,7 +24,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
         //TODO: setPigerFactory(pingerFactoryDelegate); ????
         pingerFactory = Suppliers.memoize(() -> pingerFactoryDelegate);
     }
-    
+
     @Override
     public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
 
@@ -41,7 +41,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
                 @Override
                 public void handleTimeout(InetAddress inetAddress, EchoPacket echoPacket) {
-                    future.complete(ServiceMonitorResponseImpl.down());
+                    future.complete(ServiceMonitorResponseImpl.unknown());
                 }
 
                 @Override
