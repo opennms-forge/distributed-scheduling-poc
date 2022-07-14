@@ -6,20 +6,17 @@ import com.google.common.base.Suppliers;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import org.opennms.netmgt.icmp.PingConstants;
+import java.util.concurrent.TimeUnit;
+import org.opennms.netmgt.icmp.EchoPacket;
+import org.opennms.netmgt.icmp.PingResponseCallback;
+import org.opennms.netmgt.icmp.Pinger;
 import org.opennms.netmgt.icmp.PingerFactory;
 import org.opennms.poc.plugin.api.AbstractServiceMonitor;
 import org.opennms.poc.plugin.api.MonitoredService;
-import org.opennms.poc.plugin.api.ParameterMap;
-import org.opennms.poc.plugin.api.PollStatus;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
-import org.opennms.poc.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.poc.plugin.api.ServiceMonitorResponseImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IcmpMonitor extends AbstractServiceMonitor {
-    private static final Logger LOG = LoggerFactory.getLogger(IcmpMonitor.class);
 
     private Supplier<PingerFactory> pingerFactory;
 
@@ -29,39 +26,31 @@ public class IcmpMonitor extends AbstractServiceMonitor {
     
     @Override
     public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
-        InetAddress host = svc.getAddress();
-        CompletableFuture<PollStatus> future = CompletableFuture.supplyAsync(() -> {
-            Number rtt = null;
-            try {
 
-                // get parameters
-                //
-                int retries = ParameterMap.getKeyedInteger(parameters, "retry", PingConstants.DEFAULT_RETRIES);
-                long timeout = ParameterMap.getKeyedLong(parameters, "timeout", PingConstants.DEFAULT_TIMEOUT);
-                int packetSize = ParameterMap.getKeyedInteger(parameters, "packet-size", PingConstants.DEFAULT_PACKET_SIZE);
-                final int dscp = ParameterMap.getKeyedDecodedInteger(parameters, "dscp", 0);
-                final boolean allowFragmentation = ParameterMap.getKeyedBoolean(parameters, "allow-fragmentation", true);
+        Pinger pinger = pingerFactory.get().getInstance();
+        CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
+        try {
+            pinger.ping(null, 1, 2, 3, new PingResponseCallback() {
+                @Override
+                public void handleResponse(InetAddress inetAddress, EchoPacket response) {
+                    double responseTimeMicros = Math.round(response.elapsedTime(TimeUnit.MICROSECONDS));
+                    future.complete(ServiceMonitorResponseImpl.up());
+                }
 
-                rtt =  pingerFactory.get().getInstance(dscp, allowFragmentation).ping(host, timeout, retries,packetSize);
+                @Override
+                public void handleTimeout(InetAddress inetAddress, EchoPacket echoPacket) {
+                    future.complete(ServiceMonitorResponseImpl.down());
+                }
 
-            } catch (Throwable e) {
-                LOG.debug("failed to ping {}", host, e);
-                return PollStatus.unavailable(e.getMessage());
-            }
-
-            if (rtt != null) {
-                return PollStatus.available(rtt.doubleValue());
-            } else {
-                // TODO add a reason code for unavailability
-                return PollStatus.unavailable(null);
-            }
-        });
-
-        return future.thenApply(pollStatus -> {
-            Status result = pollStatus.equals(PollStatus.SERVICE_AVAILABLE) ? Status.Up: Status.Down;
-
-            return ServiceMonitorResponseImpl.builder().status(result).build();
-        });
+                @Override
+                public void handleError(InetAddress inetAddress, EchoPacket echoPacket, Throwable throwable) {
+                    future.complete(ServiceMonitorResponseImpl.down());
+                }
+            });
+        } catch (Exception e) {
+            future.completeExceptionally(e);
+        }
+        return future;
 
     }
 
