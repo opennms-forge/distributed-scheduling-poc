@@ -32,6 +32,8 @@
         <cxf.version>3.5.0</cxf.version>
         <eos.version>1.2.0</eos.version>
         <spring.version>5.3.14_1</spring.version>
+        <quartz.version>2.3.2</quartz.version>
+        <quartz-bundle-version>2.3.2_1</quartz-bundle-version> <!-- ServiceMix Bundle Version -->
         <hibernate.version>5.4.32.Final</hibernate.version>
         <opennms-horizon.version>0.1.0-SNAPSHOT</opennms-horizon.version>
         <opennms.tracker.version>0.7</opennms.tracker.version>
@@ -42,6 +44,7 @@
     <modules>
         <module>model</module>
         <module>grpc</module>
+        <module>scheduler</module>
         <module>ignite-worker</module>
         <module>plugins</module>
         <module>features</module>
@@ -79,6 +82,13 @@
                 <version>${lombok.version}</version>
                 <optional>true</optional>
             </dependency>
+
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>2.3.2</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>

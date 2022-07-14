@@ -10,6 +10,7 @@ import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
 import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.PollStatus;
 import org.opennms.poc.plugin.api.ServiceMonitor;
+import org.opennms.poc.scheduler.OpennmsScheduler;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -25,7 +26,7 @@ public class WorkflowExecutorIgniteService implements Service {
     @LoggerResource
     private IgniteLogger logger;
 
-    private transient ScheduledThreadPoolExecutor scheduler;
+    private transient OpennmsScheduler scheduler;
 
     public WorkflowExecutorIgniteService(Workflow workflow) {
         this.workflow = workflow;
@@ -33,7 +34,7 @@ public class WorkflowExecutorIgniteService implements Service {
 
     @Override
     public void init() throws Exception {
-        scheduler = OsgiServiceHolder.getWorkflowScheduledThreadPoolExecutor();
+        scheduler = OsgiServiceHolder.getOpennmsScheduler();
     }
 
     @Override
@@ -41,7 +42,7 @@ public class WorkflowExecutorIgniteService implements Service {
         try {
             long period = Long.parseLong(workflow.getCron());
 
-            scheduler.scheduleAtFixedRate(this::executeIteration, period, period, TimeUnit.MILLISECONDS);
+            scheduler.schedulePeriodically(workflow.getUuid(), period, TimeUnit.MILLISECONDS, this::executeIteration);
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time
             logger.warning("error starting workflow " + workflow.getUuid(), exc);

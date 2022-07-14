@@ -18,6 +18,7 @@
         <feature version="${project.version}">eos</feature>
         <feature version="${project.version}">ignite-poc-model</feature>
         <feature version="${project.version}">poc-grpc</feature>
+        <feature version="${project.version}">poc-quartz</feature>
 
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
@@ -174,5 +175,15 @@
 <!--        <bundle>mvn:org.opennms.horizon.snmp/rpc-impl/${project.version}</bundle>-->
 <!--        <bundle>mvn:org.opennms.horizon.snmp/snmp4j/${project.version}</bundle>-->
 <!--        <bundle>mvn:org.opennms.horizon.snmp/shell/${project.version}</bundle>-->
+    </feature>
+
+    <feature name="poc-quartz" version="${project.version}">
+        <feature version="${project.version}">opennms-quartz</feature>
+
+        <bundle>mvn:org.opennms.poc/scheduler/${project.version}</bundle>
+    </feature>
+
+    <feature name="opennms-quartz" version="${project.version}">
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.quartz/${quartz-bundle-version}</bundle>
     </feature>
 </features>
