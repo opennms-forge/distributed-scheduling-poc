@@ -80,7 +80,7 @@ public class WorkflowExecutorIgniteService implements Service {
                 //noinspection unchecked - getParameters() returns Map<String, String>; poll wants Map<String, Object>
 //                PollStatus pollStatus = monitor.poll(monitoredService, (Map) workflow.getParameters());
 
-                monitor.poll(monitoredService ,(Map) workflow.getParameters()).whenComplete((serviceMonitorResponse, exception ) -> logger.info("POLL STATUS: " + ((ServiceMonitorResponse)serviceMonitorResponse).getStatus()));
+                monitor.poll(monitoredService ,(Map) workflow.getParameters()).whenComplete((serviceMonitorResponse, exception) -> logger.info("POLL STATUS: " + ((ServiceMonitorResponse)serviceMonitorResponse).getStatus()));
                 // TBD: REMOVE the json mapping
 //                logger.info("POLL STATUS: " + new ObjectMapper().writeValueAsString(pollStatus));
             } else {

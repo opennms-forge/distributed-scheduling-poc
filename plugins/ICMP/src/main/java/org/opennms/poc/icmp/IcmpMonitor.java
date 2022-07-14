@@ -29,37 +29,39 @@ public class IcmpMonitor extends AbstractServiceMonitor {
     
     @Override
     public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
-        Number rtt = null;
         InetAddress host = svc.getAddress();
+        CompletableFuture<PollStatus> future = CompletableFuture.supplyAsync(() -> {
+            Number rtt = null;
+            try {
 
-        try {
-            
-            // get parameters
-            //
-            int retries = ParameterMap.getKeyedInteger(parameters, "retry", PingConstants.DEFAULT_RETRIES);
-            long timeout = ParameterMap.getKeyedLong(parameters, "timeout", PingConstants.DEFAULT_TIMEOUT);
-            int packetSize = ParameterMap.getKeyedInteger(parameters, "packet-size", PingConstants.DEFAULT_PACKET_SIZE);
-            final int dscp = ParameterMap.getKeyedDecodedInteger(parameters, "dscp", 0);
-            final boolean allowFragmentation = ParameterMap.getKeyedBoolean(parameters, "allow-fragmentation", true);
+                // get parameters
+                //
+                int retries = ParameterMap.getKeyedInteger(parameters, "retry", PingConstants.DEFAULT_RETRIES);
+                long timeout = ParameterMap.getKeyedLong(parameters, "timeout", PingConstants.DEFAULT_TIMEOUT);
+                int packetSize = ParameterMap.getKeyedInteger(parameters, "packet-size", PingConstants.DEFAULT_PACKET_SIZE);
+                final int dscp = ParameterMap.getKeyedDecodedInteger(parameters, "dscp", 0);
+                final boolean allowFragmentation = ParameterMap.getKeyedBoolean(parameters, "allow-fragmentation", true);
 
-            //TODO: not sure this needs to be async!
-            rtt = pingerFactory.get().getInstance(dscp, allowFragmentation).ping(host, timeout, retries,packetSize);
-        } catch (Throwable e) {
-            LOG.debug("failed to ping {}", host, e);
-//            return PollStatus.unavailable(e.getMessage());
-            return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.down());
-        }
-        
-        if (rtt != null) {
-//            return PollStatus.available(rtt.doubleValue());
-            return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.up());
+                rtt =  pingerFactory.get().getInstance(dscp, allowFragmentation).ping(host, timeout, retries,packetSize);
 
-        } else {
-            // TODO add a reason code for unavailability
-//            return PollStatus.unavailable(null);
-            return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.down());
+            } catch (Throwable e) {
+                LOG.debug("failed to ping {}", host, e);
+                return PollStatus.unavailable(e.getMessage());
+            }
 
-        }
+            if (rtt != null) {
+                return PollStatus.available(rtt.doubleValue());
+            } else {
+                // TODO add a reason code for unavailability
+                return PollStatus.unavailable(null);
+            }
+        });
+
+        return future.thenApply(pollStatus -> {
+            Status result = pollStatus.equals(PollStatus.SERVICE_AVAILABLE) ? Status.Up: Status.Down;
+
+            return ServiceMonitorResponseImpl.builder().status(result).build();
+        });
 
     }
 
