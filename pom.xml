@@ -29,6 +29,7 @@
         <spring-boot.version>2.6.4</spring-boot.version>
         <slf4j.version>1.7.33</slf4j.version>
         <aries.jax.rs.whiteboard.version>2.0.1</aries.jax.rs.whiteboard.version>
+        <cron-utils.version>9.1.6</cron-utils.version>
         <cxf.version>3.5.0</cxf.version>
         <eos.version>1.2.0</eos.version>
         <spring.version>5.3.14_1</spring.version>
@@ -43,6 +44,7 @@
     <modules>
         <module>model</module>
         <module>grpc</module>
+        <module>scheduler</module>
         <module>ignite-worker</module>
         <module>plugins</module>
         <module>features</module>
@@ -64,6 +66,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.cronutils</groupId>
+                <artifactId>cron-utils</artifactId>
+                <version>${cron-utils.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.ignite</groupId>
                 <artifactId>ignite-core</artifactId>
                 <version>${ignite.version}</version>
@@ -80,6 +88,7 @@
                 <version>${lombok.version}</version>
                 <optional>true</optional>
             </dependency>
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>

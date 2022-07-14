@@ -7,9 +7,9 @@ import lombok.Data;
 @Builder
 @Data
 public class ServiceMonitorResponseImpl implements ServiceMonitorResponse{
-    private final Status status;
-    private final String reason;
-    private final DeviceConfig deviceConfig;
+    private Status status;
+    private String reason;
+    private DeviceConfig deviceConfig;
     private Map<String, Number> properties;
 
     public static ServiceMonitorResponse unknown() { return builder().status(Status.Unknown).build();}
