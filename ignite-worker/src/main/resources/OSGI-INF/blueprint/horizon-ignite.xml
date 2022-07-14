@@ -12,6 +12,8 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
+  <reference id="opennmsScheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler"/>
+
   <bean id="workflowRepository" class="org.opennms.poc.ignite.worker.workflows.WorkflowRepository"/>
 
   <bean id="workerIgniteConfiguration" class="org.opennms.poc.ignite.worker.ignite.WorkerIgniteConfiguration">
@@ -46,14 +48,17 @@
 <!--    <argument ref="ignite"/>-->
 <!--  </bean>-->
 
-  <bean id="workflowScheduledThreadPoolExecutor" class="java.util.concurrent.ScheduledThreadPoolExecutor">
-    <argument value="${workflowSchedulerThreadCount}" type="java.lang.Integer"/>
+  <bean id="workflowExecutorLocalServiceFactory"
+        class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowExecutorLocalServiceFactoryImpl">
+
+    <argument ref="opennmsScheduler"/>
   </bean>
 
 <!--  Creating an instance here just to get the static fields set, but we don't really need to reference this instance -->
   <bean id="osgiServiceHolder" class="org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder">
     <argument ref="blueprintBundleContext"/>
-    <argument ref="workflowScheduledThreadPoolExecutor"/>
+    <argument ref="opennmsScheduler"/>
+    <argument ref="workflowExecutorLocalServiceFactory"/>
   </bean>
 
   <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl">

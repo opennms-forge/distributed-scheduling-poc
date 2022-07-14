@@ -7,11 +7,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.opennms.netmgt.icmp.EchoPacket;
+import org.opennms.netmgt.icmp.PingConstants;
 import org.opennms.netmgt.icmp.PingResponseCallback;
 import org.opennms.netmgt.icmp.Pinger;
 import org.opennms.netmgt.icmp.PingerFactory;
 import org.opennms.poc.plugin.api.AbstractServiceMonitor;
 import org.opennms.poc.plugin.api.MonitoredService;
+import org.opennms.poc.plugin.api.ParameterMap;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.poc.plugin.api.ServiceMonitorResponseImpl;
@@ -25,11 +27,18 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
     @Override
     public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
+        int retries = ParameterMap.getKeyedInteger(parameters, "retry", PingConstants.DEFAULT_RETRIES);
+        long timeout = ParameterMap.getKeyedLong(parameters, "timeout", PingConstants.DEFAULT_TIMEOUT);
+        int packetSize = ParameterMap.getKeyedInteger(parameters, "packet-size", PingConstants.DEFAULT_PACKET_SIZE);
+        final int dscp = ParameterMap.getKeyedDecodedInteger(parameters, "dscp", 0);
+        final boolean allowFragmentation = ParameterMap.getKeyedBoolean(parameters, "allow-fragmentation", true);
 
-        Pinger pinger = pingerFactory.getInstance(0, true);
+        Pinger pinger = pingerFactory.getInstance(dscp, allowFragmentation);
         CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
+
         try {
-            pinger.ping(svc.getAddress(), 1, 2, 3, new PingResponseCallback() {
+            InetAddress host = svc.getAddress();
+            pinger.ping(host, timeout, retries, packetSize, new PingResponseCallback() {
                 @Override
                 public void handleResponse(InetAddress inetAddress, EchoPacket response) {
                     double responseTimeMicros = Math.round(response.elapsedTime(TimeUnit.MICROSECONDS));
@@ -49,6 +58,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
         } catch (Exception e) {
             future.completeExceptionally(e);
         }
+
         return future;
     }
 }

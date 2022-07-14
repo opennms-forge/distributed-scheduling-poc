@@ -18,6 +18,7 @@
         <feature version="${project.version}">eos</feature>
         <feature version="${project.version}">ignite-poc-model</feature>
         <feature version="${project.version}">poc-grpc</feature>
+        <feature version="${project.version}">poc-cron</feature>
 
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
@@ -174,5 +175,10 @@
 <!--        <bundle>mvn:org.opennms.horizon.snmp/rpc-impl/${project.version}</bundle>-->
 <!--        <bundle>mvn:org.opennms.horizon.snmp/snmp4j/${project.version}</bundle>-->
 <!--        <bundle>mvn:org.opennms.horizon.snmp/shell/${project.version}</bundle>-->
+    </feature>
+
+    <feature name="poc-cron" version="${project.version}">
+        <bundle>mvn:com.cronutils/cron-utils/${cron-utils.version}</bundle>
+        <bundle>mvn:org.opennms.poc/scheduler/${project.version}</bundle>
     </feature>
 </features>
