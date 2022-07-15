@@ -1,12 +1,11 @@
 
 package org.opennms.poc.icmp;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import lombok.RequiredArgsConstructor;
 import org.opennms.netmgt.icmp.EchoPacket;
 import org.opennms.netmgt.icmp.PingResponseCallback;
 import org.opennms.netmgt.icmp.Pinger;
@@ -16,19 +15,15 @@ import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 import org.opennms.poc.plugin.api.ServiceMonitorResponseImpl;
 
+@RequiredArgsConstructor
 public class IcmpMonitor extends AbstractServiceMonitor {
 
-    private Supplier<PingerFactory> pingerFactory;
-
-    public IcmpMonitor(PingerFactory pingerFactoryDelegate) {
-        //TODO: setPigerFactory(pingerFactoryDelegate); ????
-        pingerFactory = Suppliers.memoize(() -> pingerFactoryDelegate);
-    }
+    private final PingerFactory pingerFactory;
 
     @Override
     public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
 
-        Pinger pinger = pingerFactory.get().getInstance();
+        Pinger pinger = pingerFactory.getInstance();
         CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
         try {
             pinger.ping(null, 1, 2, 3, new PingResponseCallback() {
@@ -53,10 +48,5 @@ public class IcmpMonitor extends AbstractServiceMonitor {
             future.completeExceptionally(e);
         }
         return future;
-
-    }
-
-    public void setPingerFactory(PingerFactory pingerFactory) {
-        this.pingerFactory = Suppliers.ofInstance(pingerFactory);
     }
 }
