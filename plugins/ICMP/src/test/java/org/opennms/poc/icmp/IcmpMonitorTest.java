@@ -13,6 +13,7 @@ import org.opennms.netmgt.icmp.best.BestMatchPingerFactory;
 import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse.Status;
+import org.opennms.poc.plugin.api.ServiceMonitorResponseImpl;
 
 public class IcmpMonitorTest {
     @Mock
@@ -34,5 +35,6 @@ public class IcmpMonitorTest {
         ServiceMonitorResponse serviceMonitorResponse = response.get();
 
         assertEquals(Status.Up, serviceMonitorResponse.getStatus());
+        assertNotNull(serviceMonitorResponse.getProperties().get(IcmpMonitor.RESPONSE_TIME));
     }
 }

@@ -13,12 +13,15 @@ import org.opennms.netmgt.icmp.PingerFactory;
 import org.opennms.poc.plugin.api.AbstractServiceMonitor;
 import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
+import org.opennms.poc.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.poc.plugin.api.ServiceMonitorResponseImpl;
 
 @RequiredArgsConstructor
 public class IcmpMonitor extends AbstractServiceMonitor {
 
     private final PingerFactory pingerFactory;
+    //TODO: double check the constant for this key, probabloy defined elsewhere already
+    public final static String RESPONSE_TIME = "response.time";
 
     @Override
     public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
@@ -30,8 +33,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                 @Override
                 public void handleResponse(InetAddress inetAddress, EchoPacket response) {
                     double responseTimeMicros = Math.round(response.elapsedTime(TimeUnit.MICROSECONDS));
-                    //TODO: set the responseTimeMicros into the response properties?
-                    future.complete(ServiceMonitorResponseImpl.up());
+                    future.complete(ServiceMonitorResponseImpl.builder().status(Status.Up).properties(Map.of(RESPONSE_TIME, responseTimeMicros)).build());
                 }
 
                 @Override
