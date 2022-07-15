@@ -5,22 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.poc.ipc</groupId>
-        <artifactId>grpc</artifactId>
+        <groupId>org.opennms.poc</groupId>
+        <artifactId>ignite</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.opennms.poc.grpc</groupId>
-    <artifactId>workflow</artifactId>
+    <artifactId>ipc</artifactId>
     <packaging>pom</packaging>
 
-    <name>Ignite POC :: gRPC :: Workflow</name>
-    <description>Workflow grpc support</description>
+    <name>Ignite POC :: IPC</name>
+    <description>IPC</description>
 
     <modules>
-        <module>publisher</module>
-        <module>subscriber</module>
-        <module>injector</module>
+        <module>grpc</module>
     </modules>
 
 </project>

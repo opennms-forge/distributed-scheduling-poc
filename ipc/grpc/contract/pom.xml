@@ -5,22 +5,34 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.poc</groupId>
+        <groupId>org.opennms.poc.ipc</groupId>
         <artifactId>grpc</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.opennms.poc.grpc</groupId>
-    <artifactId>api</artifactId>
+    <groupId>org.opennms.poc.ipc.grpc</groupId>
+    <artifactId>contract</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Ignite POC :: gRPC :: Contract</name>
+    <name>Ignite POC :: IPC :: gRPC :: Contract</name>
     <description>The gRPC service contract.</description>
 
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
-            <artifactId>grpc-all</artifactId>
+            <artifactId>grpc-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>

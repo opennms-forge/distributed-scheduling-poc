@@ -51,6 +51,7 @@
         <module>ignite-worker</module>
         <module>plugins</module>
         <module>features</module>
+        <module>ipc</module>
 
         <module>assembly</module>
         <module>docker-assembly</module>

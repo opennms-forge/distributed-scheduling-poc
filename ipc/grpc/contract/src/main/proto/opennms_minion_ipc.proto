@@ -41,15 +41,22 @@ option java_package = "org.opennms.cloud.grpc.minion";
 
 // Minions initiate the connection to Cloud and maintains these streams
 service CloudService {
-  // RPCs triggered from Cloud to Minion (i.e. Run a monitor)
+  // RPCs triggered from Cloud to Minion (i.e. Run a monitor), called RpcStreaming in Horizon
+  // > ad hoc calls echo/heartbeat ?
   rpc CloudToMinionRPC (stream RpcResponse) returns (stream RpcRequest) {}
-  // RPCs triggered from Minion to Cloud (i.e. Twin Registration Request)
-  rpc MinionToCloudRPC (RpcRequest) returns (RpcResponse) {}
-  // Messages sent from Cloud to Minion (i.e. Twin Updates)
+  // Messages sent from Cloud to Minion (i.e. Twin Updates), called SinkStreaming in Horizon
+  // 3. > incremental update of workflow v56 (delta of changes)
   rpc CloudToMinionMessages (MinionHeader) returns (stream CloudToMinionMessage) {}
+
+  // RPCs triggered from Minion to Cloud (i.e. Twin Registration Request)
+  // 1. < I am interested in twin objects of workflow
+  // 2. > these are workflows v55
+  rpc MinionToCloudRPC (RpcRequest) returns (RpcResponse) {}
   // Messages sent from Minion to Cloud (i.e. Sink API push)
+  // 4. < Workflow execution status/results
   rpc MinionToCloudMessages (stream MinionToCloudMessage) returns (Empty) {}
 }
+
 
 message Empty {
 
@@ -83,7 +90,7 @@ message RpcRequest {
   string module_id = 5;
   // absolute time elapsed since the epoch in msec.
   uint64 expiration_time = 6;
-  map<string, string> tracing_info = 7;
+  map<string, google.protobuf.Any> metadata = 7;
 }
 
 message RpcResponse {
@@ -92,7 +99,7 @@ message RpcResponse {
   string system_id = 3;
   string location = 4;
   string module_id = 5;
-  map<string, string> tracing_info = 6;
+  map<string, google.protobuf.Any> metadata = 6;
 }
 
 message SinkMessage {
@@ -104,14 +111,14 @@ message SinkMessage {
   // where are the messages coming from
   string module_id = 5;
   // tracing headers
-  map<string, string> tracing_info = 6;
+  map<string, google.protobuf.Any> metadata = 6;
 }
 
 message TwinRequestProto {
   string consumer_key = 1;
   string system_id = 2;
   string location = 3;
-  map<string, string> tracing_info = 4;
+  map<string, google.protobuf.Any> metadata = 4;
 }
 
 message TwinResponseProto {
@@ -122,5 +129,5 @@ message TwinResponseProto {
   bool is_patch_object = 5;
   string session_id = 6;
   int32 version = 7;
-  map<string, string> tracing_info = 8;
+  map<string, google.protobuf.Any> metadata = 8;
 }
