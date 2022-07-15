@@ -1,79 +1,51 @@
 package org.opennms.poc.scheduler.impl;
 
+import com.cronutils.model.Cron;
+import com.cronutils.model.CronType;
+import com.cronutils.model.definition.CronDefinition;
+import com.cronutils.model.definition.CronDefinitionBuilder;
+import com.cronutils.model.time.ExecutionTime;
+import com.cronutils.parser.CronParser;
 import lombok.Getter;
 import lombok.Setter;
 import org.opennms.poc.scheduler.OpennmsScheduler;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.Job;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.JobKey;
-import org.quartz.ScheduleBuilder;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.impl.DirectSchedulerFactory;
-import org.quartz.simpl.RAMJobStore;
-import org.quartz.simpl.SimpleThreadPool;
-import org.quartz.spi.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * DEVELOPER NOTE:
- *  Quartz does not have a simple "pass a runnable to execute" interface because it is designed heavily around
- *  serialization.  This leads to the following:
  *
- *      - runnableMap - keep track of the runnable by task id
- *      - MyQuartzJob - a simple class that bridges the "real" task via lookup
  */
 public class OpennmsSchedulerImpl implements OpennmsScheduler {
-
-    public static final String QUARTZ_TASK_GROUP = "opennms.scheduler.task";
-    public static final String QUARTZ_TRIGGER_GROUP = "opennms.scheduler.trigger";
-    public static final String QUARTZ_TRIGGER_NAME_PREFIX = "opennms.scheduler.trigger.";
-    public static final String QUARTZ_SCHEDULER_NAME = "opennms.quartz-scheduler";
-    public static final int DEFAULT_THREAD_COUNT = 10;
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(OpennmsSchedulerImpl.class);
 
     private Logger log = DEFAULT_LOGGER;
 
+    // Prepare the parser.  Note that the "CRON DEFINITION" specifies WHICH FIELDS (and variations on field inputs) are supported.
+    // For now, just use the QUARTZ setting
+    private CronParser cronParser = new CronParser(CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ));
+
     @Getter
     @Setter
-    private int threadCount = DEFAULT_THREAD_COUNT;
+    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    private Scheduler scheduler;
-    private Map<String, Runnable> runnableMap = new HashMap<>();
-
+    private Map<String, Runnable> scheduledTasks = new HashMap<>();
 
 //========================================
 // Lifecycle Management
 //----------------------------------------
 
-    public void init() {
-        try {
-            scheduler = prepareQuartzScheduler();
-            scheduler.start();
-        } catch (SchedulerException exc) {
-            throw new RuntimeException("Failed to start up Quartz scheduler", exc);
-        }
-    }
-
     public void shutdown() {
-        try {
-            scheduler.shutdown();
-        } catch (SchedulerException exc) {
-            throw new RuntimeException("Error on shutdown of Quartz scheduler", exc);
-        }
+        log.info("Shutting down scheduler");
+        scheduledThreadPoolExecutor.shutdownNow();
     }
 
 //========================================
@@ -82,115 +54,98 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
 
     @Override
     public void scheduleTaskOnCron(String taskId, String cronExpression, Runnable operation) {
-        JobDetail jobDetail =
-                JobBuilder.newJob(MyQuartzJob.class)
-                        .withIdentity(taskId, QUARTZ_TASK_GROUP)
-                        .build();
+        Cron cron = cronParser.parse(cronExpression);
+        ExecutionTime executionTime = ExecutionTime.forCron(cron);
 
-        Trigger trigger = prepareCronTrigger(cronExpression);
+        RecurringCronRunner runner = new RecurringCronRunner(executionTime, operation);
 
-        try {
-            runnableMap.put(taskId, operation);
-            scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException scExc) {
-            throw new RuntimeException("Scheduler error", scExc);
+        // Remember the task before executing to avoid a possible race condition on reschedule
+        Runnable old = scheduledTasks.put(taskId, runner);
+        if (old != null) {
+            log.debug("replacing existing operation for task: task-id={}", taskId);
+            scheduledThreadPoolExecutor.remove(old);
         }
+
+        // Trigger the next run.  After that, it will reschedule itself.
+        scheduleNextRun(executionTime, runner);
     }
 
     @Override
     public void schedulePeriodically(String taskId, long period, TimeUnit unit, Runnable operation) {
-        JobDetail jobDetail =
-                JobBuilder.newJob(MyQuartzJob.class)
-                        .withIdentity(taskId, QUARTZ_TASK_GROUP)
-                        .build();
-
-        Trigger trigger = preparePeriodicTrigger(taskId, period, unit);
-
-        try {
-            runnableMap.put(taskId, operation);
-            scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException scExc) {
-            throw new RuntimeException("Scheduler error", scExc);
+        Runnable old = scheduledTasks.put(taskId, operation);
+        if (old != null) {
+            log.debug("replacing existing operation for task: task-id={}", taskId);
+            scheduledThreadPoolExecutor.remove(old);
         }
+
+        scheduledThreadPoolExecutor.scheduleAtFixedRate(operation, period, period, unit);
     }
 
     @Override
     public void cancelTask(String taskId) {
-        try {
-            runnableMap.remove(taskId);
-            scheduler.deleteJob(new JobKey(taskId, QUARTZ_TASK_GROUP));
-        } catch (SchedulerException sExc) {
-            throw new RuntimeException("Error deleting quartz job", sExc);
+        Runnable runnable = scheduledTasks.remove(taskId);
+
+        if (runnable != null) {
+            if (runnable instanceof RecurringCronRunner) {
+                // Tell the recurring runner to stop too
+                ((RecurringCronRunner) runnable).shutdown();
+            }
+
+            scheduledThreadPoolExecutor.remove(runnable);
         }
-    }
-
-    //========================================
-    // Internal Operations
-    //----------------------------------------
-
-    private Scheduler prepareQuartzScheduler() throws SchedulerException {
-        ThreadPool threadPool = prepareQuartzThreadPool();
-        DirectSchedulerFactory schedulerFactory = DirectSchedulerFactory.getInstance();
-
-        schedulerFactory.createScheduler(QUARTZ_SCHEDULER_NAME, "instance1", threadPool, new RAMJobStore());
-        return schedulerFactory.getScheduler(QUARTZ_SCHEDULER_NAME);
-    }
-
-    private ThreadPool prepareQuartzThreadPool() {
-        return new SimpleThreadPool(threadCount, Thread.NORM_PRIORITY);
-    }
-
-    private Trigger prepareCronTrigger(String cronExpression) {
-        // TODO: TimeZone or just use the default?
-        return CronScheduleBuilder
-                .cronSchedule(cronExpression)
-                .build();
-    }
-
-    private Trigger preparePeriodicTrigger(String taskId, long period, TimeUnit timeUnit) {
-        ScheduleBuilder<? extends Trigger> scheduleBuilder;
-        if (timeUnit.toSeconds(period) < 1) {
-            scheduleBuilder = SimpleScheduleBuilder.repeatSecondlyForever(1);
-        } else {
-            // Quartz only allows intervals in SECONDS, MINUTES, or HOURS
-            // Note it also only supports int, but that should not be a problem as MAX_INT seconds = 68 years (and change)
-            scheduleBuilder = SimpleScheduleBuilder.repeatSecondlyForever((int) timeUnit.toMillis(period));
-        }
-
-        String triggerId = QUARTZ_TRIGGER_NAME_PREFIX + taskId;
-
-        return TriggerBuilder.newTrigger()
-                .withIdentity(triggerId, QUARTZ_TRIGGER_GROUP)
-                .startNow()
-                .withSchedule(scheduleBuilder)
-                .build();
     }
 
 //========================================
-// Internal Classes
+// Internal Operations
 //----------------------------------------
 
-    /**
-     * Adapter class required by Quartz.
-     */
-    private static class MyQuartzJob implements Job {
-        // Quartz requires an explicit no-arg constructor on the class.
-        public MyQuartzJob() {
-            // log.trace("new instance of MyQuartzJob");
+    private void scheduleNextRun(ExecutionTime executionTime, Runnable operation) {
+        ZonedDateTime now = ZonedDateTime.now();
+
+        // Get an Optional, but the contract says it will never be null...
+        Optional<Duration> durationOpt = executionTime.timeToNextExecution(now);
+        Duration duration = durationOpt.get();
+
+        scheduledThreadPoolExecutor.schedule(operation, duration.toMillis(), TimeUnit.MILLISECONDS);
+    }
+
+//========================================
+// Internal Class
+//----------------------------------------
+
+    private class RecurringCronRunner implements Runnable {
+        private final ExecutionTime executionTime;
+        private final Runnable operation;
+        private boolean shutdown = false;
+
+        public RecurringCronRunner(ExecutionTime executionTime, Runnable operation) {
+            this.executionTime = executionTime;
+            this.operation = operation;
         }
 
         @Override
-        public void execute(JobExecutionContext context) throws JobExecutionException {
-            String jobName = context.getJobDetail().getKey().getName();
-
-            Runnable runnable;
-            runnable = runnableMap.get(jobName);
-
-            if (runnable != null) {
-                runnable.run();
+        public void run() {
+            if (!shutdown) {
+                try {
+                    log.debug("Executing now");
+                    operation.run();
+                } catch (Exception exc) {
+                    log.warn("task failure", exc);
+                } finally {
+                    if (! shutdown) {
+                        log.debug("Scheduling next execution");
+                        scheduleNextRun(executionTime, this);
+                    } else {
+                        log.debug("NOT scheduling next execution; was shutdown");
+                    }
+                }
             } else {
-                log.info("Have execution of job without runnable defined - may happen normally on job removal: job-name={}", jobName);
+                log.debug("Skipping execution and NOT scheduling next one; was shutdown");
             }
+        }
+
+        public void shutdown() {
+            shutdown = true;
         }
     }
 }

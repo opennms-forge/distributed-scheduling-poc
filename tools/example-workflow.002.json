@@ -3,7 +3,7 @@
     {
       "description": "Monitor localhost ping",
       "type": "ICMPMonitor",
-      "cron": "5000",
+      "cron": "3,13,23,33,43,53 */2 * * * ? *",
       "parameters": {
           "host": "127.0.0.1"
       },
@@ -16,7 +16,7 @@
       "parameters": {
           "host": "127.0.0.2"
       },
-      "uuid": "ac07c7ef-981b-436b-96e6-d603961a7e86"
+      "uuid": "ac07c7ef-981b-436b-96e6-d603961a7e85"
     },
     {
       "description": "Monitor localhost ping 3",

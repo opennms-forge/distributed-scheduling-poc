@@ -10,8 +10,16 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <bean id="scheduler" class="org.opennms.poc.scheduler.impl.OpennmsSchedulerImpl" init-method="init" destroy-method="shutdown">
-    <property name="threadCount" value="${schedulerThreadCount}"/>
+  <bean id="scheduledThreadPoolExecutorFactory" class="org.opennms.poc.scheduler.impl.ScheduledThreadPoolExecutorFactory"/>
+
+  <bean id="opennmsWorkflowScheduler-executor" factory-ref="scheduledThreadPoolExecutorFactory" factory-method="create">
+    <argument value="${schedulerThreadCount}"/>
+    <argument value="opennms.workflow.scheduler.thread."/>
+  </bean>
+
+  <bean id="scheduler" class="org.opennms.poc.scheduler.impl.OpennmsSchedulerImpl" destroy-method="shutdown">
+    <property name="scheduledThreadPoolExecutor" ref="opennmsWorkflowScheduler-executor"/>
+    <!--<property name="threadCount" value="${schedulerThreadCount}"/>-->
   </bean>
 
   <service ref="scheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler">

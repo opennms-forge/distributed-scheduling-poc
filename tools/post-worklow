@@ -1,8 +1,40 @@
 #!/bin/bash
 
+# DATA_FILE=example-workflow.empty.json
 # DATA_FILE=example-workflow.001.json
 DATA_FILE=example-workflow.002.json
 
 DATA="$(< ${DATA_FILE})"
 
-curl -v -X POST -H 'Content-Type: application/json' --data "${DATA}" http://localhost:8001/injector/workflow
+usage()
+{
+	echo "Usage: $0 [-hv] [-H <host:port>]"
+	echo
+	echo "  -h  Display this help"
+	echo "  -v  Verbose curl output"
+}
+
+while getopts "hH:p:R:t:u:v" arg
+do
+	case "$arg" in
+		h)
+			usage
+			exit 0
+			;;
+
+		H)
+			HOST_PORT="${OPTARG}"
+			;;
+
+		v)
+			CURL_OPTS=("${CURL_OPTS[@]}" -v)
+			;;
+
+		*)
+			usage >&2
+			exit 1
+			;;
+	esac
+done
+
+curl "${CURL_OPTS[@]}" -X POST -H 'Content-Type: application/json' --data "${DATA}" "http://${HOST_PORT}/injector/workflow"

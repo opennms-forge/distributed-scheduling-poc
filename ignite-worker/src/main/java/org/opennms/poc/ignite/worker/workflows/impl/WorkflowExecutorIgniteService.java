@@ -16,7 +16,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class WorkflowExecutorIgniteService implements Service {
@@ -32,6 +31,10 @@ public class WorkflowExecutorIgniteService implements Service {
         this.workflow = workflow;
     }
 
+//========================================
+// Ignite Service API
+//----------------------------------------
+
     @Override
     public void init() throws Exception {
         scheduler = OsgiServiceHolder.getOpennmsScheduler();
@@ -40,9 +43,18 @@ public class WorkflowExecutorIgniteService implements Service {
     @Override
     public void execute() throws Exception {
         try {
-            long period = Long.parseLong(workflow.getCron());
+            String whenSpec = workflow.getCron().trim();
 
-            scheduler.schedulePeriodically(workflow.getUuid(), period, TimeUnit.MILLISECONDS, this::executeIteration);
+            // If the value is all digits, use it as periodic time in milliseconds
+            if (whenSpec.matches("^\\d+$")) {
+                long period = Long.parseLong(workflow.getCron());
+
+                scheduler.schedulePeriodically(workflow.getUuid(), period, TimeUnit.MILLISECONDS, this::executeIteration);
+            } else {
+                // Not a number, MUST be a CRON expression
+                scheduler.scheduleTaskOnCron(workflow.getUuid(), whenSpec, this::executeIteration);
+            }
+
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time
             logger.warning("error starting workflow " + workflow.getUuid(), exc);
@@ -51,7 +63,7 @@ public class WorkflowExecutorIgniteService implements Service {
 
     @Override
     public void cancel() {
-
+        scheduler.cancelTask(workflow.getUuid());
     }
 
 
