@@ -1,7 +1,6 @@
 package org.opennms.poc.icmp;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CompletableFuture;
@@ -9,35 +8,31 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opennms.netmgt.icmp.Pinger;
-import org.opennms.netmgt.icmp.PingerFactory;
+import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.netmgt.icmp.best.BestMatchPingerFactory;
+import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse.Status;
 
 public class IcmpMonitorTest {
     @Mock
-    Pinger pinger;
-    @Mock
-    PingerFactory pingerFactory;
+    MonitoredService monitoredService;
 
     IcmpMonitor icmpMonitor;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        when(pingerFactory.getInstance()).thenReturn(pinger);
-        when(pinger.ping(any())).thenReturn(1);
-
-        icmpMonitor = new IcmpMonitor(pingerFactory);
+        when(monitoredService.getAddress()).thenReturn(InetAddressUtils.addr("127.0.0.1"));
+        icmpMonitor = new IcmpMonitor(new BestMatchPingerFactory());
     }
 
     @Test
-    public void poll() {
-        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(null, null);
+    public void poll() throws Exception {
+        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, null);
 
-        response.whenComplete((completedResponse, exception) -> {
+        ServiceMonitorResponse serviceMonitorResponse = response.get();
 
-            assertTrue(completedResponse.getStatus().equals(Status.Up));
-        });
+        assertEquals(Status.Up, serviceMonitorResponse.getStatus());
     }
 }

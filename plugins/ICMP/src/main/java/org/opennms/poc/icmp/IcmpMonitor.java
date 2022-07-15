@@ -23,10 +23,10 @@ public class IcmpMonitor extends AbstractServiceMonitor {
     @Override
     public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
 
-        Pinger pinger = pingerFactory.getInstance();
+        Pinger pinger = pingerFactory.getInstance(0, true);
         CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
         try {
-            pinger.ping(null, 1, 2, 3, new PingResponseCallback() {
+            pinger.ping(svc.getAddress(), 1, 2, 3, new PingResponseCallback() {
                 @Override
                 public void handleResponse(InetAddress inetAddress, EchoPacket response) {
                     double responseTimeMicros = Math.round(response.elapsedTime(TimeUnit.MICROSECONDS));
