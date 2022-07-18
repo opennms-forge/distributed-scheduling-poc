@@ -37,6 +37,7 @@
         <opennms.tracker.version>0.7</opennms.tracker.version>
         <commons.io.version>2.11.0</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
+        <mockito.version>4.5.1</mockito.version>
     </properties>
 
     <modules>
@@ -96,6 +97,14 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
