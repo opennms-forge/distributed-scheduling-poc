@@ -1,15 +1,12 @@
 package org.opennms.poc.ignite.worker.workflows.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.services.Service;
 import org.opennms.horizon.core.lib.IPAddress;
-import org.opennms.horizon.plugin.api.v2.ServiceMonitorResponse;
 import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
 import org.opennms.poc.plugin.api.MonitoredService;
-import org.opennms.poc.plugin.api.PollStatus;
 import org.opennms.poc.plugin.api.ServiceMonitor;
 
 import java.net.InetAddress;
@@ -18,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 
 public class WorkflowExecutorIgniteService implements Service {
 

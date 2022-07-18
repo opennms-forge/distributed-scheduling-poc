@@ -1,7 +1,6 @@
 package org.opennms.poc.plugin.api;
 
 import java.util.Map;
-import org.opennms.horizon.plugin.api.v2.MonitoredService;
 
 public interface ServiceMonitorRequest {
 
