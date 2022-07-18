@@ -35,6 +35,11 @@ And then run these commands
       feature:repo-add mvn:org.opennms.poc/features/1.0.0-SNAPSHOT/xml/features
       feature:install ignite-poc
 
+To run the Detector and Monitor plugins
+
+      feature:install icmp-plugins
+      feature:install snmp-plugins
+
 # Using the example docker-compose file
 
     $ cd tools
