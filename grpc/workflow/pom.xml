@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.poc.ipc</groupId>
+        <groupId>org.opennms.poc</groupId>
         <artifactId>grpc</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
