@@ -6,7 +6,7 @@ DATA_FILE=example-workflow.002.json
 
 DATA="$(< ${DATA_FILE})"
 
-HOST_PORT=localhost:8001
+HOST_PORT=localhost:8080
 
 usage()
 {

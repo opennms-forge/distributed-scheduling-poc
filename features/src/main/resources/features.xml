@@ -34,7 +34,7 @@
         <details>Import of Horizon gRPC apis.</details>
         <feature>shell</feature>
         <feature>aries-blueprint</feature>
-        <feature>horizon-grpc</feature>
+        <feature>horizon-grpc-workaround</feature>
     </feature>
 
     <feature name="poc-grpc-ipc-twin" description="Digital twin api with gRPC channel" version="${project.version}">
@@ -56,7 +56,6 @@
         <bundle>mvn:org.opennms.core.ipc.twin/api/${opennms-horizon.version}</bundle>
         <bundle>mvn:org.opennms.core.ipc.twin/common/${opennms-horizon.version}</bundle>
         <bundle>mvn:org.opennms.core.ipc.twin.grpc/common/${opennms-horizon.version}</bundle>
-        <bundle>mvn:org.opennms.core.ipc.twin.grpc/publisher/${opennms-horizon.version}</bundle>
         <bundle>mvn:org.opennms.core.ipc.twin.grpc/subscriber/${opennms-horizon.version}</bundle>
     </feature>
 
@@ -82,21 +81,13 @@
         <feature version="${project.version}">poc-grpc-ipc-twin</feature>
         <feature version="${project.version}">ignite-poc-model</feature>
 
-        <bundle>mvn:org.opennms.poc.grpc.workflow/publisher/${project.version}</bundle>
         <bundle>mvn:org.opennms.poc.grpc.workflow/subscriber/${project.version}</bundle>
-    </feature>
-
-    <feature name="poc-grpc-workflow-injector" version="${project.version}">
-        <feature version="${project.version}">poc-grpc-workflow</feature>
-
-        <bundle>mvn:org.opennms.poc.grpc.workflow/injector/${project.version}</bundle>
     </feature>
 
     <feature name="poc-grpc" description="gRPC communication layer" version="${project.version}">
         <details>All-in-one feature to activate gRPC functionality.</details>
         <feature version="${project.version}">poc-grpc-ipc-twin</feature>
         <feature version="${project.version}">poc-grpc-workflow</feature>
-        <feature version="${project.version}">poc-grpc-workflow-injector</feature>
         <feature version="${project.version}">poc-grpc-messaging-core</feature>
     </feature>
 
@@ -164,7 +155,7 @@
 
 <!--    // horizon stream bundles and features needed for SNMP-->
     <feature name="poc-horizon-snmp" version="${project.version}" description="Horizon :: SNMP">
-        <feature version="${opennms-horizon.version}">horizon-grpc</feature>
+        <feature version="${project.version}">horizon-grpc-workaround</feature>
         <feature version="${opennms-horizon.version}">horizon-events-api</feature>
 
         <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
@@ -180,5 +171,23 @@
     <feature name="poc-cron" version="${project.version}">
         <bundle>mvn:com.cronutils/cron-utils/${cron-utils.version}</bundle>
         <bundle>mvn:org.opennms.poc/scheduler/${project.version}</bundle>
+    </feature>
+
+    <!-- Workaround to prevent startup of the GRPC Server -->
+    <!-- This will be removed - it depends on cleanup of the Horizon Stream bundles and features -->
+    <feature name="horizon-grpc-workaround" version="${project.version}" description="Horizon :: gRPC :: WORKAROUND">
+        <feature>horizon-ipc-api</feature>
+        <feature prerequisite="true">wrap</feature>
+
+        <bundle>mvn:org.opennms.horizon.3rdparty/grpc/0.1.0-SNAPSHOT</bundle>
+        <bundle>mvn:com.google.protobuf/protobuf-java/3.16.1</bundle>
+
+        <bundle>mvn:org.opennms.horizon.ipc.grpc/client/0.1.0-SNAPSHOT</bundle>
+        <bundle>mvn:org.opennms.horizon.ipc.grpc/common/0.1.0-SNAPSHOT</bundle>
+        <bundle>mvn:org.opennms.horizon.ipc/echo/0.1.0-SNAPSHOT</bundle>
+
+        <!-- WRAP the GRPC server bundle - it contains class definitions we need, but we want to skip the Blueprint -->
+        <!--  so it does not start the server.  Note the Bundle-Blueprint=meta-inf disables the existing blueprint. -->
+        <bundle>wrap:mvn:org.opennms.horizon.ipc.grpc/server/0.1.0-SNAPSHOT$Bundle-Blueprint=meta-inf&amp;overwrite=merge</bundle>
     </feature>
 </features>
