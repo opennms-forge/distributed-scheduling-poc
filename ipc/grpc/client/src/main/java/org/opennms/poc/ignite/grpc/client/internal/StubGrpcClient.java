@@ -4,20 +4,25 @@ import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.function.Predicate;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceBlockingStub;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Empty;
 import org.opennms.cloud.grpc.minion.MinionHeader;
+import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequest;
 import org.opennms.cloud.grpc.minion.RpcResponse;
-import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.horizon.core.identity.Identity;
 import org.opennms.poc.ignite.grpc.client.GrpcClient;
 import org.slf4j.Logger;
@@ -27,10 +32,13 @@ public class StubGrpcClient implements GrpcClient {
 
   private final Logger logger = LoggerFactory.getLogger(StubGrpcClient.class);
 
+  private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "grpc-client-call"));
   private final ManagedChannel channel;
   private final CloudServiceStub asnc;
   private final CloudServiceBlockingStub blocking;
+  private final Map<Predicate<RpcRequest>, Function<RpcRequest, CompletableFuture<RpcResponse>>> handlers = new ConcurrentHashMap<>();
   private final Identity identity;
+  private StreamObserver<RpcResponse> rpcReplyStream;
 
   public StubGrpcClient(ManagedChannel channel, CloudServiceStub async, CloudServiceBlockingStub blocking, Identity identity) {
     this.channel = channel;
@@ -42,6 +50,39 @@ public class StubGrpcClient implements GrpcClient {
   @Override
   public void start() {
     channel.getState(true);
+
+    this.rpcReplyStream = asnc.cloudToMinionRPC(new StreamObserver<>() {
+      @Override
+      public void onNext(RpcRequest value) {
+        if (value.getModuleId().equals("identify")) {
+          RpcResponse response = RpcResponse.newBuilder()
+            .setSystemId(identity.getId())
+            .setLocation(identity.getLocation())
+            .setRpcId(value.getRpcId())
+            .setModuleId(value.getModuleId())
+            .build();
+          executor.schedule(new Runnable() {
+            @Override
+            public void run() {
+              rpcReplyStream.onNext(response);
+            }
+          }, 2, TimeUnit.SECONDS);
+          return;
+        }
+
+        handleIncomingRpc(value);
+      }
+
+      @Override
+      public void onError(Throwable t) {
+
+      }
+
+      @Override
+      public void onCompleted() {
+
+      }
+    });
   }
 
   @Override
@@ -56,84 +97,41 @@ public class StubGrpcClient implements GrpcClient {
     return channel.getState(false);
   }
 
-  public <Req, Rsp> Session onCall(Function<Req, CompletableFuture<Stream<Rsp>>> response) {
-    AtomicReference<StreamObserver<RpcResponse>> replyStream = new AtomicReference<>();
-    StreamObserver<RpcRequest> requestStream = new StreamObserver<>() {
-      @Override
-      public void onNext(RpcRequest value) {
-        response.apply(map(value)).whenComplete((responsesStream, error) -> {
-          if (error == null) {
-            StreamObserver<RpcResponse> responseStream = replyStream.get();
-            if (responseStream != null) {
-              responsesStream.forEach(ans -> responseStream.onNext(map(ans)));
-            }
-          }
-        });
-      }
-
-      @Override
-      public void onError(Throwable t) {
-      }
-
-      @Override
-      public void onCompleted() {
-        // do we close reply stream ?
-        replyStream.get().onCompleted();
-      }
-
-      private RpcResponse map(Rsp ans) {
-        return null;
-      }
-      private Req map(RpcRequest value) {
-        return null;
-      }
-    };
-
-    StreamObserver<RpcResponse> observer = asnc.cloudToMinionRPC(requestStream);
-    replyStream.set(observer);
+  public Session onCall(Predicate<RpcRequest> predicate, Function<RpcRequest, CompletableFuture<RpcResponse>> function) {
+    this.handlers.put(predicate, function);
     return new Session() {
       @Override
       public void close() throws IOException {
-        requestStream.onCompleted();
-        observer.onCompleted();
+        handlers.remove(predicate);
       }
     };
   }
 
-  public <Msg> PublishSession<Msg> publishToCloud() {
+  public PublishSession publishToCloud() {
     StreamObserver<MinionToCloudMessage> observer = asnc.minionToCloudMessages(new EmptyObserver());
-    return new PublishSession<>() {
+    return new PublishSession() {
       @Override
       public void close() throws IOException {
         observer.onCompleted();
       }
 
       @Override
-      public void publish(Msg message) {
-        observer.onNext(map(message));
-      }
-
-      private <T> MinionToCloudMessage map(T message) {
-        return null;
+      public void publish(MinionToCloudMessage message) {
+        observer.onNext(message);
       }
     };
   }
 
-  public <Msg> Session streamFromCloud(Consumer<Msg> consumer) {
+  public Session streamFromCloud(Consumer<CloudToMinionMessage> consumer) {
     MinionHeader header = MinionHeader.newBuilder()
       .setLocation(identity.getLocation())
       .setSystemId(identity.getId())
       .build();
 
-    StreamObserver<CloudToMinionMessage> observer = new ForwardingObserver<>(
-      new Consumer<CloudToMinionMessage>() {
+    StreamObserver<CloudToMinionMessage> observer = new ForwardingObserver<>(new Consumer<>() {
         @Override
         public void accept(CloudToMinionMessage cloudToMinionMessage) {
-          consumer.accept(map(cloudToMinionMessage));
-        }
-
-        private Msg map(CloudToMinionMessage cloudToMinionMessage) {
-          return null;
+          consumer.accept(cloudToMinionMessage);
         }
       });
     asnc.cloudToMinionMessages(header, observer);
@@ -147,16 +145,23 @@ public class StubGrpcClient implements GrpcClient {
   }
 
   @Override
-  public <Req, Rsp> Rsp request(Req request) {
-    return mapResponse(blocking.minionToCloudRPC(mapRequest(request)));
+  public RpcResponse request(RpcRequest request) {
+    return blocking.minionToCloudRPC(request);
   }
 
-  private <Rsp> Rsp mapResponse(RpcResponse minionToCloudRPC) {
-    return null;
-  }
-
-  private <Req> RpcRequest mapRequest(Req request) {
-    return null;
+  private void handleIncomingRpc(RpcRequest request) {
+    for (Entry<Predicate<RpcRequest>, Function<RpcRequest, CompletableFuture<RpcResponse>>> entry : handlers.entrySet()) {
+      if (entry.getKey().test(request)) {
+        entry.getValue().apply(request).whenComplete((response, error) -> {
+          if (error != null) {
+            logger.warn("Client side error while handling rpc request {}", request, error);
+            return;
+          }
+          rpcReplyStream.onNext(response);
+          rpcReplyStream.onCompleted();
+        });
+      }
+    }
   }
 
   static class EmptyObserver implements StreamObserver<Empty> {

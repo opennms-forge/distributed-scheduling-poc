@@ -5,19 +5,23 @@ import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.function.Predicate;
+import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
+import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
+import org.opennms.cloud.grpc.minion.RpcRequest;
+import org.opennms.cloud.grpc.minion.RpcResponse;
 
 public interface GrpcClient extends AutoCloseable {
 
   // CloudToMinionRPC, async
-  <Req, Rsp> Session onCall(Function<Req, CompletableFuture<Stream<Rsp>>> response);
+  Session onCall(Predicate<RpcRequest> request, Function<RpcRequest, CompletableFuture<RpcResponse>> response);
   // CloudToMinionMessages, async
-  <Msg> Session streamFromCloud(Consumer<Msg> consumer);
+  Session streamFromCloud(Consumer<CloudToMinionMessage> consumer);
 
   // MinionToCloudRPC, blocking
-  <Req, Rsp>  Rsp request(Req request);
+  RpcResponse request(RpcRequest request);
   // MinionToCloudMessages
-  <Msg> PublishSession<Msg> publishToCloud();
+  PublishSession publishToCloud();
 
   void start();
 
@@ -25,8 +29,8 @@ public interface GrpcClient extends AutoCloseable {
 
   interface Session extends Closeable { }
 
-  interface PublishSession<T> extends Session {
-    void publish(T message);
+  interface PublishSession extends Session {
+    void publish(MinionToCloudMessage message);
   }
 
 }

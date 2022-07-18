@@ -1,15 +1,14 @@
 package org.opennms.poc.ignite.grpc.client;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface MinionClient {
 
-  <Out> void register(PublishModule<Out> module);
-  <Out> void unregister(PublishModule<Out> module);
+  void register(PublishModule module);
+  void unregister(PublishModule module);
 
-  <In> void register(SinkModule<In> module);
-  <In> void unregister(SinkModule<In> module);
+  void register(SinkModule module);
+  void unregister(SinkModule module);
 
   <Req, Res> void registerIncomingRpc(IncomingRpcModule<Req, Res> module);
   <Req, Res> void unregisterIncomingRpc(IncomingRpcModule<Req, Res> module);
@@ -33,14 +32,10 @@ public interface MinionClient {
     Class<Ack> ack();
   }
 
-  interface SinkModule<MsgIn> extends Module {
-    Class<MsgIn> payload();
-
-    void handle(MsgIn request);
+  interface SinkModule extends Module {
   }
 
-  interface PublishModule<Msg> extends Module {
-    Class<Msg> payload();
+  interface PublishModule extends Module {
   }
 
 }

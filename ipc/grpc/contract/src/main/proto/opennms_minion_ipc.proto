@@ -84,7 +84,7 @@ message CloudToMinionMessage {
 
 message RpcRequest {
   string rpc_id = 1;
-  bytes rpc_content = 2;
+  google.protobuf.Any rpc_content = 2;
   string system_id = 3;
   string location = 4;
   string module_id = 5;
@@ -95,7 +95,7 @@ message RpcRequest {
 
 message RpcResponse {
   string rpc_id = 1;
-  bytes rpc_content = 2;
+  google.protobuf.Any rpc_content = 2;
   string system_id = 3;
   string location = 4;
   string module_id = 5;
@@ -130,4 +130,13 @@ message TwinResponseProto {
   string session_id = 6;
   int32 version = 7;
   map<string, google.protobuf.Any> metadata = 8;
+}
+
+message RegistrationRequest {
+  string instance = 1;
+}
+
+message RegistrationResponse {
+  string instance = 1;
+  bool ack = 2;
 }
