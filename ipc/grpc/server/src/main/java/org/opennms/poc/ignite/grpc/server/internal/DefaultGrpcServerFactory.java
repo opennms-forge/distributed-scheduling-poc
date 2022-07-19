@@ -7,12 +7,12 @@ import io.grpc.ServerCredentials;
 import io.grpc.ServerInterceptor;
 import java.util.List;
 import org.opennms.poc.ignite.grpc.server.GrpcServer;
-import org.opennms.poc.ignite.grpc.server.GrpcServerBuilder;
+import org.opennms.poc.ignite.grpc.server.GrpcServerFactory;
 
-public class DefaultGrpcServerBuilder implements GrpcServerBuilder {
+public class DefaultGrpcServerFactory implements GrpcServerFactory {
 
   @Override
-  public GrpcServer build(String host, int port, List<ServerInterceptor> interceptors) {
+  public GrpcServer create(String host, int port, List<ServerInterceptor> interceptors) {
     ServerCredentials credentials = InsecureServerCredentials.create();
 
     ServerBuilder<?> serverBuilder = Grpc.newServerBuilderForPort(port, credentials)
