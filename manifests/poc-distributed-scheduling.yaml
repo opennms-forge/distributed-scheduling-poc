@@ -16,6 +16,24 @@ spec:
   selector:
     run: poc-distributed-scheduling
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: poc-test-driver
+  labels:
+    run: poc-test-driver
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      protocol: TCP
+      name: http
+    - port: 8990
+      protocol: TCP
+      name: grpc
+  selector:
+    run: poc-test-driver
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -56,6 +74,10 @@ spec:
       annotations:
         linkerd.io/inject: enabled
     spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: org.opennms.core.ipc.grpc.client.cfg
       initContainers:
       - name: init-sysctl
         image: busybox
@@ -84,3 +106,42 @@ spec:
               value: ""
           ports:
             - containerPort: 8181
+          volumeMounts:
+            - name: config-volume
+              mountPath: "/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg"
+              subPath: "grpc-config"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poc-test-driver
+spec:
+  selector:
+    matchLabels:
+      run: poc-test-driver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: poc-test-driver
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+        - name: poc-test-driver
+          image: opennms/ds-poc-test-driver
+          imagePullPolicy: Never
+          env:
+            - name: management_endpoints_web_exposure_include
+              value: "*"
+          ports:
+            - containerPort: 8080
+            - containerPort: 8990
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: org.opennms.core.ipc.grpc.client.cfg
+data:
+  grpc-config: |
+    host=poc-test-driver
