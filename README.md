@@ -42,36 +42,36 @@ To run the Detector and Monitor plugins
 
 # Using the example docker-compose file
 
+**WARNING: the docker-compose file is out-of-date**
+
     $ cd tools
     $ docker-compose up
 
+# Using Skaffold
+
+* Requires Skaffold and Kind (or other Kubernetes server)
+
+
+    $ skaffold dev
+
 # To Exercise
 
-    $ curl http://localhost:8001/poc/hi-all
-    $ curl http://localhost:8002/poc/hi-all
-    $ curl http://localhost:8001/poc/hi-youngest
-    $ curl http://localhost:8002/poc/hi-youngest
-    $ curl http://localhost:8001/poc/hi-oldest
-    $ curl http://localhost:8002/poc/hi-oldest
+Wait for Twin GRPC startup.  The following log message indicates Twin GRPC has started:
 
-## Service deployment
+    [poc-ignite-worker] 00:46:34.914 INFO  [Blueprint Extender: 2] Started Twin gRPC Subscriber at location cloud with systemId 0ddba11
 
-**NOTE** this service doesn't yet repeat, in spite of its name:
+Here is a 1-liner to watch for this line (note this command only shows logs from a single pod):
 
-    $ curl http://localhost:8001/poc/hi-all-repeated-service
-    $ curl -X DELETE http://localhost:8001/poc/hi-all-repeated-service
+    watch -c 'kubectl logs --all-containers=true deployment/poc-distributed-scheduling | grep "Started Twin gRPC"'
 
-    **Service Startup Scale Testing**
-    $ curl 'http://localhost:8001/poc/noop-service?count=10000'
-    $ curl -X DELETE 'http://localhost:8001/poc/noop-service?count=10000'
+Send a workflow update via the test-driver:
+
+    $ cd tools
+    $ ./post-workflow
 
 ## Play with workflows
 
     $ curl 'http://localhost:8001/poc/load-em-up?size=SMALL'
-
-# Skaffold
- 
-    $ skaffold dev
 
 # UNSOLVED
 
@@ -80,16 +80,3 @@ To run the Detector and Monitor plugins
   * See log errors such as:
 
     Caused by: class org.apache.ignite.spi.IgniteSpiOperationTimeoutException: Failed to perform handshake due to timeout (consider increasing 'connectionTimeout' configuration property).
-
-# Service Execution from Workflow Twin Publishing
-
-    $ skaffold dev
-
-    # Wait for Twin GRPC startup
-
-The following log message indicates Twin GRPC has started:
-
-    [poc-ignite-worker] 00:46:34.914 INFO  [Blueprint Extender: 2] Started Twin gRPC Subscriber at location cloud with systemId 0ddba11
-
-    $ cd tools
-    $ ./post-workflow

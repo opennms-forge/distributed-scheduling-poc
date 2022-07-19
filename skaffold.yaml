@@ -16,6 +16,12 @@ build:
         ]
     sync:
       auto: true
+  - image: opennms/ds-poc-test-driver
+    context: .
+    jib:
+      project: test-driver
+    sync:
+      auto: true
 
 portForward:
   - resourceType: service
@@ -26,6 +32,10 @@ portForward:
     resourceName: poc-distributed-scheduling
     port: 8101
     localPort: 8101
+  - resourceType: service
+    resourceName: poc-test-driver
+    port: 8080
+    localPort: 8080
 
 deploy:
   kubectl:
