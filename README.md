@@ -70,9 +70,6 @@ To run the Detector and Monitor plugins
     $ curl 'http://localhost:8001/poc/load-em-up?size=SMALL'
 
 # Skaffold
-
-* NOTE: this is currently non-functional as it needs updates to use Karaf instead of spring-boot
-
  
     $ skaffold dev
 

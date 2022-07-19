@@ -22,6 +22,10 @@ portForward:
     resourceName: poc-distributed-scheduling
     port: 8181
     localPort: 8001
+  - resourceType: service
+    resourceName: poc-distributed-scheduling
+    port: 8101
+    localPort: 8101
 
 deploy:
   kubectl:
