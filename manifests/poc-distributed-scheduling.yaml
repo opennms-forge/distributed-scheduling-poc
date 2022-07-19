@@ -10,6 +10,9 @@ spec:
     - port: 8181
       protocol: TCP
       name: http
+    - port: 8101
+      protocol: TCP
+      name: karaf-ssh
     - port: 47500
       protocol: TCP
       name: ignite-discovery
