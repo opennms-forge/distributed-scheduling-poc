@@ -5,19 +5,13 @@ FROM opennms/deploy-base:jre-1.2.0.b105
 
 RUN mkdir -p /opt
 
-ADD work/karaf /opt/karaf
+RUN groupadd --gid 10001 minion-poc && \
+    useradd --system --uid 10001 --gid minion-poc minion-poc --home-dir /opt/karaf
+
+ADD --chown=10001:0 work/karaf/ /opt/karaf/
 
 # Set karaf.clean.cache = true in system.properties
-RUN ls -l /opt/karaf
 RUN sed -i 's/^karaf.clean.cache *=.*/karaf.clean.cache = true/' /opt/karaf/etc/system.properties
-
-# We set the correct permissions in this stage, so we don't have this as an additional
-# layer in our deploy image.
-RUN groupadd --gid 10001 minion-poc && \
-    useradd --system --uid 10001 --gid minion-poc minion-poc --home-dir /opt/karaf && \
-    chown 10001 /opt/karaf -R && \
-    chgrp -R 0 /opt/karaf && \
-    chmod -R g=u /opt/karaf
 
 # Create SSH Key-Pair to use with the Karaf Shell
 # This is a workaround to be able to use our health:check which does not work with the karaf/bin/client command
