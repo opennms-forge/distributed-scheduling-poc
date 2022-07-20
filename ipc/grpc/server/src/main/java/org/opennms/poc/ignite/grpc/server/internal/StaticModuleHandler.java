@@ -100,21 +100,18 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
 
   @Override
   public StreamObserver<RpcResponse> cloudToMinionRPC(StreamObserver<RpcRequest> responseObserver) {
-    String sessionId = UUID.randomUUID().toString();
-    RpcRequest identRequest = RpcRequest.newBuilder()
-      .setModuleId("identify")
-      .setRpcId(sessionId)
-      .build();
-    responseObserver.onNext(identRequest);
     return new StreamObserver<>() {
       @Override
       public void onNext(RpcResponse value) {
         // initial ident request
-        if ("identify".equals(value.getModuleId()) && sessionId.equals(value.getRpcId())) {
-          StreamObserver<RpcRequest> observer = rpcChannels.put(new SessionKey(value.getSystemId(), value.getLocation()), new DebugObserver<>(responseObserver));
+        if ("MINION_HEADERS".equals(value.getModuleId())) {
+          SessionKey sessionKey = new SessionKey(value.getSystemId(), value.getLocation());
+          StreamObserver<RpcRequest> observer = rpcChannels.put(sessionKey, responseObserver);
           if (observer != null) {
-            logger.info("Closing earlier rpc channel opened by minion {} {}", value.getSystemId(), value.getLocation());
+            logger.info("Closing earlier rpc channel opened by minion {}", sessionKey);
             observer.onCompleted();
+          } else {
+            logger.info("New connection from minion {}", sessionKey);
           }
           return;
         }
@@ -135,7 +132,17 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
 
       @Override
       public void onCompleted() {
-        logger.info("Closed rpc channel {}", sessionId);
+        SessionKey key = null;
+        for (Entry<SessionKey, StreamObserver<RpcRequest>> entry : rpcChannels.entrySet()) {
+          if (entry.equals(responseObserver)) {
+            key = entry.getKey();
+            break;
+          }
+        }
+        if (key != null) {
+          logger.info("Removing minion connection {}", key);
+          rpcChannels.remove(key);
+        }
       }
     };
   }
@@ -175,7 +182,6 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
               .setRpcContent(replyContent)
               .build();
             responseObserver.onNext(rpcResponse);
-            responseObserver.onCompleted();
           });
         } catch (InvalidProtocolBufferException e) {
           logger.error("Could not deserialize payload of type {}", module.receive(), e);
@@ -278,6 +284,10 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
     @Override
     public int hashCode() {
       return Objects.hash(systemId, location);
+    }
+
+    public String toString() {
+      return systemId + "@" + location;
     }
   }
 

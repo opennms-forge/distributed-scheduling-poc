@@ -6,12 +6,11 @@ import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -54,22 +53,6 @@ public class StubGrpcClient implements GrpcClient {
     this.rpcReplyStream = asnc.cloudToMinionRPC(new StreamObserver<>() {
       @Override
       public void onNext(RpcRequest value) {
-        if (value.getModuleId().equals("identify")) {
-          RpcResponse response = RpcResponse.newBuilder()
-            .setSystemId(identity.getId())
-            .setLocation(identity.getLocation())
-            .setRpcId(value.getRpcId())
-            .setModuleId(value.getModuleId())
-            .build();
-          executor.schedule(new Runnable() {
-            @Override
-            public void run() {
-              rpcReplyStream.onNext(response);
-            }
-          }, 2, TimeUnit.SECONDS);
-          return;
-        }
-
         handleIncomingRpc(value);
       }
 
@@ -83,6 +66,13 @@ public class StubGrpcClient implements GrpcClient {
 
       }
     });
+    RpcResponse headers = RpcResponse.newBuilder()
+      .setRpcId(UUID.randomUUID().toString())
+      .setModuleId("MINION_HEADERS")
+      .setSystemId(identity.getId())
+      .setLocation(identity.getLocation())
+      .build();
+    rpcReplyStream.onNext(headers);
   }
 
   @Override
@@ -158,7 +148,6 @@ public class StubGrpcClient implements GrpcClient {
             return;
           }
           rpcReplyStream.onNext(response);
-          rpcReplyStream.onCompleted();
         });
       }
     }
