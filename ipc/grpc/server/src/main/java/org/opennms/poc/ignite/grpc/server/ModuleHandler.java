@@ -5,15 +5,15 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 
 public interface ModuleHandler {
 
   void start(GrpcServer server);
 
   CompletableFuture<ZonedDateTime> push(String systemId, String location, CloudToMinionMessage message);
-  CompletableFuture<RpcResponse> request(String systemId, String location, RpcRequest request);
+  CompletableFuture<RpcResponseProto> request(String systemId, String location, RpcRequestProto request);
 
   interface Module {
     String getId();
@@ -23,7 +23,7 @@ public interface ModuleHandler {
 
   interface IncomingRpcModule<Local extends Message, Remote extends Message> extends Module {
     CompletableFuture<Remote> handle(Local request);
-    Predicate<RpcRequest> predicate();
+    Predicate<RpcRequestProto> predicate();
     Class<Local> receive();
   }
 

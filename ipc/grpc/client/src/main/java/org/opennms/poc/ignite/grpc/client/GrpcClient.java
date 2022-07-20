@@ -8,18 +8,18 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 
 public interface GrpcClient extends AutoCloseable {
 
   // CloudToMinionRPC, async
-  Session onCall(Predicate<RpcRequest> request, Function<RpcRequest, CompletableFuture<RpcResponse>> response);
+  Session onCall(Predicate<RpcRequestProto> request, Function<RpcRequestProto, CompletableFuture<RpcResponseProto>> response);
   // CloudToMinionMessages, async
   Session streamFromCloud(Consumer<CloudToMinionMessage> consumer);
 
   // MinionToCloudRPC, blocking
-  RpcResponse request(RpcRequest request);
+  RpcResponseProto request(RpcRequestProto request);
   // MinionToCloudMessages
   PublishSession publishToCloud();
 

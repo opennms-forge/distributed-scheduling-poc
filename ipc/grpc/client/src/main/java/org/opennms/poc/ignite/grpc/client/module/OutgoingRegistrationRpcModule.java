@@ -5,14 +5,14 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.UUID;
 import org.opennms.cloud.grpc.minion.RegistrationRequest;
 import org.opennms.cloud.grpc.minion.RegistrationResponse;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.poc.ignite.grpc.client.GrpcClient;
 import org.opennms.poc.ignite.grpc.client.MinionClient.OutgoingRpcModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OutgoingRegistrationRpcModule implements OutgoingRpcModule<RpcRequest, RpcResponse> {
+public class OutgoingRegistrationRpcModule implements OutgoingRpcModule<RpcRequestProto, RpcResponseProto> {
 
   public final static String MODULE_ID = "registration";
 
@@ -33,16 +33,16 @@ public class OutgoingRegistrationRpcModule implements OutgoingRpcModule<RpcReque
       .setInstance("my-test-instance")
       .build();
 
-    RpcRequest rpcRequest = RpcRequest.newBuilder()
+    RpcRequestProto rpcRequest = RpcRequestProto.newBuilder()
       .setModuleId(MODULE_ID)
       .setRpcId(UUID.randomUUID().toString())
-      .setRpcContent(Any.pack(request))
+      .setRpcContent(Any.pack(request).getValue())
       .build();
 
-    RpcResponse response = client.request(rpcRequest);
-    if (response.getRpcContent().is(RegistrationResponse.class)) {
+    RpcResponseProto response = client.request(rpcRequest);
+    if (response.getRpcContent() != null) {
       try {
-        RegistrationResponse status = response.getRpcContent().unpack(RegistrationResponse.class);
+        RegistrationResponse status = RegistrationResponse.newBuilder().mergeFrom(response.getRpcContent()).build();
         logger.debug("Registration confirmed: {}", status.getAck());
       } catch (InvalidProtocolBufferException e) {
         logger.error("Failed to complete registration", e);
@@ -51,12 +51,12 @@ public class OutgoingRegistrationRpcModule implements OutgoingRpcModule<RpcReque
   }
 
   @Override
-  public Class<RpcRequest> payload() {
-    return RpcRequest.class;
+  public Class<RpcRequestProto> payload() {
+    return RpcRequestProto.class;
   }
 
   @Override
-  public Class<RpcResponse> ack() {
-    return RpcResponse.class;
+  public Class<RpcResponseProto> ack() {
+    return RpcResponseProto.class;
   }
 }

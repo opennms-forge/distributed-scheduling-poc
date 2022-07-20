@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.concurrent.CompletableFuture;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.poc.ignite.grpc.server.GrpcServer;
 import org.opennms.poc.ignite.grpc.server.ModuleHandler;
 
@@ -51,7 +51,7 @@ public class BasicGrpcServer implements GrpcServer {
   }
 
   @Override
-  public CompletableFuture<RpcResponse> request(String systemId, String location, RpcRequest request) {
+  public CompletableFuture<RpcResponseProto> request(String systemId, String location, RpcRequestProto request) {
     return handler.request(systemId, location, request);
   }
 

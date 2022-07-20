@@ -8,8 +8,8 @@ import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
 import org.opennms.cloud.grpc.minion.MinionHeader;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.poc.ignite.grpc.client.internal.DelegatingClientInterceptor.GrpcClientRequestInterceptor;
 import org.opennms.poc.ignite.grpc.client.internal.DelegatingClientInterceptor.GrpcClientResponseInterceptor;
@@ -27,11 +27,11 @@ public class Client {
     // cloud to minion
     System.out.println("cloud to minion");
     asyncStub.cloudToMinionRPC(new DebugObserver<>())
-      .onNext(RpcResponse.newBuilder().setLocation("test").build());
+      .onNext(RpcResponseProto.newBuilder().setLocation("test").build());
 
     // minion to cloud
     System.out.println("minion to cloud");
-    RpcRequest request = RpcRequest.newBuilder().setLocation("test").build();
+    RpcRequestProto request = RpcRequestProto.newBuilder().setLocation("test").build();
     asyncStub.minionToCloudRPC(request, new DebugObserver<>());
 
     // cloud to minion

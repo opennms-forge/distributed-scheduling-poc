@@ -1,14 +1,14 @@
 package org.opennms.poc.ignite.grpc.client.module;
 
 import java.util.concurrent.CompletableFuture;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.poc.ignite.grpc.client.GrpcClient;
 import org.opennms.poc.ignite.grpc.client.MinionClient.IncomingRpcModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IncomingEchoRpcModule implements IncomingRpcModule<RpcRequest, RpcResponse> {
+public class IncomingEchoRpcModule implements IncomingRpcModule<RpcRequestProto, RpcResponseProto> {
 
   public final static String MODULE_ID = "echo";
 
@@ -27,10 +27,10 @@ public class IncomingEchoRpcModule implements IncomingRpcModule<RpcRequest, RpcR
   }
 
   @Override
-  public CompletableFuture<RpcResponse> handle(RpcRequest request) {
+  public CompletableFuture<RpcResponseProto> handle(RpcRequestProto request) {
     logger.info("Received echo request {}, publishing reply", request.getRpcId());
     return CompletableFuture.completedFuture(
-      RpcResponse.newBuilder()
+      RpcResponseProto.newBuilder()
         .setRpcIdBytes(request.getRpcIdBytes())
         .setModuleIdBytes(request.getModuleIdBytes())
         .setLocationBytes(request.getLocationBytes())

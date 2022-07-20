@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opennms.poc</groupId>
+        <artifactId>ipc</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.opennms.poc.ipc</groupId>
+    <artifactId>echo</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>Ignite POC :: IPC :: Echo</name>
+    <description>Echo module for IPC.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opennms.horizon.core</groupId>
+            <artifactId>xml</artifactId>
+            <version>${opennms-horizon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.ipc</groupId>
+            <artifactId>api</artifactId>
+            <version>${opennms-horizon.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

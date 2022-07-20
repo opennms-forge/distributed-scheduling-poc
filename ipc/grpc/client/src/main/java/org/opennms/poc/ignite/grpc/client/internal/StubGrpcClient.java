@@ -20,8 +20,8 @@ import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Empty;
 import org.opennms.cloud.grpc.minion.MinionHeader;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.horizon.core.identity.Identity;
 import org.opennms.poc.ignite.grpc.client.GrpcClient;
 import org.slf4j.Logger;
@@ -35,9 +35,9 @@ public class StubGrpcClient implements GrpcClient {
   private final ManagedChannel channel;
   private final CloudServiceStub asnc;
   private final CloudServiceBlockingStub blocking;
-  private final Map<Predicate<RpcRequest>, Function<RpcRequest, CompletableFuture<RpcResponse>>> handlers = new ConcurrentHashMap<>();
+  private final Map<Predicate<RpcRequestProto>, Function<RpcRequestProto, CompletableFuture<RpcResponseProto>>> handlers = new ConcurrentHashMap<>();
   private final Identity identity;
-  private StreamObserver<RpcResponse> rpcReplyStream;
+  private StreamObserver<RpcResponseProto> rpcReplyStream;
 
   public StubGrpcClient(ManagedChannel channel, CloudServiceStub async, CloudServiceBlockingStub blocking, Identity identity) {
     this.channel = channel;
@@ -52,7 +52,7 @@ public class StubGrpcClient implements GrpcClient {
 
     this.rpcReplyStream = asnc.cloudToMinionRPC(new StreamObserver<>() {
       @Override
-      public void onNext(RpcRequest value) {
+      public void onNext(RpcRequestProto value) {
         handleIncomingRpc(value);
       }
 
@@ -66,7 +66,7 @@ public class StubGrpcClient implements GrpcClient {
 
       }
     });
-    RpcResponse headers = RpcResponse.newBuilder()
+    RpcResponseProto headers = RpcResponseProto.newBuilder()
       .setRpcId(UUID.randomUUID().toString())
       .setModuleId("MINION_HEADERS")
       .setSystemId(identity.getId())
@@ -87,7 +87,7 @@ public class StubGrpcClient implements GrpcClient {
     return channel.getState(false);
   }
 
-  public Session onCall(Predicate<RpcRequest> predicate, Function<RpcRequest, CompletableFuture<RpcResponse>> function) {
+  public Session onCall(Predicate<RpcRequestProto> predicate, Function<RpcRequestProto, CompletableFuture<RpcResponseProto>> function) {
     this.handlers.put(predicate, function);
     return new Session() {
       @Override
@@ -135,12 +135,12 @@ public class StubGrpcClient implements GrpcClient {
   }
 
   @Override
-  public RpcResponse request(RpcRequest request) {
+  public RpcResponseProto request(RpcRequestProto request) {
     return blocking.minionToCloudRPC(request);
   }
 
-  private void handleIncomingRpc(RpcRequest request) {
-    for (Entry<Predicate<RpcRequest>, Function<RpcRequest, CompletableFuture<RpcResponse>>> entry : handlers.entrySet()) {
+  private void handleIncomingRpc(RpcRequestProto request) {
+    for (Entry<Predicate<RpcRequestProto>, Function<RpcRequestProto, CompletableFuture<RpcResponseProto>>> entry : handlers.entrySet()) {
       if (entry.getKey().test(request)) {
         entry.getValue().apply(request).whenComplete((response, error) -> {
           if (error != null) {

@@ -39,8 +39,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.horizon.ipc.grpc</groupId>
+            <groupId>org.opennms.poc.grpc.workflow</groupId>
+            <artifactId>injector</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.poc.ipc.grpc</groupId>
             <artifactId>server</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opennms.core.ipc.twin.grpc</groupId>
@@ -66,12 +73,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.16.200</version>
         </dependency>
     </dependencies>
 

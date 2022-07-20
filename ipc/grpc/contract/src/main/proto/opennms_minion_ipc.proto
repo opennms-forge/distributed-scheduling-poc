@@ -43,7 +43,7 @@ option java_package = "org.opennms.cloud.grpc.minion";
 service CloudService {
   // RPCs triggered from Cloud to Minion (i.e. Run a monitor), called RpcStreaming in Horizon
   // > ad hoc calls echo/heartbeat ?
-  rpc CloudToMinionRPC (stream RpcResponse) returns (stream RpcRequest) {}
+  rpc CloudToMinionRPC (stream RpcResponseProto) returns (stream RpcRequestProto) {}
   // Messages sent from Cloud to Minion (i.e. Twin Updates), called SinkStreaming in Horizon
   // 3. > incremental update of workflow v56 (delta of changes)
   rpc CloudToMinionMessages (MinionHeader) returns (stream CloudToMinionMessage) {}
@@ -51,7 +51,7 @@ service CloudService {
   // RPCs triggered from Minion to Cloud (i.e. Twin Registration Request)
   // 1. < I am interested in twin objects of workflow
   // 2. > these are workflows v55
-  rpc MinionToCloudRPC (RpcRequest) returns (RpcResponse) {}
+  rpc MinionToCloudRPC (RpcRequestProto) returns (RpcResponseProto) {}
   // Messages sent from Minion to Cloud (i.e. Sink API push)
   // 4. < Workflow execution status/results
   rpc MinionToCloudMessages (stream MinionToCloudMessage) returns (Empty) {}
@@ -82,9 +82,9 @@ message CloudToMinionMessage {
   }
 }
 
-message RpcRequest {
+message RpcRequestProto {
   string rpc_id = 1;
-  google.protobuf.Any rpc_content = 2;
+  bytes rpc_content = 2;
   string system_id = 3;
   string location = 4;
   string module_id = 5;
@@ -93,9 +93,9 @@ message RpcRequest {
   map<string, google.protobuf.Any> metadata = 7;
 }
 
-message RpcResponse {
+message RpcResponseProto {
   string rpc_id = 1;
-  google.protobuf.Any rpc_content = 2;
+  bytes rpc_content = 2;
   string system_id = 3;
   string location = 4;
   string module_id = 5;
@@ -139,4 +139,9 @@ message RegistrationRequest {
 message RegistrationResponse {
   string instance = 1;
   bool ack = 2;
+}
+
+message AnyJson {
+  string type = 1;
+  bytes payload = 2;
 }

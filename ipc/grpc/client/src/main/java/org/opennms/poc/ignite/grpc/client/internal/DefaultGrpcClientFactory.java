@@ -2,7 +2,7 @@ package org.opennms.poc.ignite.grpc.client.internal;
 
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import java.io.IOException;
 import java.util.List;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;

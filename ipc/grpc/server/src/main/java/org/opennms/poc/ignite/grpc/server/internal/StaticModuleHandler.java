@@ -1,6 +1,7 @@
 package org.opennms.poc.ignite.grpc.server.internal;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -25,8 +26,8 @@ import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Empty;
 import org.opennms.cloud.grpc.minion.MinionHeader;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.poc.ignite.grpc.server.GrpcServer;
 import org.opennms.poc.ignite.grpc.server.ModuleHandler;
 import org.slf4j.Logger;
@@ -40,8 +41,8 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
   private final Set<IncomingRpcModule<Message, Message>> incoming = new LinkedHashSet<>();
   private final Set<OutgoingRpcModule> outgoing = new LinkedHashSet<>();
   private final Map<String, Set<StreamObserver<CloudToMinionMessage>>> pushChannels = new ConcurrentHashMap<>();
-  private final Map<SessionKey, StreamObserver<RpcRequest>> rpcChannels = new ConcurrentHashMap<>();
-  private final Map<String, RpcCall> rpcRequests = new ConcurrentHashMap<>();
+  private final Map<SessionKey, StreamObserver<RpcRequestProto>> rpcChannels = new ConcurrentHashMap<>();
+  private final Map<String, RpcCall> RpcRequestProtos = new ConcurrentHashMap<>();
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "server-publisher"));
 
   @Override
@@ -74,12 +75,12 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
   }
 
   @Override
-  public CompletableFuture<RpcResponse> request(String systemId, String location, RpcRequest request) {
+  public CompletableFuture<RpcResponseProto> request(String systemId, String location, RpcRequestProto request) {
     String requestId = request.getRpcId();
 
-    CompletableFuture<RpcResponse> responseFuture = new CompletableFuture<>();
+    CompletableFuture<RpcResponseProto> responseFuture = new CompletableFuture<>();
     long timeout = System.currentTimeMillis() + (request.getExpirationTime() == 0 ? 100 : request.getExpirationTime());
-    rpcRequests.put(requestId, new RpcCall(timeout, responseFuture));
+    RpcRequestProtos.put(requestId, new RpcCall(timeout, responseFuture));
     rpcChannels.entrySet().stream()
       .filter(entry -> systemId.equals(entry.getKey().systemId) && location.equals(entry.getKey().location))
       .map(Entry::getValue)
@@ -89,7 +90,7 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
     executor.schedule(new Runnable() {
       @Override
       public void run() {
-        RpcCall call = rpcRequests.remove(requestId);
+        RpcCall call = RpcRequestProtos.remove(requestId);
         if (call != null) {
           call.response.completeExceptionally(new TimeoutException());
         }
@@ -99,14 +100,14 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
   }
 
   @Override
-  public StreamObserver<RpcResponse> cloudToMinionRPC(StreamObserver<RpcRequest> responseObserver) {
+  public StreamObserver<RpcResponseProto> cloudToMinionRPC(StreamObserver<RpcRequestProto> responseObserver) {
     return new StreamObserver<>() {
       @Override
-      public void onNext(RpcResponse value) {
+      public void onNext(RpcResponseProto value) {
         // initial ident request
         if ("MINION_HEADERS".equals(value.getModuleId())) {
           SessionKey sessionKey = new SessionKey(value.getSystemId(), value.getLocation());
-          StreamObserver<RpcRequest> observer = rpcChannels.put(sessionKey, responseObserver);
+          StreamObserver<RpcRequestProto> observer = rpcChannels.put(sessionKey, responseObserver);
           if (observer != null) {
             logger.info("Closing earlier rpc channel opened by minion {}", sessionKey);
             observer.onCompleted();
@@ -117,7 +118,7 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
         }
 
         String rpcId = value.getRpcId();
-        RpcCall future = rpcRequests.remove(rpcId);
+        RpcCall future = RpcRequestProtos.remove(rpcId);
         if (future == null) {
           logger.warn("Received unassociated rpc response {}", value);
           return;
@@ -133,7 +134,7 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
       @Override
       public void onCompleted() {
         SessionKey key = null;
-        for (Entry<SessionKey, StreamObserver<RpcRequest>> entry : rpcChannels.entrySet()) {
+        for (Entry<SessionKey, StreamObserver<RpcRequestProto>> entry : rpcChannels.entrySet()) {
           if (entry.equals(responseObserver)) {
             key = entry.getKey();
             break;
@@ -157,35 +158,33 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
   }
 
   @Override
-  public void minionToCloudRPC(RpcRequest request, StreamObserver<RpcResponse> responseObserver) {
+  public void minionToCloudRPC(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
     for (IncomingRpcModule<Message, Message> module : incoming) {
-      Predicate<RpcRequest> predicate = module.predicate();
+      Predicate<RpcRequestProto> predicate = module.predicate();
       if (predicate.test(request)) {
-        if (!request.getRpcContent().is(module.receive())) {
+        if (request.getRpcContent() == null) {
           logger.warn("Unsupported payload {} detected for module {}", request.getRpcContent(), module);
           continue;
         }
 
-        try {
-          Message payload = request.getRpcContent().unpack(module.receive());
-          module.handle(payload).whenComplete((response, error) -> {
-            if (error != null) {
-              responseObserver.onError(error);
-              return;
-            }
-            Any replyContent = Any.pack(response);
-            RpcResponse rpcResponse = RpcResponse.newBuilder()
-              .setModuleId(request.getModuleId())
-              .setRpcId(request.getRpcId())
-              .setLocation(request.getLocation())
-              .setSystemId(request.getSystemId())
-              .setRpcContent(replyContent)
-              .build();
-            responseObserver.onNext(rpcResponse);
-          });
-        } catch (InvalidProtocolBufferException e) {
-          logger.error("Could not deserialize payload of type {}", module.receive(), e);
-        }
+        Message payload = Any.newBuilder().setValue(request.getRpcContent())
+          .setTypeUrl(module.receive().getName()).build();
+
+        module.handle(payload).whenComplete((response, error) -> {
+          if (error != null) {
+            responseObserver.onError(error);
+            return;
+          }
+          ByteString replyContent = Any.pack(response).getValue();
+          RpcResponseProto rpcResponse = RpcResponseProto.newBuilder()
+            .setModuleId(request.getModuleId())
+            .setRpcId(request.getRpcId())
+            .setLocation(request.getLocation())
+            .setSystemId(request.getSystemId())
+            .setRpcContent(replyContent)
+            .build();
+          responseObserver.onNext(rpcResponse);
+        });
       }
     }
   }
@@ -293,9 +292,9 @@ public class StaticModuleHandler extends CloudServiceImplBase implements ModuleH
 
   static class RpcCall {
     long timeout;
-    CompletableFuture<RpcResponse> response;
+    CompletableFuture<RpcResponseProto> response;
 
-    public RpcCall(long timeout, CompletableFuture<RpcResponse> response) {
+    public RpcCall(long timeout, CompletableFuture<RpcResponseProto> response) {
       this.timeout = timeout;
       this.response = response;
     }

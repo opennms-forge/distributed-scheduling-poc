@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import org.opennms.cloud.grpc.minion.RegistrationRequest;
 import org.opennms.cloud.grpc.minion.RegistrationResponse;
-import org.opennms.cloud.grpc.minion.RpcRequest;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.poc.ignite.grpc.server.GrpcServer;
 import org.opennms.poc.ignite.grpc.server.ModuleHandler.IncomingRpcModule;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class RpcRegistrationModule implements IncomingRpcModule<RegistrationRequ
   }
 
   @Override
-  public Predicate<RpcRequest> predicate() {
+  public Predicate<RpcRequestProto> predicate() {
     return request -> request.getModuleId().equals(MODULE_ID);
   }
 

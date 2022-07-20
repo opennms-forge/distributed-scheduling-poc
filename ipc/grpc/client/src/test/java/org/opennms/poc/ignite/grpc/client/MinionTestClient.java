@@ -15,7 +15,7 @@ public class MinionTestClient {
     IdentityImpl identity = new IdentityImpl("minion01", "dc1", "minion");
     DefaultGrpcClientFactory clientFactory = new DefaultGrpcClientFactory(identity);
     GrpcClient grpcClient = clientFactory.create(
-      "localhost", 8080, Arrays.asList()
+      "localhost", 8990, Arrays.asList()
     );
     grpcClient.start();
 

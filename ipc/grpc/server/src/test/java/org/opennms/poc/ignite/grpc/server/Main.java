@@ -10,8 +10,8 @@ import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Empty;
 import org.opennms.cloud.grpc.minion.MinionHeader;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
-import org.opennms.cloud.grpc.minion.RpcRequest;
-import org.opennms.cloud.grpc.minion.RpcResponse;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 
 public class Main {
@@ -31,13 +31,13 @@ public class Main {
   static class StreamHandler extends CloudServiceImplBase {
 
     @Override
-    public StreamObserver<RpcResponse> cloudToMinionRPC(StreamObserver<RpcRequest> responseObserver) {
+    public StreamObserver<RpcResponseProto> cloudToMinionRPC(StreamObserver<RpcRequestProto> responseObserver) {
       System.out.println("cloudToMinionRPC received " + responseObserver);
       //return super.cloudToMinionRPC(responseObserver);
-      RpcResponse response = RpcResponse.newBuilder()
+      RpcResponseProto response = RpcResponseProto.newBuilder()
         .setLocation("server answer")
         .build();
-      DummyStreamObserver<RpcResponse> observer = new DummyStreamObserver<>();
+      DummyStreamObserver<RpcResponseProto> observer = new DummyStreamObserver<>();
 
       new Thread(new Runnable() {
         @Override
@@ -55,7 +55,7 @@ public class Main {
     }
 
     @Override
-    public void minionToCloudRPC(RpcRequest request, StreamObserver<RpcResponse> responseObserver) {
+    public void minionToCloudRPC(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
       System.out.println("minionToCloudRPC received " + request + " " + responseObserver);
       //super.minionToCloudRPC(request, responseObserver);
 
@@ -64,7 +64,7 @@ public class Main {
         public void run() {
           try {
             Thread.sleep(5000);
-            RpcResponse rpcResponse = RpcResponse.newBuilder().setLocation("test").build();
+            RpcResponseProto rpcResponse = RpcResponseProto.newBuilder().setLocation("test").build();
             responseObserver.onNext(rpcResponse);
           } catch (InterruptedException e) {
             e.printStackTrace();
