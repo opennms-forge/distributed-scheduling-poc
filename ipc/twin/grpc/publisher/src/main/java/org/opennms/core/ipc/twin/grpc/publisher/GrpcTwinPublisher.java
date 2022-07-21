@@ -28,8 +28,6 @@
 
 package org.opennms.core.ipc.twin.grpc.publisher;
 
-import io.grpc.BindableService;
-import io.grpc.ServerServiceDefinition;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,18 +36,15 @@ import java.util.concurrent.*;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
+import java.util.function.BiConsumer;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
-import org.opennms.cloud.grpc.minion.Empty;
 import org.opennms.cloud.grpc.minion.MinionHeader;
-import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.core.grpc.common.GrpcIpcServer;
 import org.opennms.core.grpc.common.GrpcIpcUtils;
-import org.opennms.core.ipc.grpc.server.manager.adapter.CloudServiceDelegate;
 import org.opennms.core.ipc.twin.api.TwinStrategy;
 import org.opennms.core.ipc.twin.common.AbstractTwinPublisher;
 import org.opennms.core.ipc.twin.common.LocalTwinSubscriber;
@@ -66,7 +61,6 @@ import io.grpc.stub.StreamObserver;
 public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     private static final Logger LOG = LoggerFactory.getLogger(GrpcTwinPublisher.class);
-    private final GrpcIpcServer grpcIpcServer;
     private Multimap<String, StreamObserver<TwinResponseProto>> sinkStreamsByLocation = LinkedListMultimap.create();
     private Map<String, StreamObserver<TwinResponseProto>> sinkStreamsBySystemId = new HashMap<>();
     private final ThreadFactory twinRpcThreadFactory = new ThreadFactoryBuilder()
@@ -76,7 +70,6 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     public GrpcTwinPublisher(LocalTwinSubscriber twinSubscriber, GrpcIpcServer grpcIpcServer) {
         super(twinSubscriber);
-        this.grpcIpcServer = grpcIpcServer;
     }
 
     @Override
@@ -109,12 +102,9 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     public void start() throws IOException {
         try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(GrpcIpcUtils.LOG_PREFIX)) {
-            ///grpcIpcServer.startServer(new StreamHandler());
             LOG.info("Activated Twin Service");
         }
-
     }
-
 
     public void close() throws IOException {
         try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(TwinStrategy.LOG_PREFIX)) {
@@ -123,103 +113,94 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
         }
     }
 
-    private class StreamHandler implements CloudServiceDelegate, BindableService {
+    static class AdapterObserver implements StreamObserver<TwinResponseProto> {
 
-        @Override
-        public StreamObserver<RpcResponseProto> cloudToMinionRPC(StreamObserver<RpcRequestProto> responseObserver) {
-            return null;
+        private final StreamObserver<CloudToMinionMessage> delegate;
+
+        AdapterObserver(StreamObserver<CloudToMinionMessage> delegate) {
+            this.delegate = delegate;
         }
 
         @Override
-        public void cloudToMinionMessages(MinionHeader request, StreamObserver<CloudToMinionMessage> responseObserver) {
-            handleSinkStreamUpdate(request, new StreamObserver<TwinResponseProto>() {
-                @Override
-                public void onNext(TwinResponseProto value) {
-
-                }
-
-                @Override
-                public void onError(Throwable t) {
-
-                }
-
-                @Override
-                public void onCompleted() {
-
-                }
-            });
+        public void onNext(TwinResponseProto value) {
+            delegate.onNext(map(value));
         }
 
         @Override
-        public void minionToCloudRPC(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
+        public void onError(Throwable t) {
 
         }
 
         @Override
-        public StreamObserver<MinionToCloudMessage> minionToCloudMessages(StreamObserver<Empty> responseObserver) {
-            return null;
+        public void onCompleted() {
+
         }
 
-        protected StreamObserver<TwinRequestProto> rpcStreaming(StreamObserver<TwinResponseProto> responseObserver) {
-            StreamObserver<TwinResponseProto> rpcStream = responseObserver;
-            return new StreamObserver<>() {
-                @Override
-                public void onNext(TwinRequestProto twinRequestProto) {
-                    CompletableFuture.runAsync(() -> {
-                        try {
-                            TwinRequest twinRequest = mapTwinRequestProto(twinRequestProto.toByteArray());
-                            TwinUpdate twinUpdate = getTwin(twinRequest);
-                            TwinResponseProto twinResponseProto = mapTwinResponse(twinUpdate);
-                            LOG.debug("Sent Twin response for key {} at location {}", twinRequest.getKey(), twinRequest.getLocation());
-                            sendTwinResponse(twinResponseProto, rpcStream);
-                        } catch (Exception e) {
-                            LOG.error("Exception while processing request", e);
-                        }
-                    }, twinRpcExecutor);
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    LOG.error("Error in Rpc stream handler", throwable);
-                }
-
-                @Override
-                public void onCompleted() {
-                    LOG.info("Closed Rpc Stream handler");
-                }
-            };
+        private CloudToMinionMessage map(TwinResponseProto value) {
+            return CloudToMinionMessage.newBuilder()
+                .setTwinResponse(value)
+                .build();
         }
+    }
 
-        private synchronized void sendTwinResponse(TwinResponseProto twinResponseProto, StreamObserver<TwinResponseProto> rpcStream) {
-            if (rpcStream != null) {
-                rpcStream.onNext(twinResponseProto);
+    // BiConsumer<MinionHeader, StreamObserver<CloudToMinionMessage>>
+    public BiConsumer<MinionHeader, StreamObserver<CloudToMinionMessage>> getStreamObserver() {
+        return new BiConsumer<>() {
+            @Override
+            public void accept(MinionHeader minionHeader, StreamObserver<CloudToMinionMessage> responseObserver) {
+                if (sinkStreamsBySystemId.containsKey(minionHeader.getSystemId())) {
+                    StreamObserver<TwinResponseProto> sinkStream = sinkStreamsBySystemId.remove(minionHeader.getSystemId());
+                    sinkStreamsByLocation.remove(minionHeader.getLocation(), sinkStream);
+                }
+                AdapterObserver delegate = new AdapterObserver(responseObserver);
+                sinkStreamsByLocation.put(minionHeader.getLocation(), delegate);
+                sinkStreamsBySystemId.put(minionHeader.getSystemId(), delegate);
+
+                forEachSession(((sessionKey, twinTracker) -> {
+                    if (sessionKey.location == null || sessionKey.location.equals(minionHeader.getLocation())) {
+                        TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.location, twinTracker.getObj());
+                        twinUpdate.setSessionId(twinTracker.getSessionId());
+                        twinUpdate.setVersion(twinTracker.getVersion());
+                        twinUpdate.setPatch(false);
+                        TwinResponseProto twinResponseProto = mapTwinResponse(twinUpdate);
+                        delegate.onNext(twinResponseProto);
+                    }
+                }));
             }
-        }
+        };
+    }
 
-        private synchronized void handleSinkStreamUpdate(MinionHeader request, StreamObserver<TwinResponseProto> responseObserver) {
-            if (sinkStreamsBySystemId.containsKey(request.getSystemId())) {
-                StreamObserver<TwinResponseProto> sinkStream = sinkStreamsBySystemId.remove(request.getSystemId());
-                sinkStreamsByLocation.remove(request.getLocation(), sinkStream);
-            }
-            sinkStreamsByLocation.put(request.getLocation(), responseObserver);
-            sinkStreamsBySystemId.put(request.getSystemId(), responseObserver);
-
-            forEachSession(((sessionKey, twinTracker) -> {
-                if(sessionKey.location == null || sessionKey.location.equals(request.getLocation())) {
-                    TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.location, twinTracker.getObj());
-                    twinUpdate.setSessionId(twinTracker.getSessionId());
-                    twinUpdate.setVersion(twinTracker.getVersion());
-                    twinUpdate.setPatch(false);
-                    TwinResponseProto twinResponseProto = mapTwinResponse(twinUpdate);
-                    responseObserver.onNext(twinResponseProto);
+    // BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>>
+    public BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> getRpcObserver() {
+        return new BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>>() {
+            @Override
+            public void accept(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
+                if (request.getModuleId().equals("twin")) {
+                    try {
+                        CompletableFuture.runAsync(() -> {
+                            try {
+                                TwinRequest twinRequest = mapTwinRequestProto(request.getRpcContent().toByteArray());
+                                TwinUpdate twinUpdate = getTwin(twinRequest);
+                                TwinResponseProto twinResponseProto = mapTwinResponse(twinUpdate);
+                                LOG.debug("Sent Twin response for key {} at location {}", twinRequest.getKey(), twinRequest.getLocation());
+                                RpcResponseProto rpcResponse = RpcResponseProto.newBuilder()
+                                    .setModuleId("twin")
+                                    .setRpcId(request.getRpcId())
+                                    .setSystemId(request.getSystemId())
+                                    .setLocation(request.getLocation())
+                                    .setRpcContent(twinResponseProto.toByteString())
+                                    .build();
+                                responseObserver.onNext(rpcResponse);
+                            } catch (Exception e) {
+                                LOG.error("Exception while processing request", e);
+                            }
+                        }, twinRpcExecutor);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }));
-        }
-
-        @Override
-        public ServerServiceDefinition bindService() {
-            return null;
-        }
+            }
+        };
     }
 
 }
