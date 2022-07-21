@@ -1,10 +1,9 @@
 package org.opennms.poc.ignite.worker.workflows.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opennms.horizon.core.lib.IPAddress;
 import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
+import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalService;
 import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ServiceMonitor;
@@ -34,14 +33,14 @@ public class WorkflowExecutorLocalServiceImpl implements WorkflowExecutorLocalSe
 
     private Workflow workflow;
     private OpennmsScheduler scheduler;
+    private WorkflowExecutionResultProcessor resultProcessor;
 
     private AtomicBoolean active = new AtomicBoolean(false);
 
-    public WorkflowExecutorLocalServiceImpl(OpennmsScheduler scheduler, Workflow workflow) {
+    public WorkflowExecutorLocalServiceImpl(OpennmsScheduler scheduler, WorkflowExecutionResultProcessor resultProcessor, Workflow workflow) {
         this.workflow = workflow;
         this.scheduler = scheduler;
-
-        this.active = new AtomicBoolean(false);
+        this.resultProcessor = resultProcessor;
     }
 
 //========================================
@@ -123,12 +122,7 @@ public class WorkflowExecutorLocalServiceImpl implements WorkflowExecutorLocalSe
         active.set(false);
 
         if (exc == null) {
-            try {
-                // TBD: REMOVE the json mapping - feed response back to Core
-                log.info("POLL STATUS: " + new ObjectMapper().writeValueAsString(serviceMonitorResponse));
-            } catch (JsonProcessingException jpExc) {
-                log.warn("error processing workflow response; workflow-uuid=" + workflow.getUuid(), jpExc);
-            }
+            resultProcessor.queueSendResult(serviceMonitorResponse);
         } else {
             log.warn("error executing workflow; workflow-uuid=" + workflow.getUuid(), exc);
         }
