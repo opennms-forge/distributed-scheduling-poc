@@ -41,19 +41,23 @@ option java_package = "org.opennms.cloud.grpc.minion";
 
 // Minions initiate the connection to Cloud and maintains these streams
 service CloudService {
-  // RPCs triggered from Cloud to Minion (i.e. Run a monitor), called RpcStreaming in Horizon
+  // RPCs triggered from Cloud to Minion (i.e. Run a monitor)
   // > ad hoc calls echo/heartbeat ?
+  // OpenNMSIpc.RpcStreaming
   rpc CloudToMinionRPC (stream RpcResponseProto) returns (stream RpcRequestProto) {}
   // Messages sent from Cloud to Minion (i.e. Twin Updates), called SinkStreaming in Horizon
   // 3. > incremental update of workflow v56 (delta of changes)
+  // Twin.SinkStreaming
   rpc CloudToMinionMessages (MinionHeader) returns (stream CloudToMinionMessage) {}
 
   // RPCs triggered from Minion to Cloud (i.e. Twin Registration Request)
   // 1. < I am interested in twin objects of workflow
   // 2. > these are workflows v55
+  // Twin.RpcStreaming
   rpc MinionToCloudRPC (RpcRequestProto) returns (RpcResponseProto) {}
   // Messages sent from Minion to Cloud (i.e. Sink API push)
   // 4. < Workflow execution status/results
+  // OpenNMSIpc.SinkStreaming
   rpc MinionToCloudMessages (stream MinionToCloudMessage) returns (Empty) {}
 }
 
@@ -71,14 +75,14 @@ message MinionToCloudMessage {
   oneof value {
     google.protobuf.Any any_val = 1;
     SinkMessage sink_message = 2;
-    TwinResponseProto twin_response = 3;
+    TwinRequestProto twin_request = 3;
   }
 }
 
 message CloudToMinionMessage {
   oneof value {
     google.protobuf.Any any_val = 1;
-    TwinRequestProto twin_request = 2;
+    TwinResponseProto twin_response = 2;
   }
 }
 

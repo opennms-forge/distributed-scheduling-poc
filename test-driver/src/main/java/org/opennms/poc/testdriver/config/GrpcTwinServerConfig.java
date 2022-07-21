@@ -22,6 +22,6 @@ public class GrpcTwinServerConfig {
 
     @Bean
     public LocalTwinSubscriber prepareLocalTwinSubscriber(@Autowired Identity identity, @Autowired TracerRegistry tracerRegistry) {
-        return new LocalTwinSubscriberImpl(identity, tracerRegistry);
+        return new LocalTwinSubscriberImpl(identity);
     }
 }

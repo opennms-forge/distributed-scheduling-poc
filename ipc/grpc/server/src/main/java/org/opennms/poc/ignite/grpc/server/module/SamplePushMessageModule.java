@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
+import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.poc.ignite.grpc.server.GrpcServer;
 import org.opennms.poc.ignite.grpc.server.ModuleHandler.PushModule;
 import org.slf4j.Logger;
@@ -32,12 +33,12 @@ public class SamplePushMessageModule implements PushModule<CloudToMinionMessage>
 
   @Override
   public void run() {
-    TwinRequestProto twinRequestProto = TwinRequestProto.newBuilder()
+    TwinResponseProto twinResponse = TwinResponseProto.newBuilder()
       .setConsumerKey("test")
       .build();
 
     CloudToMinionMessage cloudToMinionMessage = CloudToMinionMessage.newBuilder()
-      .setTwinRequest(twinRequestProto)
+      .setTwinResponse(twinResponse)
       .build();
     // broadcast to all nodes
     server.broadcast(cloudToMinionMessage).whenComplete((time, error) -> {
@@ -45,7 +46,7 @@ public class SamplePushMessageModule implements PushModule<CloudToMinionMessage>
         logger.error("Failed to publish message", error);
         return;
       }
-      logger.info("Published message {} to all nodes", twinRequestProto);
+      logger.info("Published message {} to all nodes", twinResponse);
     });
   }
 

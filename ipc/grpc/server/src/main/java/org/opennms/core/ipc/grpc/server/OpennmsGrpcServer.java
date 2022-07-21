@@ -32,7 +32,6 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -45,6 +44,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Empty;
 import org.opennms.cloud.grpc.minion.MinionHeader;
@@ -58,7 +58,6 @@ import org.opennms.core.ipc.grpc.server.manager.MinionManager;
 import org.opennms.core.ipc.grpc.server.manager.RpcConnectionTracker;
 import org.opennms.core.ipc.grpc.server.manager.RpcRequestTimeoutManager;
 import org.opennms.core.ipc.grpc.server.manager.RpcRequestTracker;
-import org.opennms.core.ipc.grpc.server.manager.adapter.CloudServiceDelegate;
 import org.opennms.core.ipc.grpc.server.manager.adapter.MinionRSTransportAdapter;
 import org.opennms.core.ipc.grpc.server.manager.rpc.RemoteRegistrationHandler;
 import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
@@ -120,6 +119,8 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     private final Map<String, SinkModule<?, Message>> sinkModulesById = new ConcurrentHashMap<>();
     // Maintains the map of sink consumer executor and by module Id.
     private final Map<String, ExecutorService> sinkConsumersByModuleId = new ConcurrentHashMap<>();
+    private BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> incomingRpcHandler;
+    private BiConsumer<MinionHeader, StreamObserver<CloudToMinionMessage>> outgoingMessageHandler;
 
 //========================================
 // Constructor
@@ -136,29 +137,12 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     public void start() throws IOException {
         try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(RpcClientFactory.LOG_PREFIX)) {
-
-            //minionRpcStreamConnectionManager::startRpcStreaming, this::processSinkStreamingCall
-            grpcIpcServer.startServer(new MinionRSTransportAdapter(new CloudServiceDelegate() {
-                @Override
-                public StreamObserver<RpcResponseProto> cloudToMinionRPC(StreamObserver<RpcRequestProto> responseObserver) {
-                    return getMinionRpcStreamConnectionManager().startRpcStreaming(responseObserver);
-                }
-
-                @Override
-                public void cloudToMinionMessages(MinionHeader request, StreamObserver<CloudToMinionMessage> responseObserver) {
-
-                }
-
-                @Override
-                public void minionToCloudRPC(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
-
-                }
-
-                @Override
-                public StreamObserver<MinionToCloudMessage> minionToCloudMessages(StreamObserver<Empty> responseObserver) {
-                    return processSinkStreamingCall(responseObserver);
-                }
-            }));
+            grpcIpcServer.startServer(new MinionRSTransportAdapter(
+                minionRpcStreamConnectionManager::startRpcStreaming,
+                this.outgoingMessageHandler,
+                this.incomingRpcHandler,
+                this::processSinkStreamingCall
+            ));
 
             LOG.info("Added RPC/Sink Service to OpenNMS IPC Grpc Server");
         }
@@ -313,7 +297,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
                     SinkMessage sinkMessage = message.getSinkMessage();
                     if (!Strings.isNullOrEmpty(sinkMessage.getModuleId())) {
                         ExecutorService sinkModuleExecutor = sinkConsumersByModuleId.get(sinkMessage.getModuleId());
-                        if(sinkModuleExecutor != null) {
+                        if (sinkModuleExecutor != null) {
                             sinkModuleExecutor.execute(() -> dispatchSinkMessage(sinkMessage));
                         }
                     }
@@ -340,6 +324,14 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
             Message message = sinkModule.unmarshal(sinkMessage.getContent().toByteArray());
             dispatch(sinkModule, message);
         }
+    }
+
+    public void setIncomingRpcHandler(BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> handler) {
+        this.incomingRpcHandler = handler;
+    }
+
+    public void setOutgoingMessageHandler(BiConsumer<MinionHeader, StreamObserver<CloudToMinionMessage>> outgoingMessageHandler) {
+        this.outgoingMessageHandler = outgoingMessageHandler;
     }
 
     // TODO: move to top-level class

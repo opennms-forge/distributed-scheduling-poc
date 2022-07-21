@@ -13,6 +13,7 @@ import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
+import org.opennms.cloud.grpc.minion.TwinResponseProto;
 
 public class Main {
 
@@ -82,8 +83,8 @@ public class Main {
         public void run() {
           try {
             Thread.sleep(5000);
-            CloudToMinionMessage rpcResponse = CloudToMinionMessage.newBuilder().setTwinRequest(
-              TwinRequestProto.newBuilder().setSystemId("from server").build()
+            CloudToMinionMessage rpcResponse = CloudToMinionMessage.newBuilder().setTwinResponse(
+              TwinResponseProto.newBuilder().setConsumerKey("workflow").build()
             ).build();
             responseObserver.onNext(rpcResponse);
           } catch (InterruptedException e) {

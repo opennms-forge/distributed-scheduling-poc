@@ -109,8 +109,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     public void start() throws IOException {
         try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(GrpcIpcUtils.LOG_PREFIX)) {
-            grpcIpcServer.startServer(new StreamHandler());
-            LOG.info("Added Twin Service to OpenNMS IPC Grpc Server");
+            ///grpcIpcServer.startServer(new StreamHandler());
+            LOG.info("Activated Twin Service");
         }
 
     }
@@ -118,7 +118,6 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     public void close() throws IOException {
         try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(TwinStrategy.LOG_PREFIX)) {
-            grpcIpcServer.stopServer();
             twinRpcExecutor.shutdown();
             LOG.info("Stopped Twin GRPC Server");
         }

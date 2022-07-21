@@ -178,23 +178,35 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
 
     private void initializeRpcStub() {
         // TODO: reconnect anytime the connection is not active (rpcStream == null)
-        if (getChannelState().equals(ConnectivityState.READY)) {
+        if (getChannelState().equals(ConnectivityState.READY) || getChannelState().equals(ConnectivityState.IDLE)) {
             rpcStream = asyncStub.cloudToMinionRPC(new RpcMessageHandler());
             // Need to send minion headers to gRPC server in order to register.
             sendMinionHeaders();
             LOG.info("Initialized RPC stream");
         } else {
             LOG.warn("gRPC IPC server is not in ready state");
+            try {
+                Thread.sleep(2000);
+                initializeSinkStub();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private void initializeSinkStub() {
         // TODO: reconnect anytime the connection is not active (rpcStream == null)
-        if (getChannelState().equals(ConnectivityState.READY)) {
+        if (getChannelState().equals(ConnectivityState.READY) || getChannelState().equals(ConnectivityState.IDLE)) {
             sinkStream = asyncStub.minionToCloudMessages(new EmptyMessageReceiver());
             LOG.info("Initialized Sink stream");
         } else {
             LOG.warn("gRPC IPC server is not in ready state");
+            try {
+                Thread.sleep(2000);
+                initializeSinkStub();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

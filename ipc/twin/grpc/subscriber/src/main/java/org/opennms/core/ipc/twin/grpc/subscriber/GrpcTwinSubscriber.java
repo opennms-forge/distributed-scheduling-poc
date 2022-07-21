@@ -28,10 +28,14 @@
 package org.opennms.core.ipc.twin.grpc.subscriber;
 
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -40,6 +44,7 @@ import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.MinionHeader;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.core.grpc.common.GrpcIpcUtils;
@@ -47,6 +52,7 @@ import org.opennms.core.ipc.twin.common.AbstractTwinSubscriber;
 import org.opennms.core.ipc.twin.common.TwinRequest;
 import org.opennms.core.ipc.twin.common.TwinUpdate;
 import org.opennms.horizon.core.identity.Identity;
+import org.opennms.horizon.core.identity.IdentityImpl;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +68,9 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
     private static final long RETRIEVAL_TIMEOUT = 1000;
     private static final int TWIN_REQUEST_POOL_SIZE = 100;
     private final int port;
-    private final ConfigurationAdmin configAdmin;
+    private final Properties clientProperties;
     private ManagedChannel channel;
-    private Properties clientProperties;
     private CloudServiceGrpc.CloudServiceStub asyncStub;
-    private StreamObserver<TwinRequestProto> rpcStream;
     private AtomicBoolean isShutDown = new AtomicBoolean(false);
     private ResponseHandler responseHandler = new ResponseHandler();
     private final ThreadFactory twinRequestSenderThreadFactory = new ThreadFactoryBuilder()
@@ -76,53 +80,21 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
             twinRequestSenderThreadFactory);
 
     public GrpcTwinSubscriber(Identity minionIdentity, ConfigurationAdmin configAdmin, int port) {
+        this(minionIdentity, GrpcIpcUtils.getPropertiesFromConfig(configAdmin, GrpcIpcUtils.GRPC_CLIENT_PID), port);
+    }
+
+    public GrpcTwinSubscriber(Identity minionIdentity, Properties clientProperties, int port) {
         super(minionIdentity);
-        this.configAdmin = configAdmin;
+        this.clientProperties = clientProperties;
         this.port = port;
     }
 
     public void start() throws IOException {
-        // Twin inherits all properties from ipc client
-        clientProperties = GrpcIpcUtils.getPropertiesFromConfig(configAdmin, GrpcIpcUtils.GRPC_CLIENT_PID);
-
         channel = GrpcIpcUtils.getChannel(clientProperties, this.port);
 
         asyncStub = CloudServiceGrpc.newStub(channel);
-        retryInitializeRpcStream();
+        sendMinionHeader();
         LOG.info("Started Twin gRPC Subscriber at location {} with systemId {}", getIdentity().getLocation(), getIdentity().getId());
-
-    }
-
-    private boolean initRpcStream() {
-        ConnectivityState currentChannelState = channel.getState(true);
-        if (currentChannelState.equals(ConnectivityState.READY) && this.rpcStream == null) {
-            // TODO handles this case!
-            this.rpcStream = null;
-            asyncStub.cloudToMinionRPC(new StreamObserver<RpcRequestProto>() {
-                @Override
-                public void onNext(RpcRequestProto value) {
-
-                }
-
-                @Override
-                public void onError(Throwable t) {
-
-                }
-
-                @Override
-                public void onCompleted() {
-
-                }
-            });
-            // Send minion header whenever we re-initialize rpc stream.
-            sendMinionHeader();
-            return true;
-        }
-        return false;
-    }
-
-    private void retryInitializeRpcStream() {
-        scheduleWithDelayUntilGetSucceeds(twinRequestSenderExecutor, this::initRpcStream, RETRIEVAL_TIMEOUT);
     }
 
     private synchronized void sendMinionHeader() {
@@ -130,21 +102,23 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
         // gRPC Server needs at least one message to initialize the stream
         MinionHeader minionHeader = MinionHeader.newBuilder().setLocation(getIdentity().getLocation())
                                                 .setSystemId(getIdentity().getId()).build();
-        // TODO
-        asyncStub.cloudToMinionMessages(minionHeader, new StreamObserver<CloudToMinionMessage>() {
+        asyncStub.cloudToMinionMessages(minionHeader, new StreamObserver<>() {
             @Override
             public void onNext(CloudToMinionMessage value) {
-
+                if (value.hasTwinResponse()) {
+                    TwinResponseProto twinResponse = value.getTwinResponse();
+                    responseHandler.onNext(twinResponse);
+                }
             }
 
             @Override
             public void onError(Throwable t) {
-
+                LOG.warn("Error while processing stream", t);
             }
 
             @Override
             public void onCompleted() {
-
+                LOG.debug("Closed stream");
             }
         });
     }
@@ -198,37 +172,39 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
         }
     }
 
-    private void scheduleWithDelayUntilGetSucceeds(ScheduledExecutorService executorService,
-                                                   Supplier<Boolean> supplier,
-                                                   long delayInMsec) {
-        boolean succeeded = supplier.get();
-        if (!succeeded) {
-            do {
-                ScheduledFuture<Boolean> future = executorService.schedule(() -> supplier.get(), delayInMsec, TimeUnit.MILLISECONDS);
-                try {
-                    succeeded = future.get();
-                    if (succeeded) {
-                        break;
-                    }
-                } catch (Exception e) {
-                    // It's likely that error persists, bail out
-                    succeeded = true;
-                    LOG.warn("Error while attempting to schedule the task", e);
-                }
-            } while (!succeeded || !isShutDown.get());
-        }
-    }
-
     private synchronized boolean sendTwinRpcRequest(TwinRequestProto twinRequestProto) {
-        if(this.rpcStream == null) {
-            initRpcStream();
-        }
-        if (rpcStream != null) {
-            rpcStream.onNext(twinRequestProto);
-            return true;
-        } else {
+        if (asyncStub == null) {
             return false;
         }
+
+        String rpcId = UUID.randomUUID().toString();
+        RpcRequestProto rpcRequestProto = RpcRequestProto.newBuilder()
+            .setRpcContent(twinRequestProto.toByteString())
+            .setModuleId("twin")
+            .setRpcId(rpcId)
+            .build();
+        asyncStub.minionToCloudRPC(rpcRequestProto, new StreamObserver<>() {
+            @Override
+            public void onNext(RpcResponseProto value) {
+                try {
+                    TwinResponseProto twinResponseProto = TwinResponseProto.parseFrom(value.getRpcContent());
+                    responseHandler.onNext(twinResponseProto);
+                } catch (InvalidProtocolBufferException e) {
+                    LOG.error("Error while requesting twin {}, received answer {}", twinRequestProto, value);
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                LOG.warn("Error while requesting twin {}, received answer {}", twinRequestProto, t);
+            }
+
+            @Override
+            public void onCompleted() {
+                LOG.debug("Closed reply stream");
+            }
+        });
+        return true;
     }
 
     private class ResponseHandler implements StreamObserver<TwinResponseProto> {
@@ -246,18 +222,28 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
         @Override
         public void onError(Throwable throwable) {
             LOG.error("Error in Twin streaming", throwable);
-            rpcStream = null;
-            CompletableFuture.runAsync(() -> retryInitializeRpcStream(), twinRequestSenderExecutor);
         }
 
         @Override
         public void onCompleted() {
             LOG.error("Closing Twin Response Handler");
-            rpcStream = null;
-            CompletableFuture.runAsync(() -> retryInitializeRpcStream(), twinRequestSenderExecutor);
         }
 
     }
 
+    public static void main(String[] args) throws Exception {
+        GrpcTwinSubscriber subscriber = new GrpcTwinSubscriber(new IdentityImpl("minion01", "dc1", "minion"), new Properties(), 8990);
+        subscriber.start();
+
+        subscriber.subscribe("workflow", Map.class, new Consumer<>() {
+            @Override
+            public void accept(Map map) {
+                System.out.println("Received twin " + map);
+            }
+        });
+
+        System.in.read();
+
+    }
 
 }

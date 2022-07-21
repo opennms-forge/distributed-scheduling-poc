@@ -32,7 +32,7 @@ public class InboundRpcAdapter implements StreamObserver<RpcResponseProto> {
 
     @Override
     public void onError(Throwable thrown) {
-        onError(thrown);
+        onError.accept(thrown);
     }
 
     @Override
