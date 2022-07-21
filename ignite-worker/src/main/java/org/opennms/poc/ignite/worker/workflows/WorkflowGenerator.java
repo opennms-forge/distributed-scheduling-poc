@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.collect.ImmutableMap;
 import org.opennms.poc.ignite.model.workflows.Network;
 import org.opennms.poc.ignite.model.workflows.Workflow;
+import org.opennms.poc.ignite.model.workflows.WorkflowType;
 
 public class WorkflowGenerator {
 
@@ -26,7 +27,8 @@ public class WorkflowGenerator {
         for (int nodeIndex = 0; nodeIndex < network.getNumNodes(); nodeIndex++) {
             Workflow nodeScanWorkflow = new Workflow();
             nodeScanWorkflow.setUuid(UUID.randomUUID().toString());
-            nodeScanWorkflow.setType("NodeScan");
+            nodeScanWorkflow.setType(WorkflowType.DETECTOR);
+            nodeScanWorkflow.setPluginName("NodeScan");
             nodeScanWorkflow.setCron(Long.toString(TimeUnit.HOURS.toMillis(1)));
             nodeScanWorkflow.setParameters(ImmutableMap.<String,String>builder()
                     .put("host", getIpAddressForNode(nodeIndex))
@@ -45,7 +47,8 @@ public class WorkflowGenerator {
         // Poll every 30 seconds
         Workflow icmpPollWorkflow = new Workflow();
         icmpPollWorkflow.setUuid(UUID.randomUUID().toString());
-        icmpPollWorkflow.setType("IcmpMonitor");
+        icmpPollWorkflow.setType(WorkflowType.DETECTOR);
+        icmpPollWorkflow.setPluginName("IcmpMonitor");
         icmpPollWorkflow.setCron(Long.toString(TimeUnit.SECONDS.toMillis(30)));
         icmpPollWorkflow.setParameters(ImmutableMap.<String,String>builder()
                 .put("host", service.getIpAddress())
@@ -58,7 +61,8 @@ public class WorkflowGenerator {
         // Collect every 1 minute
         Workflow snmpCollectWorkflow = new Workflow();
         snmpCollectWorkflow.setUuid(UUID.randomUUID().toString());
-        snmpCollectWorkflow.setType("SnmpCollector");
+        snmpCollectWorkflow.setType(WorkflowType.DETECTOR);
+        snmpCollectWorkflow.setPluginName("SnmpListener");
         snmpCollectWorkflow.setCron(Long.toString(TimeUnit.MINUTES.toMillis(1)));
         snmpCollectWorkflow.setParameters(ImmutableMap.<String,String>builder()
                 .put("host", service.getIpAddress())

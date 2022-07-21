@@ -53,6 +53,11 @@
       <artifactId>SNMP</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.opennms.poc.plugins</groupId>
+      <artifactId>WEB-LISTEN</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.opennms.poc.grpc.whiteboard</groupId>

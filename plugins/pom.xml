@@ -22,6 +22,7 @@
     <module>api</module>
     <module>SNMP</module>
     <module>ICMP</module>
+    <module>WEB-LISTEN</module>
   </modules>
 
 </project>
