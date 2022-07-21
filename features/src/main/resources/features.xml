@@ -117,6 +117,8 @@
         <bundle>mvn:org.apache.commons/commons-jexl/2.1.1</bundle>
         <bundle>mvn:org.opennms.horizon.core/lib/0.1.0-SNAPSHOT</bundle>
         <bundle>mvn:org.opennms.poc.plugins/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/core/${opennms-horizon.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/api/${opennms-horizon.version}</bundle>
     </feature>
 
     <feature name="rest-utils" version="${project.version}">
@@ -136,9 +138,9 @@
     </feature>
 
     <feature name="snmp-plugins" description="OpenNMS SNMP Plugins" version="${project.version}">
+        <feature version="${project.version}">poc-horizon-snmp</feature>
         <bundle>wrap:mvn:com.googlecode.concurrent-locks/concurrent-locks/1.0.0</bundle>
         <bundle>mvn:org.opennms.poc.plugins/SNMP/${project.version}</bundle>
-        <feature version="${project.version}">poc-horizon-snmp</feature>
     </feature>
 
     <feature name="icmp-plugins" description="OpenNMS ICMP Plugins" version="${project.version}">
@@ -147,6 +149,14 @@
         <bundle>mvn:org.opennms.lib/org.opennms.lib.tracker/${opennms.tracker.version}</bundle>
 
         <bundle>mvn:org.opennms.poc.plugins/ICMP/${project.version}</bundle>
+    </feature>
+
+    <feature name="web-plugins" description="OpenNMS WEB Plugins" version="${project.version}">
+        <!--        horizon-stream bundles needed for ICMP-->
+        <bundle>mvn:org.opennms.horizon.provision/core/${opennms-horizon.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-web/${opennms-horizon.version}</bundle>
+        
+        <bundle>mvn:org.opennms.poc.plugins/WEB/${project.version}</bundle>
     </feature>
 
     <feature name="eclipse-stuff" version="${project.version}">

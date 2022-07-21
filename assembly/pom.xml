@@ -127,6 +127,7 @@
                         <feature>poc-grpc</feature>
                         <feature>icmp-plugins</feature>
                         <feature>snmp-plugins</feature>
+                        <feature>web-plugins</feature>
                     </bootFeatures>
                     <libraries>
                     </libraries>

@@ -38,6 +38,9 @@
         <opennms.tracker.version>0.7</opennms.tracker.version>
         <commons.io.version>2.11.0</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
+        <grpc.version>1.47.0</grpc.version>
+        <protobuf.version>3.21.2</protobuf.version>
+        <protoc.version>3.20.1</protoc.version>
         <mockito.version>4.5.1</mockito.version>
     </properties>
 
@@ -116,6 +119,15 @@
 
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>

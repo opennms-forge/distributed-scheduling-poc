@@ -29,6 +29,16 @@
       <artifactId>lombok</artifactId>
       <version>${lombok.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.opennms.horizon.provision</groupId>
+      <artifactId>api</artifactId>
+      <version>${opennms-horizon.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.horizon.provision</groupId>
+      <artifactId>core</artifactId>
+      <version>${opennms-horizon.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
