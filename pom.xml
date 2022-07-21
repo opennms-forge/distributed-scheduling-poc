@@ -24,6 +24,7 @@
         <lombok.version>1.18.22</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <ignite.version>2.13.0</ignite.version>
+        <jetty.version>9.4.43.v20210629</jetty.version>
         <junit.version>4.13.2</junit.version>
 
         <spring-boot.version>2.6.4</spring-boot.version>
@@ -100,6 +101,17 @@
                 <groupId>org.apache.ignite</groupId>
                 <artifactId>ignite-kubernetes</artifactId>
                 <version>${ignite.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
             </dependency>
 
             <dependency>

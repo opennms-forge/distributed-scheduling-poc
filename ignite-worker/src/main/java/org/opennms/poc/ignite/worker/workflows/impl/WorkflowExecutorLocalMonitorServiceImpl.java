@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -21,13 +22,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Local implementation of the service to execute a workflow.  This class runs "locally" only, so it is never
+ * Local implementation of the service to execute a Monitor workflow.  This class runs "locally" only, so it is never
  *  serialized / deserialized; this enables the "ignite" service to be a thin implementation, reducing the chances of
  *  problems due to serialization/deserialization.
  */
-public class WorkflowExecutorLocalServiceImpl implements WorkflowExecutorLocalService {
+public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutorLocalService {
 
-    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(WorkflowExecutorLocalServiceImpl.class);
+    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(WorkflowExecutorLocalMonitorServiceImpl.class);
 
     private Logger log = DEFAULT_LOGGER;
 
@@ -37,7 +38,7 @@ public class WorkflowExecutorLocalServiceImpl implements WorkflowExecutorLocalSe
 
     private AtomicBoolean active = new AtomicBoolean(false);
 
-    public WorkflowExecutorLocalServiceImpl(OpennmsScheduler scheduler, WorkflowExecutionResultProcessor resultProcessor, Workflow workflow) {
+    public WorkflowExecutorLocalMonitorServiceImpl(OpennmsScheduler scheduler, Workflow workflow, WorkflowExecutionResultProcessor resultProcessor) {
         this.workflow = workflow;
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
@@ -58,7 +59,7 @@ public class WorkflowExecutorLocalServiceImpl implements WorkflowExecutorLocalSe
 
                 scheduler.schedulePeriodically(workflow.getUuid(), period, TimeUnit.MILLISECONDS, this::executeSerializedIteration);
             } else {
-                // Not a number, MUST be a CRON expression
+                // Not a number, REQUIRED to be a CRON expression
                 scheduler.scheduleTaskOnCron(workflow.getUuid(), whenSpec, this::executeSerializedIteration);
             }
 
@@ -79,9 +80,9 @@ public class WorkflowExecutorLocalServiceImpl implements WorkflowExecutorLocalSe
 //----------------------------------------
 
     private ServiceMonitor lookupMonitor(Workflow workflow) {
-        String type = workflow.getType();
+        String pluginName = workflow.getPluginName();
 
-        Optional<ServiceMonitor> result = OsgiServiceHolder.getMonitor(type);
+        Optional<ServiceMonitor> result = OsgiServiceHolder.getMonitor(pluginName);
 
         return result.orElse(null);
     }
@@ -106,7 +107,8 @@ public class WorkflowExecutorLocalServiceImpl implements WorkflowExecutorLocalSe
             if (monitor != null) {
                 MonitoredService monitoredService = configureMonitoredService();
 
-                CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, (Map) workflow.getParameters());
+                Map<String, Object> castMap = new HashMap<>(workflow.getParameters());
+                CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, castMap);
                 future.whenComplete(this::handleExecutionComplete);
             } else {
                 log.info("Skipping service monitor execution; monitor not found: monitor=" + workflow.getType());

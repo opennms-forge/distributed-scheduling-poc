@@ -13,21 +13,15 @@ import org.osgi.framework.BundleContext;
 public class OsgiServiceHolder {
     private static DetectorRegistry detectorRegistry;
     private static MonitorRegistry monitorRegistry;
+    private static ListenerFactoryRegistry listenerFactoryRegistry;
     private static OpennmsScheduler opennmsScheduler;
     private static WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory;
 
     public OsgiServiceHolder(
             BundleContext bundleContext,
             OpennmsScheduler opennmsScheduler,
-            WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory) {
-
-        init(bundleContext, opennmsScheduler, workflowExecutorLocalServiceFactory);
-    }
-
-    public static void init(
-            BundleContext bundleContext,
-            OpennmsScheduler opennmsScheduler,
-            WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory) {
+            WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory,
+            ListenerFactoryRegistry listenerFactoryRegistry) {
 
         log.info("Creating an instance of the StaticDetectorRegistry for initialization. Don't do this twice!");
         detectorRegistry = new DetectorRegistryImpl(bundleContext);
@@ -35,6 +29,7 @@ public class OsgiServiceHolder {
 
         OsgiServiceHolder.opennmsScheduler = opennmsScheduler;
         OsgiServiceHolder.workflowExecutorLocalServiceFactory = workflowExecutorLocalServiceFactory;
+        OsgiServiceHolder.listenerFactoryRegistry = listenerFactoryRegistry;
     }
 
     public static Optional<ServiceDetector> getDetector(String name) {
@@ -59,5 +54,9 @@ public class OsgiServiceHolder {
 
     public static WorkflowExecutorLocalServiceFactory getWorkflowExecutorLocalServiceFactory() {
         return workflowExecutorLocalServiceFactory;
+    }
+
+    public static ListenerFactoryRegistry getListenerFactoryRegistry() {
+        return listenerFactoryRegistry;
     }
 }

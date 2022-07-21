@@ -62,7 +62,7 @@ public class WorkflowService implements Service {
         // Use type field of workflow to map to detector? Or put it in the properties?
 
         log.info("########### registered detector count {}", OsgiServiceHolder.getRegisteredDetectorCount());
-        Optional<ServiceDetector> detector = OsgiServiceHolder.getDetector(workflow.getType());
+        Optional<ServiceDetector> detector = OsgiServiceHolder.getDetector(workflow.getPluginName());
         log.info("Detector is {}", detector.isPresent() ? detector.toString():"NOT FOUND");
         Optional<ServiceMonitor> serviceMonitor = OsgiServiceHolder.getMonitor("blah");
 
