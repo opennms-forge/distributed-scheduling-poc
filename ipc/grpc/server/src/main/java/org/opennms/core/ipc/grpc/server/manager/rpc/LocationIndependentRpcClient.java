@@ -4,14 +4,12 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.core.ipc.grpc.server.manager.RpcConnectionTracker;
 import org.opennms.horizon.core.identity.Identity;
-import org.opennms.horizon.core.lib.Logging;
 import org.opennms.horizon.ipc.rpc.api.RpcClient;
 import org.opennms.horizon.ipc.rpc.api.RpcClientFactory;
 import org.opennms.horizon.ipc.rpc.api.RpcModule;
@@ -135,8 +133,6 @@ public class LocationIndependentRpcClient<REQUEST extends RpcRequest, RESPONSE e
     }
 
     private CompletableFuture<RESPONSE> executeRemotely(REQUEST request) {
-        final Map<String, String> loggingContext = Logging.getCopyOfContextMap();
-
         String marshalRequest = localModule.marshalRequest(request);
 
         CompletableFuture<RESPONSE> future = new CompletableFuture<>();

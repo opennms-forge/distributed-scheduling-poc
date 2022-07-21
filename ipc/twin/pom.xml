@@ -11,7 +11,7 @@
 
   <groupId>org.opennms.poc.ipc</groupId>
   <artifactId>twin</artifactId>
-  <name>OpenNMS POC :: IPC :: Twin</name>
+  <name>Ignite POC :: IPC :: Twin</name>
   <packaging>pom</packaging>
 
   <modules>

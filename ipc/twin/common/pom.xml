@@ -13,7 +13,7 @@
 
     <groupId>org.opennms.poc.ipc.twin</groupId>
     <artifactId>common</artifactId>
-    <name>OpenNMS POC :: IPC :: Twin :: Common</name>
+    <name>Ignite POC :: IPC :: Twin :: Common</name>
     <packaging>bundle</packaging>
 
     <dependencies>

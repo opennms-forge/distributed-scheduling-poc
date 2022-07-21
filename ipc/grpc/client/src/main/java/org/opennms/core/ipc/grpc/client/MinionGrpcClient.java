@@ -59,8 +59,6 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.horizon.core.identity.Identity;
-import org.opennms.horizon.core.lib.Logging;
-import org.opennms.horizon.core.lib.PropertiesUtils;
 import org.opennms.horizon.ipc.rpc.api.RpcModule;
 import org.opennms.horizon.ipc.rpc.api.RpcRequest;
 import org.opennms.horizon.ipc.rpc.api.RpcResponse;
@@ -84,6 +82,8 @@ import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.MDC;
+import org.slf4j.MDC.MDCCloseable;
 
 /**
  * Minion GRPC client runs both RPC/Sink together.
@@ -282,7 +282,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
     @Override
     public <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, String metadata, T message) {
 
-        try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(MessageConsumerManager.LOG_PREFIX)) {
+        try (MDCCloseable mdc = MDC.putCloseable("prefix", MessageConsumerManager.LOG_PREFIX)) {
             byte[] sinkMessageContent = module.marshal(message);
             String messageId = UUID.randomUUID().toString();
             SinkMessage.Builder sinkMessageBuilder = SinkMessage.newBuilder()

@@ -13,7 +13,7 @@
 
     <groupId>org.opennms.poc.ipc.twin.grpc</groupId>
     <artifactId>publisher</artifactId>
-    <name>OpenNMS POC :: IPC :: Twin :: gRPC :: Publisher</name>
+    <name>Ignite POC :: IPC :: Twin :: gRPC :: Publisher</name>
     <packaging>bundle</packaging>
 
     <dependencies>

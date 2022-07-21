@@ -45,11 +45,12 @@ import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.core.ipc.twin.api.TwinPublisher;
 import org.opennms.core.ipc.twin.api.TwinStrategy;
-import org.opennms.horizon.core.lib.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.MDC;
+import org.slf4j.MDC.MDCCloseable;
 
 public abstract class AbstractTwinPublisher implements TwinPublisher {
 
@@ -71,7 +72,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher {
 
     @Override
     public <T> Session<T> register(String key, Class<T> clazz, String location) throws IOException {
-        try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(TwinStrategy.LOG_PREFIX)) {
+        try (MDCCloseable mdc = MDC.putCloseable("prefix", TwinStrategy.LOG_PREFIX)) {
             SessionKey sessionKey = new SessionKey(key, location);
             LOG.info("Registered a session with key {}", sessionKey);
             return new SessionImpl<>(sessionKey);
@@ -193,7 +194,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher {
 
         @Override
         public void publish(T obj) throws IOException {
-            try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(TwinStrategy.LOG_PREFIX)) {
+            try (MDCCloseable mdc = MDC.putCloseable("prefix", TwinStrategy.LOG_PREFIX)) {
                 LOG.info("Published an object update for the session with key {}", sessionKey.toString());
                 byte[] objInBytes = objectMapper.writeValueAsBytes(obj);
                 TwinUpdate twinUpdate = getResponseFromUpdatedObj(objInBytes, sessionKey);

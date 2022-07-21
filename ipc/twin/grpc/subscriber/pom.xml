@@ -15,17 +15,12 @@
     <artifactId>subscriber</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS POC :: IPC :: Twin :: gRPC :: Subscriber</name>
+    <name>Ignite POC :: IPC :: Twin :: gRPC :: Subscriber</name>
 
     <dependencies>
         <dependency>
             <groupId>org.opennms.poc.ipc.twin</groupId>
             <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.poc.ipc.grpc</groupId>
-            <artifactId>server</artifactId>
             <version>${project.version}</version>
         </dependency>
 

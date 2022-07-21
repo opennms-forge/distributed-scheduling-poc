@@ -41,7 +41,6 @@ import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.MinionHeader;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
-import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.core.grpc.common.GrpcIpcServer;
 import org.opennms.core.grpc.common.GrpcIpcUtils;
@@ -50,13 +49,14 @@ import org.opennms.core.ipc.twin.common.AbstractTwinPublisher;
 import org.opennms.core.ipc.twin.common.LocalTwinSubscriber;
 import org.opennms.core.ipc.twin.common.TwinRequest;
 import org.opennms.core.ipc.twin.common.TwinUpdate;
-import org.opennms.horizon.core.lib.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
 import io.grpc.stub.StreamObserver;
+import org.slf4j.MDC;
+import org.slf4j.MDC.MDCCloseable;
 
 public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
@@ -101,13 +101,13 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
     }
 
     public void start() throws IOException {
-        try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(GrpcIpcUtils.LOG_PREFIX)) {
+        try (MDCCloseable mdc = MDC.putCloseable("prefix", GrpcIpcUtils.LOG_PREFIX)) {
             LOG.info("Activated Twin Service");
         }
     }
 
     public void close() throws IOException {
-        try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(TwinStrategy.LOG_PREFIX)) {
+        try (MDCCloseable mdc = MDC.putCloseable("prefix", GrpcIpcUtils.LOG_PREFIX)) {
             twinRpcExecutor.shutdown();
             LOG.info("Stopped Twin GRPC Server");
         }

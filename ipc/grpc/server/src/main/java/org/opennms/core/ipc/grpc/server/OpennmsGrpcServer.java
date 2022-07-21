@@ -62,7 +62,6 @@ import org.opennms.core.ipc.grpc.server.manager.adapter.MinionRSTransportAdapter
 import org.opennms.core.ipc.grpc.server.manager.rpc.RemoteRegistrationHandler;
 import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
 import org.opennms.horizon.core.identity.Identity;
-import org.opennms.horizon.core.lib.Logging;
 import org.opennms.horizon.ipc.rpc.api.RemoteExecutionException;
 import org.opennms.horizon.ipc.rpc.api.RequestTimedOutException;
 import org.opennms.horizon.ipc.rpc.api.RpcClient;
@@ -76,6 +75,8 @@ import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.common.AbstractMessageConsumerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.slf4j.MDC.MDCCloseable;
 
 /**
  * OpenNMS GRPC Server runs as OSGI bundle and it runs both RPC/Sink together.
@@ -136,7 +137,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 //----------------------------------------
 
     public void start() throws IOException {
-        try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(RpcClientFactory.LOG_PREFIX)) {
+        try (MDCCloseable mdc = MDC.putCloseable("prefix", RpcClientFactory.LOG_PREFIX)) {
             grpcIpcServer.startServer(new MinionRSTransportAdapter(
                 minionRpcStreamConnectionManager::startRpcStreaming,
                 this.outgoingMessageHandler,
@@ -277,10 +278,8 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     private String registerRemoteCall(RpcRequest request, long expiration, CompletableFuture future, RpcModule localModule) {
         String rpcId = UUID.randomUUID().toString();
 
-        Map<String, String> loggingContext = Logging.getCopyOfContextMap();
-
         RpcResponseHandlerImpl responseHandler =
-                new RpcResponseHandlerImpl(future, localModule, rpcId, request.getLocation(), expiration, loggingContext);
+                new RpcResponseHandlerImpl(future, localModule, rpcId, request.getLocation(), expiration);
 
         rpcRequestTracker.addRequest(rpcId, responseHandler);
         rpcRequestTimeoutManager.registerRequestTimeout(responseHandler);
@@ -342,24 +341,22 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         private final String rpcId;
         private final String location;
         private final long expirationTime;
-        private final Map<String, String> loggingContext;
         private boolean isProcessed = false;
         private final Long requestCreationTime;
 
         private RpcResponseHandlerImpl(CompletableFuture<T> responseFuture, RpcModule<S, T> rpcModule, String rpcId,
-                                       String location, long timeout, Map<String, String> loggingContext) {
+                                       String location, long timeout) {
             this.responseFuture = responseFuture;
             this.rpcModule = rpcModule;
             this.rpcId = rpcId;
             this.location = location;
             this.expirationTime = timeout;
-            this.loggingContext = loggingContext;
             this.requestCreationTime = System.currentTimeMillis();
         }
 
         @Override
         public void sendResponse(String message) {
-            try (Logging.MDCCloseable mdc = Logging.withContextMapCloseable(loggingContext)) {
+            try {
                 if (message != null) {
                     T response = rpcModule.unmarshalResponse(message);
                     if (response.getErrorMessage() != null) {

@@ -15,7 +15,7 @@
     <artifactId>api</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS POC :: IPC :: Twin :: API</name>
+    <name>Ignite POC :: IPC :: Twin :: API</name>
 
     <dependencies>
         <dependency>

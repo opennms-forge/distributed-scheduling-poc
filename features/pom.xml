@@ -55,6 +55,43 @@
     </dependency>
 
     <dependency>
+      <groupId>org.opennms.poc.grpc.whiteboard</groupId>
+      <artifactId>api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.poc.grpc.whiteboard</groupId>
+      <artifactId>core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opennms.poc.ipc.grpc</groupId>
+      <artifactId>client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.poc.ipc.grpc</groupId>
+      <artifactId>contract</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.poc.ipc.twin</groupId>
+      <artifactId>api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.poc.ipc.twin</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.poc.ipc.twin.grpc</groupId>
+      <artifactId>subscriber</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.opennms.horizon.assemblies</groupId>
       <artifactId>features</artifactId>
       <version>${opennms-horizon.version}</version>

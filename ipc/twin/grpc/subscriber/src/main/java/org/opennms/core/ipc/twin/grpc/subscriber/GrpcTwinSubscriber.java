@@ -37,7 +37,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
@@ -47,20 +46,16 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
-import org.opennms.core.grpc.common.GrpcIpcUtils;
 import org.opennms.core.ipc.twin.common.AbstractTwinSubscriber;
 import org.opennms.core.ipc.twin.common.TwinRequest;
 import org.opennms.core.ipc.twin.common.TwinUpdate;
 import org.opennms.horizon.core.identity.Identity;
-import org.opennms.horizon.core.identity.IdentityImpl;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
-
 
 public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
 
@@ -228,21 +223,6 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
         public void onCompleted() {
             LOG.error("Closing Twin Response Handler");
         }
-
-    }
-
-    public static void main(String[] args) throws Exception {
-        GrpcTwinSubscriber subscriber = new GrpcTwinSubscriber(new IdentityImpl("minion01", "dc1", "minion"), new Properties(), 8990);
-        subscriber.start();
-
-        subscriber.subscribe("workflow", Map.class, new Consumer<>() {
-            @Override
-            public void accept(Map map) {
-                System.out.println("Received twin " + map);
-            }
-        });
-
-        System.in.read();
 
     }
 

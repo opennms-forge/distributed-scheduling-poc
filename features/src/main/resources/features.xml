@@ -30,18 +30,35 @@
         <bundle dependency="true">mvn:com.savoirtech.eos/eos-core/${eos.version}</bundle>
     </feature>
 
+    <feature name="poc-horizon-core" version="${project.version}">
+        <feature prerequisite="true">wrap</feature>
+        <bundle>mvn:org.opennms.horizon.core/identity/${opennms-horizon.version}</bundle>
+        <bundle>wrap:mvn:org.opennms.horizon.core/xml/${opennms-horizon.version}$overwrite=merge&amp;Import-Package=org.opennms.horizon.core.lib;resolution:=optional,org.eclipse.persistence.*;resolution:=optional,org.springframework*;resolution:=optional,*</bundle>
+
+        <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
+        <bundle dependency="true">mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
+    </feature>
+
     <feature name="poc-grpc-horizon" description="Horizon gRPC apis" version="${project.version}">
         <details>Import of Horizon gRPC apis.</details>
+        <feature prerequisite="true">wrap</feature>
         <feature>shell</feature>
         <feature>aries-blueprint</feature>
-        <feature>horizon-grpc-workaround</feature>
+        <feature>poc-horizon-core</feature>
+        <feature>rate-limited-logger</feature>
+        <feature>metrics</feature>
+        <feature>guava</feature>
+        <feature>poc-opentracing</feature>
+
+        <bundle>mvn:org.opennms.horizon.3rdparty/grpc/${opennms-horizon.version}</bundle>
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
+        <bundle>wrap:mvn:org.opennms.horizon.ipc/api/${opennms-horizon.version}$overwrite=merge&amp;Import-Package=org.opennms.horizon.core.lib;resolution:=optional,*</bundle>
     </feature>
 
     <feature name="poc-grpc-ipc-twin" description="Digital twin api with gRPC channel" version="${project.version}">
         <feature>jackson</feature>
-        <feature>guava</feature>
-        <feature version="${opennms-horizon.version}">horizon-tracing</feature>
-        <feature version="${project.version}">poc-grpc-horizon</feature>
+        <feature>poc-grpc-horizon</feature>
+        <feature>metrics</feature>
 
         <!-- shallow copy of horizon dependencies -->
         <bundle>mvn:org.opennms.horizon.3rdparty/json-patch-osgi/${opennms-horizon.version}</bundle>
@@ -50,17 +67,23 @@
         <bundle>mvn:com.github.fge/btf/1.2</bundle>
         <bundle>mvn:com.google.code.findbugs/jsr305/3.0.2</bundle>
 
-        <bundle>mvn:com.google.protobuf/protobuf-java/3.16.1</bundle>
         <!-- /copy -->
 
-        <bundle>mvn:org.opennms.core.ipc.twin/api/${opennms-horizon.version}</bundle>
-        <bundle>mvn:org.opennms.core.ipc.twin/common/${opennms-horizon.version}</bundle>
-        <bundle>mvn:org.opennms.core.ipc.twin.grpc/common/${opennms-horizon.version}</bundle>
-        <bundle>mvn:org.opennms.core.ipc.twin.grpc/subscriber/${opennms-horizon.version}</bundle>
+        <bundle>mvn:org.opennms.poc.ipc.grpc/contract/${project.version}</bundle>
+        <bundle>mvn:org.opennms.poc.ipc.grpc/client/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.poc.ipc.twin/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.poc.ipc.twin/common/${project.version}</bundle>
+        <bundle>mvn:org.opennms.poc.ipc.twin.grpc/subscriber/${project.version}</bundle>
     </feature>
 
     <feature name="ignite-poc-model" description="POC Model" version="${project.version}">
         <bundle>mvn:org.opennms.poc/model/${project.version}</bundle>
+    </feature>
+
+    <feature name="poc-twin-api" version="${project.version}">
+        <feature>guava</feature>
+        <bundle>mvn:org.opennms.poc.ipc.twin/api/${project.version}</bundle>
     </feature>
 
     <feature name="poc-grpc-messaging-api" description="Messaging API" version="${project.version}">
@@ -72,6 +95,7 @@
         <feature version="${project.version}">poc-grpc-ipc-twin</feature>
         <feature version="${project.version}">ignite-poc-model</feature>
         <feature version="${project.version}">eos</feature>
+        <feature version="${project.version}">poc-twin-api</feature>
 
         <bundle>mvn:org.opennms.poc.grpc.whiteboard/core/${project.version}</bundle>
     </feature>
@@ -155,7 +179,7 @@
 
 <!--    // horizon stream bundles and features needed for SNMP-->
     <feature name="poc-horizon-snmp" version="${project.version}" description="Horizon :: SNMP">
-        <feature version="${project.version}">horizon-grpc-workaround</feature>
+        <feature version="${project.version}">poc-grpc-horizon</feature>
         <feature version="${opennms-horizon.version}">horizon-events-api</feature>
 
         <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
@@ -173,21 +197,13 @@
         <bundle>mvn:org.opennms.poc/scheduler/${project.version}</bundle>
     </feature>
 
-    <!-- Workaround to prevent startup of the GRPC Server -->
-    <!-- This will be removed - it depends on cleanup of the Horizon Stream bundles and features -->
-    <feature name="horizon-grpc-workaround" version="${project.version}" description="Horizon :: gRPC :: WORKAROUND">
-        <feature>horizon-ipc-api</feature>
-        <feature prerequisite="true">wrap</feature>
-
-        <bundle>mvn:org.opennms.horizon.3rdparty/grpc/0.1.0-SNAPSHOT</bundle>
-        <bundle>mvn:com.google.protobuf/protobuf-java/3.16.1</bundle>
-
-        <bundle>mvn:org.opennms.horizon.ipc.grpc/client/0.1.0-SNAPSHOT</bundle>
-        <bundle>mvn:org.opennms.horizon.ipc.grpc/common/0.1.0-SNAPSHOT</bundle>
-        <bundle>mvn:org.opennms.horizon.ipc/echo/0.1.0-SNAPSHOT</bundle>
-
-        <!-- WRAP the GRPC server bundle - it contains class definitions we need, but we want to skip the Blueprint -->
-        <!--  so it does not start the server.  Note the Bundle-Blueprint=meta-inf disables the existing blueprint. -->
-        <bundle>wrap:mvn:org.opennms.horizon.ipc.grpc/server/0.1.0-SNAPSHOT$Bundle-Blueprint=meta-inf&amp;overwrite=merge</bundle>
+    <feature name="metrics">
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/3.1.2</bundle>
     </feature>
+
+    <feature name="rate-limited-logger" version="2.0.2" description="Rate Limited Logger">
+        <bundle>mvn:joda-time/joda-time/2.1</bundle>
+        <bundle>wrap:mvn:com.swrve/rate-limited-logger/2.0.2</bundle>
+    </feature>
+
 </features>

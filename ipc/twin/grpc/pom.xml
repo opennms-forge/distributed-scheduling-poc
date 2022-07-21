@@ -15,7 +15,7 @@
     <artifactId>grpc</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS POC :: IPC :: Twin :: gRPC</name>
+    <name>Ignite POC :: IPC :: Twin :: gRPC</name>
 
     <modules>
         <module>publisher</module>
