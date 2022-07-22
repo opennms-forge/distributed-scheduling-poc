@@ -15,8 +15,14 @@ import org.opennms.core.ipc.grpc.server.manager.rpc.LocationIndependentRpcClient
 import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
 import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.impl.MinionRpcStreamConnectionManagerImpl;
 import org.opennms.core.ipc.twin.grpc.publisher.GrpcTwinPublisher;
+import org.opennms.horizon.ipc.sink.api.Message;
+import org.opennms.horizon.ipc.sink.api.MessageConsumer;
+import org.opennms.horizon.ipc.sink.api.SinkModule;
+import org.opennms.poc.ignite.model.workflows.Results;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import orh.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
+import orh.opennms.poc.ignite.grpc.workflow.WrapperMessage;
 
 @Configuration
 public class GrpcServerConfig {
@@ -41,6 +47,19 @@ public class GrpcServerConfig {
         server.setMinionRpcStreamConnectionManager(manager);
         server.setIncomingRpcHandler(publisher.getRpcObserver());
         server.setOutgoingMessageHandler(publisher.getStreamObserver());
+
+        WorkflowSinkModule workflowSinkModule = new WorkflowSinkModule();
+        server.registerConsumer(new MessageConsumer<WrapperMessage<Results>, WrapperMessage<Results>>() {
+            @Override
+            public SinkModule<WrapperMessage<Results>, WrapperMessage<Results>> getModule() {
+                return workflowSinkModule;
+            }
+
+            @Override
+            public void handleMessage(WrapperMessage<Results> message) {
+                System.out.println("Received result " + message.getMessage());
+            }
+        });
 
         server.start();
         return server;

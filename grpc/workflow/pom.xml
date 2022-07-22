@@ -20,6 +20,7 @@
     <modules>
         <module>publisher</module>
         <module>subscriber</module>
+        <module>module</module>
         <module>injector</module>
     </modules>
 

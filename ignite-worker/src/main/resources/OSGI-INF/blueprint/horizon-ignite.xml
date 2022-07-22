@@ -14,6 +14,8 @@
 
   <reference id="opennmsScheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler"/>
 
+  <reference id="resultPublisher" interface="java.util.function.Consumer" filter="(message.publisher.topic=workflow-result)" />
+
   <bean id="workflowRepository" class="org.opennms.poc.ignite.worker.workflows.WorkflowRepository"/>
 
   <bean id="workerIgniteConfiguration" class="org.opennms.poc.ignite.worker.ignite.WorkerIgniteConfiguration">
@@ -56,6 +58,7 @@
         class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowExecutionResultProcessorImpl"
         init-method="init"
   >
+    <argument ref="resultPublisher" />
     <property name="executor" ref="resultProcessorThreadPoolExecutor"/>
   </bean>
 

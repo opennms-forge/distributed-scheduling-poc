@@ -108,6 +108,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
     private Properties properties;
     private BundleContext bundleContext;
     private Identity minionIdentity;
+    private MetricRegistry metricRegistry;
     private StreamObserver<RpcResponseProto> rpcStream;
     private StreamObserver<MinionToCloudMessage> sinkStream;
     private ConnectivityState currentChannelState;
@@ -124,14 +125,25 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
     // This maintains a blocking thread for each dispatch module when OpenNMS is not in active state.
     private final ScheduledExecutorService blockingSinkMessageScheduler = Executors.newScheduledThreadPool(SINK_BLOCKING_THREAD_POOL_SIZE,
             blockingSinkMessageThreadFactory);
+    private Tracer tracer;
 
     public MinionGrpcClient(Identity identity, ConfigurationAdmin configAdmin) {
-        this(identity, ConfigUtils.getPropertiesFromConfig(configAdmin, GRPC_CLIENT_PID));
+        this(identity, ConfigUtils.getPropertiesFromConfig(configAdmin, GRPC_CLIENT_PID), new MetricRegistry(), null);
+    }
+
+    public MinionGrpcClient(Identity identity, ConfigurationAdmin configAdmin, MetricRegistry metricRegistry, Tracer tracer) {
+        this(identity, ConfigUtils.getPropertiesFromConfig(configAdmin, GRPC_CLIENT_PID), metricRegistry, tracer);
     }
 
     public MinionGrpcClient(Identity identity, Properties properties) {
+        this(identity, properties, new MetricRegistry(), null);
+    }
+
+    public MinionGrpcClient(Identity identity, Properties properties, MetricRegistry metricRegistry, Tracer tracer) {
         this.minionIdentity = identity;
         this.properties = properties;
+        this.metricRegistry = metricRegistry;
+        this.tracer = tracer;
     }
 
     public void start() throws IOException {
@@ -266,12 +278,12 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
 
     @Override
     public Tracer getTracer() {
-        return null;
+        return tracer;
     }
 
     @Override
     public MetricRegistry getMetrics() {
-        return null;
+        return metricRegistry;
     }
 
     ConnectivityState getChannelState() {

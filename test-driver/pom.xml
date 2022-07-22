@@ -37,6 +37,11 @@
             <artifactId>injector</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.poc.grpc.workflow</groupId>
+            <artifactId>module</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.opennms.poc.grpc.workflow</groupId>
