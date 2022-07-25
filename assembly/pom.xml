@@ -121,6 +121,7 @@
                         <feature>snmp-plugins</feature>
                         <feature>web-listen-plugin</feature>
                         <feature>fake-connector-plugin</feature>
+                        <feature>test-tcp-connector-plugin</feature>
                     </bootFeatures>
                     <libraries>
                     </libraries>

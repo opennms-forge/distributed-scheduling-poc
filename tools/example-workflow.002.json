@@ -39,6 +39,16 @@
           "port": "12345"
       },
       "uuid": "4d61d65e-95c4-425f-9240-5f8f6647ef41"
+    },
+    {
+      "description": "Test TCP Connector",
+      "type": "CONNECTOR",
+      "pluginName": "TestTcpConnector",
+      "parameters": {
+          "host": "poc-test-driver",
+          "port": "9980"
+      },
+      "uuid": "cf61984f-71f6-4433-b1d9-05ba5b78117e"
     }
   ]
 }

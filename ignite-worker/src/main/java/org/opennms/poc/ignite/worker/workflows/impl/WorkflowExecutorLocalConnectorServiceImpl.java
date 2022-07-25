@@ -50,11 +50,13 @@ public class WorkflowExecutorLocalConnectorServiceImpl implements WorkflowExecut
     public void start() throws Exception {
         ServiceConnectorFactory serviceConnectorFactory = lookupServiceConnectorFactory(workflow);
 
-        Map<String, Object> castMap = new HashMap<>(workflow.getParameters());
+        if (serviceConnectorFactory != null) {
+            Map<String, Object> castMap = new HashMap<>(workflow.getParameters());
 
-        serviceConnector = serviceConnectorFactory.create(resultProcessor::queueSendResult, castMap, this::handleDisconnect);
+            serviceConnector = serviceConnectorFactory.create(resultProcessor::queueSendResult, castMap, this::handleDisconnect);
 
-        attemptConnect();
+            attemptConnect();
+        }
     }
 
     @Override
@@ -137,6 +139,11 @@ public class WorkflowExecutorLocalConnectorServiceImpl implements WorkflowExecut
         String pluginName = workflow.getPluginName();
 
         ServiceConnectorFactory result = OsgiServiceHolder.getServiceConnectorFactoryRegistry().getService(pluginName);
+
+        if (result == null) {
+            log.error("Failed to locate connector factory for workflow: plugin-name={}; workflow-uuid={}",
+                    pluginName, workflow.getUuid());
+        }
 
         return result;
     }
