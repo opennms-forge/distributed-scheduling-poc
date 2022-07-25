@@ -34,6 +34,9 @@ spec:
     - port: 8990
       protocol: TCP
       name: grpc
+    - port: 9980
+      protocol: TCP
+      name: test-tcp-connector
   selector:
     run: poc-test-driver
 ---
@@ -140,6 +143,7 @@ spec:
           ports:
             - containerPort: 8080
             - containerPort: 8990
+            - containerPort: 9980
 ---
 apiVersion: v1
 kind: ConfigMap

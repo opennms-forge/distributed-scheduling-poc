@@ -58,6 +58,7 @@ public class TestTcpConnectionHandler {
             outputStream.write('U');
         } catch (IOException ioException) {
             log.warn("Error writing to connection", ioException);
+            stop();
         }
     }
 }
