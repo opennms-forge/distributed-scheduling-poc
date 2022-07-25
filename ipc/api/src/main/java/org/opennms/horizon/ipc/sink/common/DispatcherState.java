@@ -30,7 +30,8 @@ package org.opennms.horizon.ipc.sink.common;
 
 import java.util.Collection;
 
-import org.opennms.horizon.ipc.sink.api.Message;
+import com.google.protobuf.Message;
+
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

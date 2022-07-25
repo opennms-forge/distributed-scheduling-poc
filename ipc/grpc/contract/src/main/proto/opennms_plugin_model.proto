@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package opennms;
 
-import "any.proto";
+import "google/protobuf/any.proto";
 
 message ServiceMonitorRequest {
   string name = 1;

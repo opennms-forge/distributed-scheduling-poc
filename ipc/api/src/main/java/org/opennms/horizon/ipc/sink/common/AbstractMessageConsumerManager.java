@@ -36,12 +36,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.opennms.horizon.core.lib.Logging;
-import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.protobuf.Message;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;

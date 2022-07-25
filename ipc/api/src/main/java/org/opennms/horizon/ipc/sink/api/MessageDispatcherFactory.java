@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.ipc.sink.api;
 
+import com.google.protobuf.Message;
+
 /**
  * Generates a dispatcher for the given {@link SinkModule}.
  *

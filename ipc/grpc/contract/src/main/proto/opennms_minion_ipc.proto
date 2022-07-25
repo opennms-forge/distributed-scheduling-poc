@@ -27,7 +27,7 @@
  *******************************************************************************/
 syntax = "proto3";
 
-import "any.proto";
+import "google/protobuf/any.proto";
 
 // This spec defines the interface via which a Minion ("client") can
 // handle RPCs, trigger RPCs and send/receives messages to the OpenNMS system.
@@ -134,18 +134,4 @@ message TwinResponseProto {
   string session_id = 6;
   int32 version = 7;
   map<string, google.protobuf.Any> metadata = 8;
-}
-
-message RegistrationRequest {
-  string instance = 1;
-}
-
-message RegistrationResponse {
-  string instance = 1;
-  bool ack = 2;
-}
-
-message AnyJson {
-  string type = 1;
-  bytes payload = 2;
 }

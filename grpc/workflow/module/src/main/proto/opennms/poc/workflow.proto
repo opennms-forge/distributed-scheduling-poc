@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -25,17 +25,18 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+syntax = "proto3";
 
-package org.opennms.horizon.ipc.sink.api;
+import "google/protobuf/any.proto";
 
-/**
- * Marker interface for messages that are produced and consumed by a {@link SinkModule}.
- *
- * @author jwhite
- */
-public interface Message {
+package workflow;
+option java_multiple_files = true;
+option java_package = "org.opennms.poc.ignite.grpc.workflow.contract";
 
-    static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
-
-    static final String SINK_METRIC_CONSUMER_DOMAIN = "org.opennms.core.ipc.sink.consumer";
+message WorkflowResults {
+  message WorkflowResult {
+    string uuid = 1;
+    map<string, google.protobuf.Any> parameters = 2;
+  }
+  repeated WorkflowResult results = 1;
 }

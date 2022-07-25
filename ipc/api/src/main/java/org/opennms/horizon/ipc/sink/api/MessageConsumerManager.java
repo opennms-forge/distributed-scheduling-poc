@@ -32,6 +32,8 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
+import com.google.protobuf.Message;
+
 /**
  * Handles dispatching of messages to the registered consumer(s).
  *

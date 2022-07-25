@@ -32,9 +32,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
 
+import com.google.protobuf.Message;
+
 import org.opennms.horizon.ipc.sink.aggregation.AggregatingSinkMessageProducer;
 import org.opennms.horizon.ipc.sink.api.AsyncDispatcher;
-import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.api.SyncDispatcher;

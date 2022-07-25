@@ -30,10 +30,10 @@ package org.opennms.core.ipc.grpc.client;
 
 import static org.opennms.core.ipc.grpc.client.GrpcClientConstants.*;
 import static org.opennms.horizon.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
-import static org.opennms.horizon.ipc.sink.api.Message.SINK_METRIC_PRODUCER_DOMAIN;
 import static org.opennms.horizon.ipc.sink.api.SinkModule.HEARTBEAT_MODULE_ID;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
 import io.opentracing.Tracer;
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +62,6 @@ import org.opennms.horizon.core.identity.Identity;
 import org.opennms.horizon.ipc.rpc.api.RpcModule;
 import org.opennms.horizon.ipc.rpc.api.RpcRequest;
 import org.opennms.horizon.ipc.rpc.api.RpcResponse;
-import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.common.AbstractMessageDispatcherFactory;
@@ -99,6 +98,8 @@ import org.slf4j.MDC.MDCCloseable;
  * messages are buffered and blocked till minion is able to connect to OpenNMS.
  */
 public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
+
+    static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
 
     private static final Logger LOG = LoggerFactory.getLogger(MinionGrpcClient.class);
     private static final long SINK_BLOCKING_TIMEOUT = 1000;

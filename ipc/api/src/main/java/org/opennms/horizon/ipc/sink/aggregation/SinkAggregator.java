@@ -30,7 +30,7 @@ package org.opennms.horizon.ipc.sink.aggregation;
 
 import java.util.Objects;
 
-import org.opennms.horizon.ipc.sink.api.Message;
+import com.google.protobuf.Message;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 
 /**

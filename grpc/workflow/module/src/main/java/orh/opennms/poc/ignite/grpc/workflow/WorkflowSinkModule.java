@@ -1,19 +1,17 @@
 package orh.opennms.poc.ignite.grpc.workflow;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opennms.horizon.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
-import org.opennms.poc.ignite.model.workflows.Results;
+import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WorkflowSinkModule implements SinkModule<WrapperMessage<Results>, WrapperMessage<Results>> {
+public class WorkflowSinkModule implements SinkModule<WorkflowResults, WorkflowResults> {
 
   private static final String MODULE_ID = "workflows";
   private final Logger logger = LoggerFactory.getLogger(WorkflowSinkModule.class);
-  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
   public String getId() {
@@ -26,9 +24,9 @@ public class WorkflowSinkModule implements SinkModule<WrapperMessage<Results>, W
   }
 
   @Override
-  public byte[] marshal(WrapperMessage<Results> resultsMessage) {
+  public byte[] marshal(WorkflowResults resultsMessage) {
     try {
-      return objectMapper.writeValueAsBytes(resultsMessage.getMessage());
+      return resultsMessage.toByteArray();
     } catch (Exception e) {
       logger.warn("Error while marshalling message {}.", resultsMessage, e);
       return new byte[0];
@@ -36,10 +34,9 @@ public class WorkflowSinkModule implements SinkModule<WrapperMessage<Results>, W
   }
 
   @Override
-  public WrapperMessage<Results> unmarshal(byte[] bytes) {
+  public WorkflowResults unmarshal(byte[] bytes) {
     try {
-      Results results = objectMapper.readValue(bytes, Results.class);
-      return new WrapperMessage<>(results);
+      return WorkflowResults.parseFrom(bytes);
     } catch (Exception e) {
       logger.warn("Error while unmarshalling message.", e);
       return null;
@@ -47,17 +44,17 @@ public class WorkflowSinkModule implements SinkModule<WrapperMessage<Results>, W
   }
 
   @Override
-  public byte[] marshalSingleMessage(WrapperMessage<Results> resultsMessage) {
+  public byte[] marshalSingleMessage(WorkflowResults resultsMessage) {
     return marshal(resultsMessage);
   }
 
   @Override
-  public WrapperMessage unmarshalSingleMessage(byte[] bytes) {
+  public WorkflowResults unmarshalSingleMessage(byte[] bytes) {
     return unmarshal(bytes);
   }
 
   @Override
-  public AggregationPolicy<WrapperMessage<Results>, WrapperMessage<Results>, ?> getAggregationPolicy() {
+  public AggregationPolicy<WorkflowResults, WorkflowResults, ?> getAggregationPolicy() {
     return new IdentityAggregationPolicy<>();
   }
 

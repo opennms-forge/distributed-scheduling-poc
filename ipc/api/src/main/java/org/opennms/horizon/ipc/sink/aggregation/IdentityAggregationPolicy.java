@@ -29,7 +29,7 @@
 package org.opennms.horizon.ipc.sink.aggregation;
 
 import org.opennms.horizon.ipc.sink.api.AggregationPolicy;
-import org.opennms.horizon.ipc.sink.api.Message;
+import com.google.protobuf.Message;
 
 /**
  * An aggregation policy that returns the original unmodified

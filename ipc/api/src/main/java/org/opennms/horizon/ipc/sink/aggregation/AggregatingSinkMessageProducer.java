@@ -28,8 +28,8 @@
 
 package org.opennms.horizon.ipc.sink.aggregation;
 
+import com.google.protobuf.Message;
 import org.opennms.horizon.ipc.sink.api.AggregationPolicy;
-import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.ipc.sink.api.MessageDispatcher;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.api.SyncDispatcher;

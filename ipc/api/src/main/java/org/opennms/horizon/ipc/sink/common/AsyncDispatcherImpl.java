@@ -51,13 +51,14 @@ import org.opennms.horizon.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.ipc.sink.api.DispatchQueue;
 import org.opennms.horizon.ipc.sink.api.DispatchQueueFactory;
-import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.api.SyncDispatcher;
 import org.opennms.horizon.ipc.sink.api.WriteFailedException;
 import org.opennms.horizon.ipc.sink.offheap.DispatchQueueServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.protobuf.Message;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;

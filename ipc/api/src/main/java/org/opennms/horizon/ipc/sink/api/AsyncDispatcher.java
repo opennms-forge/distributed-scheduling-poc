@@ -30,6 +30,8 @@ package org.opennms.horizon.ipc.sink.api;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.google.protobuf.Message;
+
 /**
  * Used to asynchronously dispatch messages.
  *

@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.ipc.sink.api;
 
+import com.google.protobuf.Message;
+
 /**
  * Implemented by consumers of a particular {@link SinkModule}.
  *
