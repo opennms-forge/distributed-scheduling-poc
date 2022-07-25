@@ -76,6 +76,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.opennms.poc.ipc</groupId>
+      <artifactId>api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opennms.poc.ipc.grpc</groupId>
       <artifactId>client</artifactId>
       <version>${project.version}</version>

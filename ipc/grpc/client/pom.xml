@@ -35,9 +35,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.horizon.ipc</groupId>
+            <groupId>org.opennms.poc.ipc</groupId>
             <artifactId>api</artifactId>
-            <version>${opennms-horizon.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.core</groupId>

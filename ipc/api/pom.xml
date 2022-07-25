@@ -11,24 +11,30 @@
     </parent>
 
     <groupId>org.opennms.poc.ipc</groupId>
-    <artifactId>echo</artifactId>
+    <artifactId>api</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Ignite POC :: IPC :: Echo</name>
-    <description>Echo module for IPC.</description>
+    <name>Ignite POC :: IPC :: API</name>
+    <description>Shallow copy of IPC api.</description>
 
     <dependencies>
         <dependency>
             <groupId>org.opennms.horizon.core</groupId>
-            <artifactId>xml</artifactId>
+            <artifactId>lib</artifactId>
             <version>${opennms-horizon.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.poc.ipc</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.swrve</groupId>
+            <artifactId>rate-limited-logger</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

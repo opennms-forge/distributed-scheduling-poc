@@ -38,6 +38,17 @@
         <bundle dependency="true">mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
     </feature>
 
+    <feature name="horizon-core-lib" version="${opennms-horizon.version}">
+        <feature prerequisite="true">wrap</feature>
+<!--        $overwrite=merge&amp;Import-Package=org.opennms.horizon.core.lib;resolution:=optional,*-->
+        <bundle>wrap:mvn:org.opennms.horizon.core/lib/${opennms-horizon.version}$overwrite=merge&amp;Import-Package=*;resolution:=optional</bundle>
+    </feature>
+
+    <feature name="horizon-ipc-api" version="${project.version}">
+        <feature>horizon-core-lib</feature>
+        <bundle>mvn:org.opennms.poc.ipc/api/${project.version}</bundle>
+    </feature>
+
     <feature name="poc-grpc-horizon" description="Horizon gRPC apis" version="${project.version}">
         <details>Import of Horizon gRPC apis.</details>
         <feature prerequisite="true">wrap</feature>
@@ -51,12 +62,12 @@
 
         <bundle>mvn:org.opennms.horizon.3rdparty/grpc/${opennms-horizon.version}</bundle>
         <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
-        <bundle>wrap:mvn:org.opennms.horizon.ipc/api/${opennms-horizon.version}$overwrite=merge&amp;Import-Package=org.opennms.horizon.core.lib;resolution:=optional,*</bundle>
     </feature>
 
     <feature name="poc-grpc-client" description="gRPC client" version="${project.version}">
         <feature>poc-grpc-horizon</feature>
         <feature>poc-tracing-stub</feature>
+        <feature>horizon-ipc-api</feature>
 
         <bundle>mvn:org.opennms.poc.ipc.grpc/contract/${project.version}</bundle>
         <bundle>mvn:org.opennms.poc.ipc.grpc/client/${project.version}</bundle>
@@ -67,6 +78,7 @@
         <feature>poc-grpc-horizon</feature>
         <feature>poc-grpc-client</feature>
         <feature>metrics</feature>
+        <feature>horizon-core-lib</feature>
 
         <!-- shallow copy of horizon dependencies -->
         <bundle>mvn:org.opennms.horizon.3rdparty/json-patch-osgi/${opennms-horizon.version}</bundle>

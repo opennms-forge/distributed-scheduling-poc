@@ -1,6 +1,7 @@
 package orh.opennms.poc.ignite.grpc.workflow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.opennms.horizon.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
@@ -57,7 +58,7 @@ public class WorkflowSinkModule implements SinkModule<WrapperMessage<Results>, W
 
   @Override
   public AggregationPolicy<WrapperMessage<Results>, WrapperMessage<Results>, ?> getAggregationPolicy() {
-    return null;
+    return new IdentityAggregationPolicy<>();
   }
 
   @Override
