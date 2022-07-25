@@ -14,6 +14,7 @@ public class OsgiServiceHolder {
     private static DetectorRegistry detectorRegistry;
     private static MonitorRegistry monitorRegistry;
     private static ListenerFactoryRegistry listenerFactoryRegistry;
+    private static ServiceConnectorFactoryRegistryImpl serviceConnectorFactoryRegistry;
     private static OpennmsScheduler opennmsScheduler;
     private static WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory;
 
@@ -21,7 +22,8 @@ public class OsgiServiceHolder {
             BundleContext bundleContext,
             OpennmsScheduler opennmsScheduler,
             WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory,
-            ListenerFactoryRegistry listenerFactoryRegistry) {
+            ListenerFactoryRegistry listenerFactoryRegistry,
+            ServiceConnectorFactoryRegistryImpl serviceConnectorFactoryRegistry) {
 
         log.info("Creating an instance of the StaticDetectorRegistry for initialization. Don't do this twice!");
         detectorRegistry = new DetectorRegistryImpl(bundleContext);
@@ -30,6 +32,7 @@ public class OsgiServiceHolder {
         OsgiServiceHolder.opennmsScheduler = opennmsScheduler;
         OsgiServiceHolder.workflowExecutorLocalServiceFactory = workflowExecutorLocalServiceFactory;
         OsgiServiceHolder.listenerFactoryRegistry = listenerFactoryRegistry;
+        OsgiServiceHolder.serviceConnectorFactoryRegistry = serviceConnectorFactoryRegistry;
     }
 
     public static Optional<ServiceDetector> getDetector(String name) {
@@ -58,5 +61,9 @@ public class OsgiServiceHolder {
 
     public static ListenerFactoryRegistry getListenerFactoryRegistry() {
         return listenerFactoryRegistry;
+    }
+
+    public static ServiceConnectorFactoryRegistryImpl getServiceConnectorFactoryRegistry() {
+        return serviceConnectorFactoryRegistry;
     }
 }

@@ -63,6 +63,10 @@
     <argument ref="blueprintBundleContext"/>
   </bean>
 
+  <bean id="serviceConnectorFactoryRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.ServiceConnectorFactoryRegistryImpl">
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
   <bean id="workflowExecutorLocalServiceFactory"
         class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowExecutorLocalServiceFactoryImpl">
 
@@ -76,6 +80,7 @@
     <argument ref="opennmsScheduler"/>
     <argument ref="workflowExecutorLocalServiceFactory"/>
     <argument ref="listenerFactoryRegistry"/>
+    <argument ref="serviceConnectorFactoryRegistry"/>
   </bean>
 
   <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl">
