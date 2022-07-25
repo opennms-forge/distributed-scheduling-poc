@@ -51,7 +51,7 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
         // WARNING: very large numbers of these node singletons will impact startup performance notably due to the
         //  slowness with starting Ignite services one at a time.  Unfortunately, the "node singleton" cannot be started
         //  via deployAllAsync().
-        deployNodeSingletonServices(workflowDefinitions);
+        int singletonCount = deployNodeSingletonServices(workflowDefinitions);
 
         // Prepare the services that run on only 1 node across the cluster
         List<ServiceConfiguration> serviceConfigurationList = prepareOnePerClusterServiceConfigurations(workflowDefinitions);
@@ -65,7 +65,7 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
 
         // Log the update summary
         log.info("Completed workflow update: deploy-count={}; cancel-count={}",
-                serviceConfigurationList.size(),
+                serviceConfigurationList.size() + singletonCount,
                 canceledServices.size());
     }
 
@@ -79,11 +79,16 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
      *
      * @param workflowDefinitions
      */
-    private void deployNodeSingletonServices(Workflows workflowDefinitions) {
-        workflowDefinitions.getWorkflows()
-                .stream()
-                .filter((workflow) -> workflow.getType().equals(WorkflowType.LISTENER))
-                .forEach(this::deployOneNodeSingletonService);
+    private int deployNodeSingletonServices(Workflows workflowDefinitions) {
+        int count = 0;
+        for (Workflow oneWorkflow : workflowDefinitions.getWorkflows()) {
+            if (oneWorkflow.getType().equals(WorkflowType.LISTENER)) {
+                count++;
+                this.deployOneNodeSingletonService(oneWorkflow);
+            }
+        }
+
+        return count;
     }
 
     private void deployOneNodeSingletonService(Workflow workflow) {
@@ -97,7 +102,7 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
         List<ServiceConfiguration> serviceConfigurationList =
             workflowDefinitions.getWorkflows()
                     .stream()
-                    .filter((workflow) -> workflow.getType().equals(WorkflowType.MONITOR))
+                    .filter(this::isWorkflowOnePerCluster)
                     .map((workflow) -> {
                             WorkflowExecutorIgniteService workflowExecutorIgniteService = new WorkflowExecutorIgniteService(workflow);
                             ServiceConfiguration serviceConfiguration = prepareServiceConfiguration(workflow, workflowExecutorIgniteService);
@@ -108,6 +113,17 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
                     .collect(Collectors.toList());
 
         return serviceConfigurationList;
+    }
+
+    private boolean isWorkflowOnePerCluster(Workflow workflow) {
+        switch (workflow.getType()) {
+            case MONITOR:
+            case CONNECTOR:
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     private String formulateServiceNameForWorkflow(Workflow workflow) {

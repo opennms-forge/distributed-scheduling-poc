@@ -29,6 +29,16 @@
           "port": "9999"
       },
       "uuid": "4a3c39a7-cd76-4fc7-83e4-30bf6029c0cc"
+    },
+    {
+      "description": "FAKE Connector",
+      "type": "CONNECTOR",
+      "pluginName": "FAKEConnector",
+      "parameters": {
+          "address": "localhost",
+          "port": "12345"
+      },
+      "uuid": "4d61d65e-95c4-425f-9240-5f8f6647ef41"
     }
   ]
 }

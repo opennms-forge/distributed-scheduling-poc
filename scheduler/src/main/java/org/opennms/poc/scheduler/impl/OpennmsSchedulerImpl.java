@@ -17,6 +17,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +38,7 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
     @Setter
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    private Map<String, Runnable> scheduledTasks = new HashMap<>();
+    private Map<String, Runnable> scheduledTasks = new ConcurrentHashMap<>();
 
 //========================================
 // Lifecycle Management
@@ -82,6 +83,19 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
     }
 
     @Override
+    public void scheduleOnce(String taskId, long period, TimeUnit unit, Runnable operation) {
+        Runnable old = scheduledTasks.put(taskId, operation);
+        if (old != null) {
+            log.debug("replacing existing operation for task: task-id={}", taskId);
+            scheduledThreadPoolExecutor.remove(old);
+        }
+
+        // Use a wrapper to remove the task from scheduledTasks once it completes.
+        OneShotTaskWrapper wrapper = new OneShotTaskWrapper(taskId, operation);
+        scheduledThreadPoolExecutor.schedule(wrapper, period, unit);
+    }
+
+    @Override
     public void cancelTask(String taskId) {
         Runnable runnable = scheduledTasks.remove(taskId);
 
@@ -110,7 +124,7 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
     }
 
 //========================================
-// Internal Class
+// Internal Classes
 //----------------------------------------
 
     private class RecurringCronRunner implements Runnable {
@@ -146,6 +160,26 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
 
         public void shutdown() {
             shutdown = true;
+        }
+    }
+
+    private class OneShotTaskWrapper implements Runnable {
+
+        private final String taskId;
+        private final Runnable nested;
+
+        public OneShotTaskWrapper(String taskId, Runnable nested) {
+            this.taskId = taskId;
+            this.nested = nested;
+        }
+
+        @Override
+        public void run() {
+            try {
+                nested.run();
+            } finally {
+                scheduledTasks.remove(taskId);
+            }
         }
     }
 }

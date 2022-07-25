@@ -23,6 +23,7 @@
     <module>SNMP</module>
     <module>ICMP</module>
     <module>WEB-LISTEN</module>
+    <module>FAKE-CONNECTOR</module>
   </modules>
 
 </project>
