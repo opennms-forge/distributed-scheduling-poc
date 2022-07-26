@@ -81,7 +81,7 @@ public class GrpcServerConfig {
                             e.printStackTrace();
                         }
                     }
-                    System.out.println("Received result " + result.getUuid() + " " + resultMap);
+                    System.out.println("Received result workflow=" + result.getUuid() + " status=" + result.getStatus() + " result=" + result.getReason() + " params=" + resultMap);
                 }
             }
         });
