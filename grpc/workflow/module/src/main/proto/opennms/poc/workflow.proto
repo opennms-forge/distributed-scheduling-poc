@@ -36,7 +36,9 @@ option java_package = "org.opennms.poc.ignite.grpc.workflow.contract";
 message WorkflowResults {
   message WorkflowResult {
     string uuid = 1;
-    map<string, google.protobuf.Any> parameters = 2;
+    string status = 2;
+    string reason = 3;
+    map<string, google.protobuf.Any> parameters = 4;
   }
   repeated WorkflowResult results = 1;
 }

@@ -4,6 +4,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.NullValue;
 import com.google.protobuf.Value;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults;
 import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults.Builder;
@@ -29,24 +30,27 @@ public class ResultsConsumer implements Consumer<Results> {
   public void accept(Results results) {
     Builder workflowBuilder = WorkflowResults.newBuilder();
     for (Result result : results.getResults()) {
-      for (Map.Entry<String, Object> entry : result.getParameters().entrySet()) {
-        Object value = entry.getValue();
-        Value.Builder valueBuilder = Value.newBuilder();
-        if (value instanceof Number) {
-          valueBuilder.setNumberValue(((Number) value).doubleValue());
-        } else if (value instanceof String) {
-          valueBuilder.setStringValue((String) value);
-        } else {
-          logger.warn("Unsupported result property {} {}", entry.getKey(), entry.getValue());
-          valueBuilder.setNullValue(NullValue.NULL_VALUE);
-        }
+      WorkflowResult.Builder resultBuilder = WorkflowResult.newBuilder();
 
-        workflowBuilder.addResults(WorkflowResult.newBuilder()
-            .setUuid(result.getUuid())
-            .putParameters(entry.getKey(), Any.pack(valueBuilder.build()))
-            .build()
-        );
+      if (result.getParameters() != null) {
+        for (Map.Entry<String, Object> entry : result.getParameters().entrySet()) {
+          Object value = entry.getValue();
+          Value.Builder valueBuilder = Value.newBuilder();
+          if (value instanceof Number) {
+            valueBuilder.setNumberValue(((Number) value).doubleValue());
+          } else if (value instanceof String) {
+            valueBuilder.setStringValue((String) value);
+          } else {
+            logger.warn("Unsupported result property {} {}", entry.getKey(), entry.getValue());
+            valueBuilder.setNullValue(NullValue.NULL_VALUE);
+          }
+          resultBuilder.putParameters(entry.getKey(), Any.pack(valueBuilder.build()));
+        }
       }
+      Optional.ofNullable(result.getUuid()).ifPresent(resultBuilder::setUuid);
+      Optional.ofNullable(result.getStatus()).ifPresent(resultBuilder::setStatus);
+      Optional.ofNullable(result.getReason()).ifPresent(resultBuilder::setReason);
+      workflowBuilder.addResults(resultBuilder.build());
     }
     dispatcher.send(workflowBuilder.build());
   }
