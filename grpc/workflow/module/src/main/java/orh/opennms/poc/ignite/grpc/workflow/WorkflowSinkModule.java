@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class WorkflowSinkModule implements SinkModule<WorkflowResults, WorkflowResults> {
 
-  private static final String MODULE_ID = "workflows";
+  public static final String MODULE_ID = "workflows";
   private final Logger logger = LoggerFactory.getLogger(WorkflowSinkModule.class);
 
   @Override
