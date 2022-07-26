@@ -124,7 +124,7 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
         active.set(false);
 
         if (exc == null) {
-            resultProcessor.queueSendResult(serviceMonitorResponse);
+            resultProcessor.queueSendResult(workflow.getUuid(), serviceMonitorResponse);
         } else {
             log.warn("error executing workflow; workflow-uuid=" + workflow.getUuid(), exc);
         }
