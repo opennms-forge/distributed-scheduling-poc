@@ -39,7 +39,11 @@ public class WorkflowExecutionResultProcessorImpl implements WorkflowExecutionRe
                 Results results = new Results();
                 Result result = new Result();
                 result.setUuid(entry.uuid);
-                result.setParameters(new LinkedHashMap<>(responseProperties));
+                if (responseProperties != null) {
+                    result.setParameters(new LinkedHashMap<>(responseProperties));
+                } else {
+                    result.setParameters(new LinkedHashMap<>());
+                }
                 if (entry.result.getStatus() != null) {
                     result.setStatus(entry.result.getStatus().name());
                 }

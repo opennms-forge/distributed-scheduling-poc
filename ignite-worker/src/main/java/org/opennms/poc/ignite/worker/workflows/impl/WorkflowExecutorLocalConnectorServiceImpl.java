@@ -53,7 +53,10 @@ public class WorkflowExecutorLocalConnectorServiceImpl implements WorkflowExecut
         if (serviceConnectorFactory != null) {
             Map<String, Object> castMap = new HashMap<>(workflow.getParameters());
 
-            serviceConnector = serviceConnectorFactory.create(resultProcessor::queueSendResult, castMap, this::handleDisconnect);
+            serviceConnector =
+                    serviceConnectorFactory.create(
+                            result -> resultProcessor.queueSendResult(workflow.getUuid(), result), castMap,
+                            this::handleDisconnect);
 
             attemptConnect();
         }
