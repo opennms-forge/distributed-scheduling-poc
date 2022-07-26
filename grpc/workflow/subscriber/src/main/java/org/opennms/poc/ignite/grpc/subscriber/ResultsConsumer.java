@@ -42,6 +42,7 @@ public class ResultsConsumer implements Consumer<Results> {
         }
 
         workflowBuilder.addResults(WorkflowResult.newBuilder()
+            .setUuid(result.getUuid())
             .putParameters(entry.getKey(), Any.pack(valueBuilder.build()))
             .build()
         );

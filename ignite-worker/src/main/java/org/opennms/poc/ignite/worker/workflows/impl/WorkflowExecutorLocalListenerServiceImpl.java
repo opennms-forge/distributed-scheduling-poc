@@ -45,7 +45,9 @@ public class WorkflowExecutorLocalListenerServiceImpl implements WorkflowExecuto
 
             Map<String, Object> castMap = new HashMap<>(workflow.getParameters());
 
-            listener = listenerFactory.create(resultProcessor::queueSendResult, castMap);
+            listener = listenerFactory.create(
+                serviceMonitorResponse -> resultProcessor.queueSendResult(workflow.getUuid(),
+                    serviceMonitorResponse), castMap);
             listener.start();
         } else {
             log.warn("Listener plugin not registered; workflow will not run: plugin-name={}; workflow-id={}",
