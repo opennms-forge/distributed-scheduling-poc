@@ -33,12 +33,16 @@ import orh.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
 public class GrpcServerConfig {
 
     @Bean
-    public OpennmsGrpcServer opennmsServer(GrpcIpcServer serverBuilder, GrpcTwinPublisher publisher) throws Exception {
+    MinionManager minionManager() {
+        return new MinionManagerImpl();
+    }
+
+    @Bean
+    public OpennmsGrpcServer opennmsServer(GrpcIpcServer serverBuilder, GrpcTwinPublisher publisher, MinionManager minionManager) throws Exception {
         OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder);
 
         RpcConnectionTracker rpcConnectionTracker = new RpcConnectionTrackerImpl();
         RpcRequestTracker rpcRequestTracker = new RpcRequestTrackerImpl();
-        MinionManager minionManager = new MinionManagerImpl();
         ScheduledExecutorService responseHandlerExecutor = Executors.newSingleThreadScheduledExecutor();
         LocationIndependentRpcClientFactory locationIndependentRpcClientFactory = new LocationIndependentRpcClientFactoryImpl();
 
