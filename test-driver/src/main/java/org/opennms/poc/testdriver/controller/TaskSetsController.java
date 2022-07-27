@@ -3,48 +3,61 @@ package org.opennms.poc.testdriver.controller;
 import static j2html.TagCreator.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.opennms.core.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.core.ipc.grpc.server.manager.MinionManager;
+import org.opennms.poc.ignite.model.workflows.Workflow;
+import org.opennms.poc.ignite.model.workflows.Workflows;
 import org.opennms.poc.testdriver.view.CodedView;
 import org.opennms.poc.testdriver.view.ViewRegistry;
+import org.opennms.poc.testdriver.workflow.WorkflowManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping("/minions")
-public class MinionsWebController {
+@RequestMapping("/")
+public class TaskSetsController {
 
   private final MinionManager minionManager;
+  private final WorkflowManager workflowManager;
   private final ViewRegistry viewRegistry;
 
-  public MinionsWebController(ViewRegistry viewRegistry, MinionManager minionManager) {
-    viewRegistry.register("/minions", "Minions");
+  public TaskSetsController(ViewRegistry viewRegistry, MinionManager minionManager, WorkflowManager workflowManager) {
+    viewRegistry.register("/", "Task sets");
     this.viewRegistry = viewRegistry;
     this.minionManager = minionManager;
+    this.workflowManager = workflowManager;
   }
 
   @RequestMapping(method = RequestMethod.GET)
-  ModelAndView getMinions() {
+  ModelAndView getTasks() {
     List<MinionInfo> minions = minionManager.getMinions();
+    Set<Workflow> workflows = workflowManager.getAll().stream().flatMap(w -> w.getWorkflows().stream())
+        .collect(Collectors.toSet());
     return new ModelAndView(CodedView.supplied(() -> {
       return html(
         head(
-          title("Minions")
+          title("Task sets")
         ),
         body(
           viewRegistry.menu(),
-          h1("Minions"),
+          h1("Task sets"),
           table(
             tr(
-              th("id"),
-              th("location")
+              th("Task id"),
+              th("Type"),
+              th("Description"),
+              th("Plugin")
             ),
-            each(minions, minion -> tr(
-              td(minion.getId()),
-              td(minion.getLocation())
-            ))
+          each(workflows, (workflow) -> tr(
+            td(workflow.getUuid()),
+            td(workflow.getType().name()),
+            td(workflow.getDescription()),
+            td(workflow.getPluginName())
+          ))
           ).attr("border", 1).attr("cellspacing", 2).attr("cellpadding", 2).withStyle("width: 100%;")
         )
       );

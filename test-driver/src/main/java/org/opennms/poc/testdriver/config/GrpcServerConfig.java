@@ -25,6 +25,7 @@ import org.opennms.horizon.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults;
 import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults.WorkflowResult;
+import org.opennms.poc.testdriver.workflow.ResultCollector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import orh.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
@@ -38,7 +39,7 @@ public class GrpcServerConfig {
     }
 
     @Bean
-    public OpennmsGrpcServer opennmsServer(GrpcIpcServer serverBuilder, GrpcTwinPublisher publisher, MinionManager minionManager) throws Exception {
+    public OpennmsGrpcServer opennmsServer(GrpcIpcServer serverBuilder, GrpcTwinPublisher publisher, MinionManager minionManager, ResultCollector resultCollector) throws Exception {
         OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder);
 
         RpcConnectionTracker rpcConnectionTracker = new RpcConnectionTrackerImpl();
@@ -85,7 +86,7 @@ public class GrpcServerConfig {
                             e.printStackTrace();
                         }
                     }
-                    System.out.println("Received result workflow=" + result.getUuid() + " status=" + result.getStatus() + " result=" + result.getReason() + " params=" + resultMap);
+                    resultCollector.process(result, resultMap);
                 }
             }
         });

@@ -2,6 +2,8 @@ package org.opennms.poc.testdriver.rest;
 
 import org.opennms.poc.ignite.grpc.publisher.WorkflowPublisher;
 import org.opennms.poc.ignite.model.workflows.Workflows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +20,7 @@ public class TestWorkflowInjectorRestController {
 
     private final WorkflowPublisher publisher;
 
-    public TestWorkflowInjectorRestController(WorkflowPublisher publisher) {
+    public TestWorkflowInjectorRestController(@Qualifier("manager") WorkflowPublisher publisher) {
         this.publisher = publisher;
     }
 

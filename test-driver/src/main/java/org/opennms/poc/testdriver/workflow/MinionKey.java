@@ -4,6 +4,7 @@ import java.util.Objects;
 
 public class MinionKey {
 
+  public final static MinionKey NULL_KEY = new MinionKey("", "");
   private final String id;
   private final String location;
 
