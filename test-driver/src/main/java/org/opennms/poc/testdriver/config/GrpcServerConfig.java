@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.opennms.core.grpc.common.GrpcIpcServer;
 import org.opennms.core.ipc.grpc.server.OpennmsGrpcServer;
 import org.opennms.core.ipc.grpc.server.manager.LocationIndependentRpcClientFactory;
@@ -55,6 +57,8 @@ public class GrpcServerConfig {
 
         WorkflowSinkModule workflowSinkModule = new WorkflowSinkModule();
         server.registerConsumer(new MessageConsumer<WorkflowResults, WorkflowResults>() {
+            private AtomicLong samplesCounted = new AtomicLong(0);
+
             @Override
             public SinkModule<WorkflowResults, WorkflowResults> getModule() {
                 return workflowSinkModule;
@@ -81,7 +85,18 @@ public class GrpcServerConfig {
                             e.printStackTrace();
                         }
                     }
-                    System.out.println("Received result workflow=" + result.getUuid() + " status=" + result.getStatus() + " result=" + result.getReason() + " params=" + resultMap);
+
+                    long sampleCount = samplesCounted.incrementAndGet();
+                    if (sampleCount < 20) {
+                        System.out.println("Sample count received " + sampleCount);
+                        System.out.println("Received result workflow=" + result.getUuid() + " status=" + result.getStatus() + " result=" + result.getReason() + " params=" + resultMap);
+                    } else if ((sampleCount < 1000) && ((sampleCount % 100) == 0)) {
+                        System.out.println("..Sample count received " + sampleCount);
+                    } else if ((sampleCount < 10000) && ((sampleCount % 1000) == 0)) {
+                        System.out.println("...Sample count received " + sampleCount);
+                    } else if ((sampleCount % 10000) == 0) {
+                        System.out.println("....Sample count received " + sampleCount);
+                    }
                 }
             }
         });

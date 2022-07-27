@@ -2,9 +2,10 @@
 
 # DATA_FILE=example-workflow.empty.json
 # DATA_FILE=example-workflow.001.json
-DATA_FILE=example-workflow.002.json
+# DATA_FILE=example-workflow.002.json
+DATA_FILE=task-set.8k.json
 
-DATA="$(< ${DATA_FILE})"
+###--- DATA="$(< ${DATA_FILE})"
 
 HOST_PORT=localhost:8080
 
@@ -39,4 +40,4 @@ do
 	esac
 done
 
-curl "${CURL_OPTS[@]}" -X POST -H 'Content-Type: application/json' --data "${DATA}" "http://${HOST_PORT}/injector/workflow"
+curl "${CURL_OPTS[@]}" -X POST -H 'Content-Type: application/json' --data-binary "@${DATA_FILE}" "http://${HOST_PORT}/injector/workflow"

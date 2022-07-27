@@ -84,8 +84,10 @@ public class WorkflowExecutionResultProcessorImpl implements WorkflowExecutionRe
 
     private void stubConsumer(Entry entry) {
         try {
-            // TBD: REMOVE the json mapping - feed response back to Core
-            log.info("O-POLL STATUS: " + new ObjectMapper().writeValueAsString(entry.result));
+            if (log.isDebugEnabled()) {
+                // TBD: REMOVE the json mapping - feed response back to Core
+                log.debug("O-POLL STATUS: " + new ObjectMapper().writeValueAsString(entry.result));
+            }
             consumer.accept(entry);
         } catch (JsonProcessingException jpExc) {
             log.warn("error processing workflow result", jpExc);
