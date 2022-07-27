@@ -36,8 +36,13 @@ portForward:
     resourceName: poc-test-driver
     port: 8080
     localPort: 8080
+  - resourceType: service
+    resourceName: prometheus
+    port: 9090
+    localPort: 9090
 
 deploy:
   kubectl:
     manifests:
     - ./manifests/poc-distributed-scheduling.yaml
+    - ./manifests/prometheus-manifest.yaml
