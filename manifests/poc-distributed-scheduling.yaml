@@ -79,6 +79,7 @@ spec:
         run: poc-distributed-scheduling
       annotations:
         linkerd.io/inject: enabled
+        config.linkerd.io/opaque-ports: "47100,47500"
     spec:
       volumes:
         - name: config-volume
