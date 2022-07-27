@@ -35,7 +35,7 @@ public class PluginConfigInjectorTest  {
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         annotationProcessor = new PluginConfigScanner();
-        pluginConfigInjector = new PluginConfigInjector(detectorRegistry);
+        pluginConfigInjector = new PluginConfigInjector();
     }
 
     @Test
@@ -46,14 +46,18 @@ public class PluginConfigInjectorTest  {
         assertEquals(4,fieldConfigMeta.size());
         fieldConfigMeta.forEach(fieldConfigMeta1 -> System.out.println(fieldConfigMeta1));
 
-        FieldConfigMeta fieldConfigMetaBlahString = new FieldConfigMeta("blah", "blahString","java.lang.String", "newBlahValue");
-        FieldConfigMeta fieldConfigMetaBlahInt = new FieldConfigMeta("integerField", "blahInt","int", Integer.valueOf(2));
-        FieldConfigMeta fieldConfigMetaEnum = new FieldConfigMeta("anEnum", "horizonEnum","org.opennms.poc.plugin.config.PluginConfigInjectorTest$HorizonEnum", HorizonEnum.TWO);
+        FieldConfigMeta fieldConfigMetaBlahString = new FieldConfigMeta("blah", "blahString","java.lang.String");
+        fieldConfigMetaBlahString.setValue("newBlahValue");
+        FieldConfigMeta fieldConfigMetaBlahInt = new FieldConfigMeta("integerField", "blahInt","int");
+        fieldConfigMetaBlahInt.setValue(Integer.valueOf(2));
+        FieldConfigMeta fieldConfigMetaEnum = new FieldConfigMeta("anEnum", "horizonEnum","org.opennms.poc.plugin.config.PluginConfigInjectorTest$HorizonEnum");
+        fieldConfigMetaEnum.setValue(HorizonEnum.TWO);
         MyCustomClass customClass = new MyCustomClass("ewww");
-        FieldConfigMeta fieldConfigMetaCustom = new FieldConfigMeta("custom", "customClass","org.opennms.poc.plugin.config.PluginConfigInjectorTest$MyCustomClass", customClass);
+        FieldConfigMeta fieldConfigMetaCustom = new FieldConfigMeta("custom", "customClass","org.opennms.poc.plugin.config.PluginConfigInjectorTest$MyCustomClass");
+        fieldConfigMetaCustom.setValue(customClass);
 
 
-        pluginConfigInjector.injectConfigs( Arrays.asList(fieldConfigMetaBlahString, fieldConfigMetaBlahInt, fieldConfigMetaEnum, fieldConfigMetaCustom));
+        pluginConfigInjector.injectConfigs( testMinionPlugin, Arrays.asList(fieldConfigMetaBlahString, fieldConfigMetaBlahInt, fieldConfigMetaEnum, fieldConfigMetaCustom));
 
         assertTrue(testMinionPlugin.getBlahString().equals("newBlahValue"));
         assertEquals(2, (testMinionPlugin.getBlahInt()));

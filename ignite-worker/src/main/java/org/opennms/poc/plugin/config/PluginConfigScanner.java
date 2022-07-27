@@ -17,7 +17,7 @@ public class PluginConfigScanner {
         return Arrays.stream(fields).filter(field -> field.getDeclaredAnnotation(HorizonConfig.class) != null).
                 map(field -> {
                     FieldConfigMeta fcm =
-                        new FieldConfigMeta(field.getName(), field.getName(), field.getType().getName(), "blah");
+                        new FieldConfigMeta(field.getName(), field.getName(), field.getType().getName());
                     fcm.setEnum(field.getType().isEnum());
                     fcm.setEnumConstants(field.getType().getEnumConstants());
                     HorizonConfig annotation = field.getAnnotation(HorizonConfig.class);

@@ -13,8 +13,9 @@ public class FieldConfigMeta {
     private final String annotatedName;
     private final String name;
     private final String javaType;
-    private final Object value;
 
+    @Setter
+    private Object value;
     @Setter
     private boolean isEnum;
     @Setter

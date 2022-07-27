@@ -11,35 +11,37 @@ import org.opennms.poc.plugin.api.ServiceDetector;
 @RequiredArgsConstructor
 public class PluginConfigInjector {
 
-    private final DetectorRegistry detectorRegistry;
+//    private final DetectorRegistry detectorRegistry;
 
-    public void injectConfigs(List<FieldConfigMeta> configs) {
+//    public void injectConfigs(List<FieldConfigMeta> configs) {
+//
+//        configs.forEach(config -> {
+//            //TODO: need a servicename
+//             ServiceDetector serviceDetector = detectorRegistry.getService("???");
+//
+//             injectConfigs(serviceDetector, config);
+//        });
+//    }
 
-        configs.forEach(config -> {
-            //TODO: need a servicename
-             ServiceDetector serviceDetector = detectorRegistry.getService("???");
-
-             injectConfigs(serviceDetector, config);
-        });
-    }
-
-    public void injectConfigs(Object target, FieldConfigMeta config) {
+    public void injectConfigs(Object target, List<FieldConfigMeta> configs) {
 
         Class clazz = target.getClass();
 
-        try {
-            Field f = clazz.getDeclaredField(config.getName());
+        configs.forEach(config -> {
+            try {
+                Field f = clazz.getDeclaredField(config.getName());
 
-            if (config.getJavaType().equals(f.getType().getName())) {
-                f.set(target, config.getValue());
+                if (config.getJavaType().equals(f.getType().getName())) {
+                    f.set(target, config.getValue());
+                }
+                else {
+                    log.error("Field types don't match!");
+                }
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
-            else {
-                log.error("Field types don't match!");
-            }
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 }
