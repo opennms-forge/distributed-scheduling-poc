@@ -1,11 +1,11 @@
-package org.opennms.poc.plugin.annotations;
+package org.opennms.poc.plugin.config;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.opennms.poc.plugin.annotations.PluginConfigScanner.FieldConfigMeta;
+import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 
 public class PluginConfigScannerTest {
 

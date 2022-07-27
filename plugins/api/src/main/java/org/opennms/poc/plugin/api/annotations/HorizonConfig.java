@@ -1,4 +1,4 @@
-package org.opennms.poc.plugin.annotations;
+package org.opennms.poc.plugin.api.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
