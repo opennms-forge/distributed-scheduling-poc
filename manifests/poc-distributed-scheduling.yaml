@@ -83,7 +83,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: org.opennms.core.ipc.grpc.client.cfg
+            name: minion-cfg-files
       initContainers:
       - name: init-sysctl
         image: busybox
@@ -116,6 +116,9 @@ spec:
             - name: config-volume
               mountPath: "/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg"
               subPath: "grpc-config"
+            - name: config-volume
+              mountPath: "/opt/karaf/etc/org.opennms.identity.cfg"
+              subPath: "opennms-identity"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -148,7 +151,10 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: org.opennms.core.ipc.grpc.client.cfg
+  name: minion-cfg-files
 data:
   grpc-config: |
     host=poc-test-driver
+  opennms-identity: |
+    identity.id=${env:HOSTNAME:-UNKNOWN}
+    identity.location=${env:LOCATION:-cloud}
