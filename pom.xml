@@ -43,6 +43,7 @@
         <protobuf.version>3.21.2</protobuf.version>
         <protoc.version>3.20.1</protoc.version>
         <mockito.version>4.5.1</mockito.version>
+        <dropwizard-metrics.version>4.2.10</dropwizard-metrics.version>
     </properties>
 
     <modules>
@@ -212,6 +213,17 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-xds</artifactId>
                 <version>${grpc.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${dropwizard-metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${dropwizard-metrics.version}</version>
             </dependency>
 
             <dependency>

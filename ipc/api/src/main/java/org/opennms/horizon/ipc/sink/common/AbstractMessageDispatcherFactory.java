@@ -42,7 +42,6 @@ import org.opennms.horizon.ipc.sink.api.SyncDispatcher;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricSet;
 import com.codahale.metrics.Timer.Context;
@@ -63,8 +62,6 @@ import io.opentracing.Tracer;
  * @param <W> type of module specific state or meta-data, use <code>Void</code> if none is used
  */
 public abstract class AbstractMessageDispatcherFactory<W> implements MessageDispatcherFactory {
-
-    private JmxReporter metricsJmxRepoter = null;
 
     private ServiceRegistration<MetricSet> metricsServiceRegistration = null;
 
@@ -158,31 +155,6 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
         @Override
         public void close() throws Exception {
             state.close();
-        }
-    }
-
-
-    public void onInit() {
-        registerJmxReporterForMetrics();
-        maybeRegisterMetricSetInServiceRegistry();
-    }
-
-    public void onDestroy() {
-        unregisterJmxReporterForMetrics();
-        unregisterMetricSetInServiceRegistry();
-    }
-
-    private void registerJmxReporterForMetrics() {
-        metricsJmxRepoter = JmxReporter.forRegistry(getMetrics())
-                    .inDomain(getMetricDomain())
-                    .build();
-        metricsJmxRepoter.start();
-    }
-
-    private void unregisterJmxReporterForMetrics() {
-        if (metricsJmxRepoter != null) {
-            metricsJmxRepoter.close();
-            metricsJmxRepoter = null;
         }
     }
 

@@ -88,11 +88,11 @@ public class GrpcLocalDispatcherFactory extends AbstractMessageDispatcherFactory
 
     @Override
     public void afterPropertiesSet() {
-        onInit();
+
     }
 
     @Override
     public void destroy() {
-        onDestroy();
+
     }
 }
