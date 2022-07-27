@@ -1,0 +1,20 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns:camel="http://camel.apache.org/schema/blueprint"
+  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <cm:property-placeholder persistent-id="org.opennms.plugins.web-listen" update-strategy="reload">
+    <cm:default-properties>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <bean id="webListenerFactory" class="org.opennms.poc.weblisten.WebListenerFactory"/>
+
+  <service ref="webListenerFactory" interface="org.opennms.poc.plugin.api.ListenerFactory">
+    <service-properties>
+      <entry key="listener.name" value="WebListener"/>
+    </service-properties>
+  </service>
+
+</blueprint>

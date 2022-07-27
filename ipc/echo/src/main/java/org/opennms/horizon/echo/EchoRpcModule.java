@@ -30,22 +30,31 @@ package org.opennms.horizon.echo;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import org.opennms.horizon.ipc.rpc.api.AbstractXmlRpcModule;
+import java.io.StringReader;
+import java.io.StringWriter;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
+import org.opennms.horizon.ipc.rpc.api.RpcModule;
 
-public class EchoRpcModule extends AbstractXmlRpcModule<EchoRequest, EchoResponse> {
+public class EchoRpcModule implements RpcModule<EchoRequest, EchoResponse> {
 
     public static final EchoRpcModule INSTANCE = new EchoRpcModule();
 
     public static final String RPC_MODULE_ID = "Echo";
 
     private static final Supplier<Timer> TIMER_SUPPLIER = Suppliers.memoize(() -> new Timer("EchoRpcModule"));
+    private final JAXBContext context;
 
     public EchoRpcModule() {
-        super(EchoRequest.class, EchoResponse.class);
+        try {
+            context = JAXBContext.newInstance(EchoRequest.class, EchoResponse.class);
+        } catch (JAXBException e) {
+            throw new RuntimeException("Failed to initialize EchoRpcModule", e);
+        }
     }
 
     public void beforeRun() { }
@@ -85,7 +94,50 @@ public class EchoRpcModule extends AbstractXmlRpcModule<EchoRequest, EchoRespons
     }
 
     @Override
+    public String marshalRequest(EchoRequest echoRequest) {
+        return marshal(echoRequest);
+    }
+
+    @Override
+    public EchoRequest unmarshalRequest(String payload) {
+        return unmarshal(EchoRequest.class, payload);
+    }
+
+    @Override
+    public String marshalResponse(EchoResponse echoResponse) {
+        return marshal(echoResponse);
+    }
+
+    @Override
+    public EchoResponse unmarshalResponse(String payload) {
+        return unmarshal(EchoResponse.class, payload);
+    }
+
+    @Override
     public EchoResponse createResponseWithException(Throwable ex) {
         return new EchoResponse(ex);
     }
+
+    private <T> T unmarshal(Class<T> type, String payload) {
+        try {
+            Object unmarshal = context.createUnmarshaller().unmarshal(new StringReader(payload));
+            if (type.isInstance(unmarshal)) {
+                return type.cast(unmarshal);
+            }
+            throw new IllegalArgumentException("Unexpected value " + unmarshal.getClass().getName() + "  received");
+        } catch (JAXBException e) {
+            throw new RuntimeException("Could not ");
+        }
+    }
+
+    private <T> String marshal(T payload) {
+        try {
+            StringWriter writer = new StringWriter();
+            context.createMarshaller().marshal(payload, writer);
+            return writer.toString();
+        } catch (JAXBException e) {
+            throw new RuntimeException("Could not serialize " + payload.getClass().getName());
+        }
+    }
+
 }

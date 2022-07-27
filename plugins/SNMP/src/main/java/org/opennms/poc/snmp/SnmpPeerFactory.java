@@ -74,8 +74,6 @@ import org.opennms.netmgt.snmp.conf.xml.SnmpConfig;
 import org.opennms.netmgt.snmp.conf.xml.SnmpProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 
 /**
  * This class is the main repository for SNMP configuration information used by
@@ -126,28 +124,28 @@ public class SnmpPeerFactory implements SnmpAgentConfigFactory {
     /**
      * <p>Constructor for SnmpPeerFactory.</p>
      *
-     * @param resource a {@link Resource} object.
+     * @param resource a {@link File} object.
      */
-    public SnmpPeerFactory(final Resource resource) {
+    public SnmpPeerFactory(final File resource) {
         LOG.debug("creating new instance for resource {}: {}", resource, this);
 
         final SnmpConfig config = JaxbUtils.unmarshal(SnmpConfig.class, resource);
 
-        try {
-            final File file = resource.getFile();
-            if (file != null) {
-                m_callback = new FileReloadCallback<SnmpConfig>() {
-                    @Override
-                    public SnmpConfig reload(final SnmpConfig object, final Resource resource) throws IOException {
-                        return JaxbUtils.unmarshal(SnmpConfig.class, resource);
-                    }
-                };
-                m_container = new FileReloadContainer<SnmpConfig>(config, resource, m_callback);
-                return;
-            }
-        } catch (final IOException e) {
-            LOG.debug("No file associated with resource {}, skipping reload container initialization. Reason: ", resource, e.getMessage());
-        }
+//      Disable reload behavior
+//        try {
+//            if (resource != null) {
+//                m_callback = new FileReloadCallback<SnmpConfig>() {
+//                    @Override
+//                    public SnmpConfig reload(final SnmpConfig object, final Resource resource) throws IOException {
+//                        return JaxbUtils.unmarshal(SnmpConfig.class, resource);
+//                    }
+//                };
+//                m_container = new FileReloadContainer<SnmpConfig>(config, resource, m_callback);
+//                return;
+//            }
+//        } catch (final IOException e) {
+//            LOG.debug("No file associated with resource {}, skipping reload container initialization. Reason: ", resource, e.getMessage());
+//        }
 
         // if we fall through to here, then the file was null, or something else went wrong store the config directly
         m_config = config;
@@ -165,9 +163,7 @@ public class SnmpPeerFactory implements SnmpAgentConfigFactory {
         if (!s_loaded.get()) {
             final File cfgFile = getFile();
             LOG.debug("init: config file path: {}", cfgFile.getPath());
-            final FileSystemResource resource = new FileSystemResource(cfgFile);
-
-            s_singleton = new SnmpPeerFactory(resource);
+            s_singleton = new SnmpPeerFactory(cfgFile);
             s_loaded.set(true);
         }
     }
@@ -413,7 +409,7 @@ public class SnmpPeerFactory implements SnmpAgentConfigFactory {
     /**
      * <p>getSnmpConfig</p>
      *
-     * @return a {@link org.opennms.netmgt.config.snmp.SnmpConfig} object.
+     * @return a {@link SnmpConfig} object.
      */
     public SnmpConfig getSnmpConfig() {
         getReadLock().lock();
@@ -437,7 +433,7 @@ public class SnmpPeerFactory implements SnmpAgentConfigFactory {
      * Puts a specific IP address with associated read-community string into
      * the currently loaded snmp-config.xml.
      *
-     * @param info a {@link org.opennms.netmgt.config.SnmpEventInfo} object.
+     * @param info a {@link SnmpEventInfo} object.
      */
     public void define(final SnmpEventInfo info) {
         saveDefinition(info.createDef());

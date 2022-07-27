@@ -2,7 +2,8 @@
   "workflows": [
     {
       "description": "Monitor localhost ping",
-      "type": "ICMPMonitor",
+      "type": "MONITOR",
+      "pluginName": "ICMPMonitor",
       "cron": "0,11,22,33,44,55 */2 * * * ? *",
       "parameters": {
           "host": "127.0.0.1"
@@ -11,7 +12,8 @@
     },
     {
       "description": "Monitor localhost ping 2",
-      "type": "ICMPMonitor",
+      "type": "MONITOR",
+      "pluginName": "ICMPMonitor",
       "cron": "5000",
       "parameters": {
           "host": "127.0.0.2"
@@ -19,13 +21,34 @@
       "uuid": "ac07c7ef-981b-436b-96e6-d603961a7e85"
     },
     {
-      "description": "Monitor localhost ping 3",
-      "type": "ICMPMonitor",
-      "cron": "5000",
+      "description": "Listener localhost port 9999",
+      "type": "LISTENER",
+      "pluginName": "WebListener",
       "parameters": {
-          "host": "127.0.0.3"
+          "address": "0.0.0.0",
+          "port": "9999"
       },
-      "uuid": "4a3c39a7-cd76-4fc7-83e4-30bf6029c0cd"
+      "uuid": "4a3c39a7-cd76-4fc7-83e4-30bf6029c0cc"
+    },
+    {
+      "description": "FAKE Connector",
+      "type": "CONNECTOR",
+      "pluginName": "FAKEConnector",
+      "parameters": {
+          "address": "localhost",
+          "port": "12345"
+      },
+      "uuid": "4d61d65e-95c4-425f-9240-5f8f6647ef41"
+    },
+    {
+      "description": "Test TCP Connector",
+      "type": "CONNECTOR",
+      "pluginName": "TestTcpConnector",
+      "parameters": {
+          "host": "poc-test-driver",
+          "port": "9980"
+      },
+      "uuid": "cf61984f-71f6-4433-b1d9-05ba5b78117e"
     }
   ]
 }

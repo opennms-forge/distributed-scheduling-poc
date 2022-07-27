@@ -17,6 +17,7 @@
     <description>IPC</description>
 
     <modules>
+        <module>api</module>
         <module>grpc</module>
         <module>echo</module>
         <module>twin</module>

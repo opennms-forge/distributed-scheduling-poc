@@ -2,7 +2,6 @@ package org.opennms.poc.scheduler.impl;
 
 import com.cronutils.model.Cron;
 import com.cronutils.model.CronType;
-import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
@@ -14,9 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +37,7 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
     @Setter
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    private Map<String, Runnable> scheduledTasks = new HashMap<>();
+    private Map<String, RunningTaskInfo> scheduledTasks = new ConcurrentHashMap<>();
 
 //========================================
 // Lifecycle Management
@@ -60,38 +60,59 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
         RecurringCronRunner runner = new RecurringCronRunner(executionTime, operation);
 
         // Remember the task before executing to avoid a possible race condition on reschedule
-        Runnable old = scheduledTasks.put(taskId, runner);
+        RunningTaskInfo taskInfo = new RunningTaskInfo(runner);
+        RunningTaskInfo old = scheduledTasks.put(taskId, taskInfo);
         if (old != null) {
             log.debug("replacing existing operation for task: task-id={}", taskId);
-            scheduledThreadPoolExecutor.remove(old);
+            unscheduleTask(old);
         }
 
         // Trigger the next run.  After that, it will reschedule itself.
-        scheduleNextRun(executionTime, runner);
+        Future<?> future = scheduleNextRun(executionTime, runner);
+        safeSetTaskInfoFuture(taskInfo, future);
     }
 
     @Override
     public void schedulePeriodically(String taskId, long period, TimeUnit unit, Runnable operation) {
-        Runnable old = scheduledTasks.put(taskId, operation);
+        RunningTaskInfo taskInfo = new RunningTaskInfo(operation);
+        RunningTaskInfo old = scheduledTasks.put(taskId, taskInfo);
         if (old != null) {
             log.debug("replacing existing operation for task: task-id={}", taskId);
-            scheduledThreadPoolExecutor.remove(old);
+            unscheduleTask(old);
         }
 
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(operation, period, period, unit);
+        Future<?> future = scheduledThreadPoolExecutor.scheduleAtFixedRate(operation, period, period, unit);
+        safeSetTaskInfoFuture(taskInfo, future);
+    }
+
+    @Override
+    public void scheduleOnce(String taskId, long period, TimeUnit unit, Runnable operation) {
+        RunningTaskInfo taskInfo = new RunningTaskInfo(operation);
+        RunningTaskInfo old = scheduledTasks.put(taskId, taskInfo);
+        if (old != null) {
+            log.debug("replacing existing operation for task: task-id={}", taskId);
+            unscheduleTask(old);
+        }
+
+        // Use a wrapper to remove the task from scheduledTasks once it completes.
+        OneShotTaskWrapper wrapper = new OneShotTaskWrapper(taskId, operation);
+        Future<?> future = scheduledThreadPoolExecutor.schedule(wrapper, period, unit);
+
+        // Remember the future in order to properly cancel it later, as-needed
+        safeSetTaskInfoFuture(taskInfo, future);
     }
 
     @Override
     public void cancelTask(String taskId) {
-        Runnable runnable = scheduledTasks.remove(taskId);
+        RunningTaskInfo taskInfo = scheduledTasks.remove(taskId);
 
-        if (runnable != null) {
-            if (runnable instanceof RecurringCronRunner) {
+        if (taskInfo != null) {
+            if (taskInfo.getRunnable() instanceof RecurringCronRunner) {
                 // Tell the recurring runner to stop too
-                ((RecurringCronRunner) runnable).shutdown();
+                ((RecurringCronRunner) taskInfo.getRunnable()).shutdown();
             }
 
-            scheduledThreadPoolExecutor.remove(runnable);
+            unscheduleTask(taskInfo);
         }
     }
 
@@ -99,18 +120,42 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
 // Internal Operations
 //----------------------------------------
 
-    private void scheduleNextRun(ExecutionTime executionTime, Runnable operation) {
+    private Future<?> scheduleNextRun(ExecutionTime executionTime, Runnable operation) {
         ZonedDateTime now = ZonedDateTime.now();
 
         // Get an Optional, but the contract says it will never be null...
         Optional<Duration> durationOpt = executionTime.timeToNextExecution(now);
         Duration duration = durationOpt.get();
 
-        scheduledThreadPoolExecutor.schedule(operation, duration.toMillis(), TimeUnit.MILLISECONDS);
+        Future<?> result = scheduledThreadPoolExecutor.schedule(operation, duration.toMillis(), TimeUnit.MILLISECONDS);
+
+        return result;
+    }
+
+    private void unscheduleTask(RunningTaskInfo runningTaskInfo) {
+        runningTaskInfo.setStopped(true);
+        scheduledThreadPoolExecutor.remove(runningTaskInfo.getRunnable());
+        if (runningTaskInfo.getFuture() != null) {
+            runningTaskInfo.getFuture().cancel(true);
+        }
+    }
+
+    /**
+     * Set the future on the given task-info, watching for a possible race condition between setting the future and
+     *  canceling the task.
+     *
+     * @param taskInfo
+     * @param future
+     */
+    private void safeSetTaskInfoFuture(RunningTaskInfo taskInfo, Future<?> future) {
+        taskInfo.setFuture(future);
+        if (taskInfo.isStopped()) {
+            future.cancel(true);
+        }
     }
 
 //========================================
-// Internal Class
+// Internal Classes
 //----------------------------------------
 
     private class RecurringCronRunner implements Runnable {
@@ -146,6 +191,43 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
 
         public void shutdown() {
             shutdown = true;
+        }
+    }
+
+    private class OneShotTaskWrapper implements Runnable {
+
+        private final String taskId;
+        private final Runnable nested;
+
+        public OneShotTaskWrapper(String taskId, Runnable nested) {
+            this.taskId = taskId;
+            this.nested = nested;
+        }
+
+        @Override
+        public void run() {
+            try {
+                nested.run();
+            } finally {
+                scheduledTasks.remove(taskId);
+            }
+        }
+    }
+
+    private static class RunningTaskInfo {
+        @Getter
+        private final Runnable runnable;
+
+        @Getter
+        @Setter
+        private Future<?> future;
+
+        @Getter
+        @Setter
+        private boolean stopped = false;
+
+        public RunningTaskInfo(Runnable runnable) {
+            this.runnable = runnable;
         }
     }
 }

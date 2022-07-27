@@ -24,6 +24,7 @@
         <lombok.version>1.18.22</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <ignite.version>2.13.0</ignite.version>
+        <jetty.version>9.4.43.v20210629</jetty.version>
         <junit.version>4.13.2</junit.version>
 
         <spring-boot.version>2.6.4</spring-boot.version>
@@ -32,7 +33,7 @@
         <cron-utils.version>9.1.6</cron-utils.version>
         <cxf.version>3.5.0</cxf.version>
         <eos.version>1.2.0</eos.version>
-        <spring.version>5.3.14_1</spring.version>
+        <spring.version>5.3.17</spring.version>
         <hibernate.version>5.4.32.Final</hibernate.version>
         <opennms-horizon.version>0.1.0-SNAPSHOT</opennms-horizon.version>
         <opennms.tracker.version>0.7</opennms.tracker.version>
@@ -57,6 +58,7 @@
         <module>docker-assembly</module>
 
         <module>test-driver</module>
+        <module>tracing</module>
         <!-- <module>docker-it</module> -->
     </modules>
 
@@ -100,6 +102,17 @@
                 <groupId>org.apache.ignite</groupId>
                 <artifactId>ignite-kubernetes</artifactId>
                 <version>${ignite.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
             </dependency>
 
             <dependency>
@@ -213,6 +226,16 @@
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

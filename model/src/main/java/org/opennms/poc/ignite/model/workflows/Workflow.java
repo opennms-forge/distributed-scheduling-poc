@@ -10,10 +10,11 @@ public class Workflow implements Serializable {
     private static final long serialVersionUID = 0L;
 
     private String description;
-    private String type;
+    private WorkflowType type;
+    private String pluginName;
     private Map<String,String> parameters = new LinkedHashMap<>();
     private String uuid;
-    String cron;
+    private String cron;
 
     public String getDescription() {
         return description;
@@ -23,12 +24,20 @@ public class Workflow implements Serializable {
         this.description = description;
     }
 
-    public String getType() {
+    public WorkflowType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(WorkflowType type) {
         this.type = type;
+    }
+
+    public String getPluginName() {
+        return pluginName;
+    }
+
+    public void setPluginName(String pluginName) {
+        this.pluginName = pluginName;
     }
 
     public String getCron() {

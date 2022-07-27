@@ -14,6 +14,8 @@
 
   <reference id="opennmsScheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler"/>
 
+  <reference id="resultPublisher" interface="java.util.function.Consumer" filter="(message.publisher.topic=workflow-result)" />
+
   <bean id="workflowRepository" class="org.opennms.poc.ignite.worker.workflows.WorkflowRepository"/>
 
   <bean id="workerIgniteConfiguration" class="org.opennms.poc.ignite.worker.ignite.WorkerIgniteConfiguration">
@@ -56,10 +58,19 @@
         class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowExecutionResultProcessorImpl"
         init-method="init"
   >
+    <argument ref="resultPublisher" />
     <property name="executor" ref="resultProcessorThreadPoolExecutor"/>
   </bean>
 
-  <bean id="workflowExecutionLocalServiceFactory"
+  <bean id="listenerFactoryRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.ListenerFactoryRegistryImpl">
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+  <bean id="serviceConnectorFactoryRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.ServiceConnectorFactoryRegistryImpl">
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+  <bean id="workflowExecutorLocalServiceFactory"
         class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowExecutorLocalServiceFactoryImpl">
 
     <argument ref="opennmsScheduler"/>
@@ -70,7 +81,9 @@
   <bean id="osgiServiceHolder" class="org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder">
     <argument ref="blueprintBundleContext"/>
     <argument ref="opennmsScheduler"/>
-    <argument ref="workflowExecutionLocalServiceFactory"/>
+    <argument ref="workflowExecutorLocalServiceFactory"/>
+    <argument ref="listenerFactoryRegistry"/>
+    <argument ref="serviceConnectorFactoryRegistry"/>
   </bean>
 
   <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl">

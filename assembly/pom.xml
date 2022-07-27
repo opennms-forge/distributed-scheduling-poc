@@ -60,13 +60,6 @@
             <classifier>features</classifier>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.assemblies</groupId>
-            <artifactId>features</artifactId>
-            <version>${opennms-horizon.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-        </dependency>
     </dependencies>
 
     <build>
@@ -122,11 +115,13 @@
                         <feature>service</feature>
                         <feature>system</feature>
                         <feature>scr</feature>
-                        <feature>horizon-icmp</feature>
                         <feature>ignite-poc</feature>
                         <feature>poc-grpc</feature>
                         <feature>icmp-plugins</feature>
                         <feature>snmp-plugins</feature>
+                        <feature>web-listen-plugin</feature>
+                        <feature>fake-connector-plugin</feature>
+                        <feature>test-tcp-connector-plugin</feature>
                     </bootFeatures>
                     <libraries>
                     </libraries>

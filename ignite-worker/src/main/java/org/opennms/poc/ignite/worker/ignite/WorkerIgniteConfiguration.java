@@ -32,6 +32,7 @@ public class WorkerIgniteConfiguration {
         IgniteConfiguration igniteConfiguration = new IgniteConfiguration();
 
         igniteConfiguration.setClientMode(false);
+        igniteConfiguration.setMetricsLogFrequency(0);  // DISABLE IGNITE METRICS
 
         if (useKubernetes) {
             configureClusterNodeDiscoveryKubernetes(igniteConfiguration);

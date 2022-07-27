@@ -30,6 +30,7 @@ package org.opennms.core.ipc.grpc.server;
 
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.Map;
@@ -70,7 +71,6 @@ import org.opennms.horizon.ipc.rpc.api.RpcModule;
 import org.opennms.horizon.ipc.rpc.api.RpcRequest;
 import org.opennms.horizon.ipc.rpc.api.RpcResponse;
 import org.opennms.horizon.ipc.rpc.api.RpcResponseHandler;
-import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.common.AbstractMessageConsumerManager;
 import org.slf4j.Logger;

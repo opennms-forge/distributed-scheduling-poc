@@ -21,7 +21,10 @@ public class WorkflowExecutorLocalServiceFactoryImpl implements WorkflowExecutor
 // Constructor
 //----------------------------------------
 
-    public WorkflowExecutorLocalServiceFactoryImpl(OpennmsScheduler scheduler, WorkflowExecutionResultProcessor resultProcessor) {
+    public WorkflowExecutorLocalServiceFactoryImpl(
+            OpennmsScheduler scheduler,
+            WorkflowExecutionResultProcessor resultProcessor) {
+
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
     }
@@ -32,6 +35,18 @@ public class WorkflowExecutorLocalServiceFactoryImpl implements WorkflowExecutor
 
     @Override
     public WorkflowExecutorLocalService create(Workflow workflow) {
-        return new WorkflowExecutorLocalServiceImpl(scheduler, resultProcessor, workflow);
+        switch (workflow.getType()) {
+            case MONITOR:
+                return new WorkflowExecutorLocalMonitorServiceImpl(scheduler, workflow, resultProcessor);
+
+            case LISTENER:
+                return new WorkflowExecutorLocalListenerServiceImpl(workflow, resultProcessor);
+
+            case CONNECTOR:
+                return new WorkflowExecutorLocalConnectorServiceImpl(scheduler, workflow, resultProcessor);
+
+            default:
+                throw new RuntimeException("unrecognized workflow type " + workflow.getType());
+        }
     }
 }

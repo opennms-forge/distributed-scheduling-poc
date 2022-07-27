@@ -23,6 +23,16 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.poc.grpc.workflow</groupId>
+            <artifactId>module</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.poc.ipc.grpc</groupId>
+            <artifactId>client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.poc.ipc.twin</groupId>
             <artifactId>api</artifactId>
             <version>${project.version}</version>

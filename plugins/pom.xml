@@ -22,6 +22,9 @@
     <module>api</module>
     <module>SNMP</module>
     <module>ICMP</module>
+    <module>WEB-LISTEN</module>
+    <module>FAKE-CONNECTOR</module>
+    <module>TEST-TCP-CONNECTOR</module>
   </modules>
 
 </project>
