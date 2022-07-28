@@ -1,0 +1,126 @@
+#!/bin/bash
+########################################################################################################################
+##
+## PROGRAM: build-task-set
+##
+## ARGUMENTS:
+##	taskset-spec-file	File with the specification for the task set.
+##
+## SPECIFICATION FILE FORMAT:
+##
+##	Line separted records
+##	Pipe ('|') separated fields
+##	Fields:
+##		* count - number of plugins to generate for this row
+##		* plugin-type: MONITOR, LISTENER, CONNECTOR
+##		* plugin-name - name of the plugin, such as "ICMPMonitor"
+##		* cron - for monitors that use it, either a number (period in ms) or a quartz cron expression
+##		* configuration - json formatted field with key/value pairs sent to the plugin
+##	Replacements:
+##		{{OCTET_LOW}}	- lowest order byte for a serial configured IP address
+##		{{OCTET_MID}}	- middle order byte for a serial configured IP address
+##		{{OCTET_HIGH}}	- high order byte for a serial configured IP address
+##
+########################################################################################################################
+
+awk -F'|' '
+	/^#.*/	\
+	{
+		next
+	}
+
+	BEGIN {
+		FIRST = 1;
+		OCTET_LOW = 1;
+		OCTET_MID = 0;
+		OCTET_HIGH = 0;
+
+		UUIDGEN_CMD="uuidgen --random"
+		UUIDGEN_CMD | getline INIT_UUID;
+		close(UUIDGEN_CMD);
+
+		UUID_PREFIX=gensub(/[0-9a-f]{6}$/, "000000", "g", INIT_UUID);
+
+		printf("%s ", "{ \"workflows\": [");
+	}
+
+	END {
+		printf("%s ", "] }");
+	}
+
+	{
+
+		COUNT = $1;
+		TYPE = $2;
+		PLUGIN = $3;
+		CRON = $4;
+		PROPERTIES = $5;
+
+		cur = 0;
+		while (cur < COUNT) {
+			uuid_ending=sprintf("%06x", cur);
+
+			UUID = UUID_PREFIX uuid_ending;
+
+			if (FIRST) {
+				FIRST = 0;
+			}
+			else {
+				printf(",");
+			}
+
+			switch (TYPE) {
+				case "MONITOR":
+					out = sprintf("{ \"type\": \"%s\", \"pluginName\": \"%s\", \"cron\": \"%s\", \"parameters\": %s, \"uuid\": \"%s\" }",
+					       TYPE,
+					       PLUGIN,
+					       CRON,
+					       PROPERTIES,
+					       UUID);
+					break;
+
+				case "LISTENER":
+					out = sprintf("{ \"type\": \"%s\", \"pluginName\": \"%s\", \"parameters\": %s, \"uuid\": \"%s\" }",
+					       TYPE,
+					       PLUGIN,
+					       PROPERTIES,
+					       UUID);
+					break;
+
+
+				case "CONNECTOR":
+					out = sprintf("{ \"type\": \"%s\", \"pluginName\": \"%s\", \"parameters\": %s, \"uuid\": \"%s\" }",
+					       TYPE,
+					       PLUGIN,
+					       PROPERTIES,
+					       UUID);
+					break;
+
+				default:
+					print "UNRECOGNIZED TYPE " TYPE >"/dev/stderr";
+					break;
+			}
+
+			repl = gensub(/{{OCTET_HIGH}}/, OCTET_HIGH, "g", out);
+			repl = gensub(/{{OCTET_MID}}/, OCTET_MID, "g", repl);
+			repl = gensub(/{{OCTET_LOW}}/, OCTET_LOW, "g", repl);
+
+			print repl;
+
+			if (OCTET_LOW >= 255) {
+				OCTET_LOW = 0;
+
+				if (OCTET_MID >= 255) {
+					OCTET_MID = 0;
+					OCTET_HIGH++;
+				} else {
+					OCTET_MID++;
+				}
+			} else {
+				OCTET_LOW++;
+			}
+
+			cur++;
+		}
+	}
+	' "$@"
