@@ -40,6 +40,7 @@ awk -F'|' '
 		close(UUIDGEN_CMD);
 
 		UUID_PREFIX=gensub(/[0-9a-f]{6}$/, "000000", "g", INIT_UUID);
+		UUID_SEQ=0;
 
 		printf("%s ", "{ \"workflows\": [");
 	}
@@ -58,7 +59,8 @@ awk -F'|' '
 
 		cur = 0;
 		while (cur < COUNT) {
-			uuid_ending=sprintf("%06x", cur);
+			UUID_SEQ++;
+			uuid_ending=sprintf("%06x", UUID_SEQ);
 
 			UUID = UUID_PREFIX uuid_ending;
 
