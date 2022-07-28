@@ -185,7 +185,7 @@ rules:
    resources:
      - ingresses
    verbs: ["get", "list", "watch"]
- - nonResourceURLs: ["/metrics"]
+ - nonResourceURLs: ["/metrics", "/prometheus"]
    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

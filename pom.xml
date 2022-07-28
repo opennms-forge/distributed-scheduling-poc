@@ -40,6 +40,7 @@
         <commons.io.version>2.11.0</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
         <grpc.version>1.47.0</grpc.version>
+        <prometheus.version>0.16.0</prometheus.version>
         <protobuf.version>3.21.2</protobuf.version>
         <protoc.version>3.20.1</protoc.version>
         <mockito.version>4.5.1</mockito.version>
@@ -60,6 +61,7 @@
 
         <module>test-driver</module>
         <module>tracing</module>
+        <module>metrics</module>
         <!-- <module>docker-it</module> -->
     </modules>
 
@@ -72,6 +74,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_bom</artifactId>
+                <version>${prometheus.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.opennms.horizon.ipc.grpc</groupId>
                 <artifactId>server</artifactId>

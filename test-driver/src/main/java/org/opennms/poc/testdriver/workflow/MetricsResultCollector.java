@@ -32,7 +32,6 @@ public class MetricsResultCollector implements ResultCollector {
       if (responseTime instanceof Number) {
         Double pingTime = ((Number) responseTime).doubleValue();
         metricRegistry.timer(name(name, "timer.response.time")).update(Duration.ofMillis(pingTime.longValue()));
-        metricRegistry.histogram(name(name, "histogram.response.time")).update(pingTime.longValue());
       }
     }
 
