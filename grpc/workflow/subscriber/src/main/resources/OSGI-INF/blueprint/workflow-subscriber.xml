@@ -4,12 +4,18 @@
   xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
   xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
+  <reference id="identity" interface="org.opennms.horizon.core.identity.Identity" />
   <reference id="messageDispatcherFactory" interface="org.opennms.horizon.ipc.sink.api.MessageDispatcherFactory" />
 
   <bean id="subscriber" class="org.opennms.poc.ignite.grpc.subscriber.LoggingWorkflowSubscriber" />
 
-  <bean id="resultConsumer" class="org.opennms.poc.ignite.grpc.subscriber.ResultsConsumer">
-    <argument ref="messageDispatcherFactory" />
+  <bean id="resultConsumer" class="org.opennms.poc.ignite.grpc.subscriber.MeteredConsumer">
+    <argument ref="identity" />
+    <argument>
+      <bean class="org.opennms.poc.ignite.grpc.subscriber.ResultsConsumer">
+        <argument ref="messageDispatcherFactory" />
+      </bean>
+    </argument>
   </bean>
 
   <service ref="subscriber" interface="org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener">
@@ -18,7 +24,11 @@
     </service-properties>
   </service>
 
-  <service ref="resultConsumer" interface="java.util.function.Consumer">
+  <service ref="resultConsumer">
+    <interfaces>
+      <value>java.util.function.Consumer</value>
+      <value>com.codahale.metrics.MetricSet</value>
+    </interfaces>
     <service-properties>
       <entry key="message.publisher.topic" value="workflow-result" />
     </service-properties>

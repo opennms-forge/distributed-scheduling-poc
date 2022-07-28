@@ -12,6 +12,7 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
+  <reference id="identity" interface="org.opennms.horizon.core.identity.Identity"/>
   <reference id="opennmsScheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler"/>
 
   <reference id="resultPublisher" interface="java.util.function.Consumer" filter="(message.publisher.topic=workflow-result)" />
@@ -23,7 +24,7 @@
     <argument value="${kubernetes.service-name}"/>
   </bean>
 
-  <bean id="ignite" class="org.opennms.poc.ignite.worker.ignite.IgnitionFactory" factory-method="create">
+  <bean id="ignite" class="org.opennms.poc.ignite.worker.ignite.IgnitionFactory" factory-method="create" destroy-method="close">
     <argument ref="workerIgniteConfiguration"/>
   </bean>
 
@@ -86,14 +87,23 @@
     <argument ref="serviceConnectorFactoryRegistry"/>
   </bean>
 
-  <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl">
-    <property name="ignite" ref="ignite"/>
+  <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.MeteredWorkflowLifecycleManager">
+    <argument ref="identity" />
+    <argument>
+      <bean class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl">
+        <property name="ignite" ref="ignite"/>
+      </bean>
+    </argument>
+  </bean>
+
+  <bean id="workflowLifecycleAdapter" class="org.opennms.poc.ignite.worker.workflows.impl.TwinToWorkflowLifecycleManagerAdapter">
+    <argument ref="workflowLifecycleManager" />
   </bean>
 
 <!--  TODO: will we need this as an OSGi service anywhere now?-->
 <!--  <service id="detectorRegistry" ref="detectorRegistryImpl" interface="org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry"/>-->
 
-  <service ref="workflowLifecycleManager" interface="org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener">
+  <service ref="workflowLifecycleAdapter" interface="org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener">
     <service-properties>
       <entry key="message.listener.topic" value="workflow" />
     </service-properties>
