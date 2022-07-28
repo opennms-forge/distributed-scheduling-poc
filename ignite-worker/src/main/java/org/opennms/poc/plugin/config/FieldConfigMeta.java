@@ -10,8 +10,8 @@ import lombok.ToString;
 @Getter
 public class FieldConfigMeta {
 
-    private final String annotatedName;
-    private final String name;
+    private final String displayName;
+    private final String declaredFieldName;
     private final String javaType;
 
     @Setter

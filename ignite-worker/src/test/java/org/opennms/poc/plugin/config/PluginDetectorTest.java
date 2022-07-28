@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +20,11 @@ import org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry;
 import org.opennms.poc.ignite.worker.ignite.registries.MonitorRegistry;
 import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ServiceDetector;
+import org.opennms.poc.plugin.api.ServiceDetectorManager;
 import org.opennms.poc.plugin.api.ServiceDetectorRequest;
 import org.opennms.poc.plugin.api.ServiceDetectorResults;
 import org.opennms.poc.plugin.api.ServiceMonitor;
+import org.opennms.poc.plugin.api.ServiceMonitorManager;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 
@@ -32,24 +35,24 @@ public class PluginDetectorTest {
     @Mock
     MonitorRegistry monitorRegistry;
 
-    Map<String, ServiceDetector> serviceDetectorMap;
-    Map<String, ServiceMonitor> serviceMonitorMap;
+    Map<String, ServiceDetectorManager> serviceDetectorMap;
+    Map<String, ServiceMonitorManager> serviceMonitorMap;
 
     PluginDetector pluginDetector;
 
-    SampleDetectorPlugin detectorInstance1;
-    SampleDetectorPlugin detectorInstance2;
-    SampleMonitorPlugin monitorInstance1;
-    SampleMonitorPlugin monitorInstance2;
+    SampleDetectorManager detectorInstance1;
+    SampleDetectorManager detectorInstance2;
+    SampleMonitorManager monitorInstance1;
+    SampleMonitorManager monitorInstance2;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        detectorInstance1 = new SampleDetectorPlugin();
-        detectorInstance2 = new SampleDetectorPlugin();
-        monitorInstance1 = new SampleMonitorPlugin();
-        monitorInstance2 = new SampleMonitorPlugin();
+        detectorInstance1 = new SampleDetectorManager();
+        detectorInstance2 = new SampleDetectorManager();
+        monitorInstance1 = new SampleMonitorManager();
+        monitorInstance2 = new SampleMonitorManager();
         serviceDetectorMap = Map.of("detectorPlugin1", detectorInstance1, "detectorPlugin2", detectorInstance2);
         when(detectorRegistry.getServices()).thenReturn(serviceDetectorMap);
 
@@ -59,7 +62,7 @@ public class PluginDetectorTest {
         when(detectorRegistry.getService(eq("detectorPlugin1"))).thenReturn(detectorInstance1);
         when(detectorRegistry.getService(eq("detectorPlugin2"))).thenReturn(detectorInstance2);
         when(monitorRegistry.getService(eq("monitorPlugin1"))).thenReturn(monitorInstance1);
-        when(monitorRegistry.getService(eq("monitorPlugin1"))).thenReturn(monitorInstance2);
+        when(monitorRegistry.getService(eq("monitorPlugin2"))).thenReturn(monitorInstance2);
 
         pluginDetector = new PluginDetector(monitorRegistry, detectorRegistry, new PluginConfigScanner(), new PluginConfigInjector());
     }
@@ -94,7 +97,6 @@ public class PluginDetectorTest {
                          //TODO: incomplete on type.... beanUtils?
                      default:
                  }
-
              });
         });
 
@@ -103,38 +105,48 @@ public class PluginDetectorTest {
         assertEquals("blahNewString", detectorInstance1.someDetectorConfigValue);
     }
 
-    public class SampleDetectorPlugin implements ServiceDetector {
-        @HorizonConfig(name="blah")
+    public class SampleDetectorManager implements ServiceDetectorManager {
+        @HorizonConfig(displayName="blah")
         @Getter
         @Setter
         //TODO: get this to work on private fields with bean utils?
         public String someDetectorConfigValue;
 
         @Override
-        public CompletableFuture<ServiceDetectorResults> detect(ServiceDetectorRequest request) {
-            return null;
+        public ServiceDetector create(Consumer<ServiceDetectorResults> resultProcessor) {
+            return new ServiceDetector() {
+                @Override
+                public CompletableFuture<ServiceDetectorResults> detect(ServiceDetectorRequest request) {
+                    return null;
+                }
+            };
         }
     }
 
-    public class SampleMonitorPlugin implements ServiceMonitor {
-        @HorizonConfig(name="blah")
+    public class SampleMonitorManager implements ServiceMonitorManager {
+        @HorizonConfig(displayName="blah")
         @Getter
         @Setter
         public String someMonitorConfigValue;
 
         @Override
-        public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
-            return null;
-        }
+        public ServiceMonitor create(Consumer<ServiceMonitorResponse> resultProcessor) {
+            return new ServiceMonitor() {
+                @Override
+                public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
+                    return null;
+                }
 
-        @Override
-        public Map<String, Object> getRuntimeAttributes(MonitoredService svc, Map<String, Object> parameters) {
-            return null;
-        }
+                @Override
+                public Map<String, Object> getRuntimeAttributes(MonitoredService svc, Map<String, Object> parameters) {
+                    return null;
+                }
 
-        @Override
-        public String getEffectiveLocation(String location) {
-            return null;
+                @Override
+                public String getEffectiveLocation(String location) {
+                    return null;
+                }
+            };
         }
     }
 }

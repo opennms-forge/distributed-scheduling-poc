@@ -1,12 +1,11 @@
 package org.opennms.poc.ignite.worker.ignite.registries;
 
-import java.util.List;
 import java.util.Map;
-import org.opennms.poc.plugin.api.ServiceDetector;
+import org.opennms.poc.plugin.api.ServiceDetectorManager;
 
 public interface DetectorRegistry {
 
-    ServiceDetector getService(String type);
+    ServiceDetectorManager getService(String type);
     int getCount();
-    Map<String, ServiceDetector> getServices();
+    Map<String, ServiceDetectorManager> getServices();
 }

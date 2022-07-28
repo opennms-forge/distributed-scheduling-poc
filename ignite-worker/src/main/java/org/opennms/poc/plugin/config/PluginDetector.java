@@ -8,7 +8,9 @@ import org.opennms.poc.ignite.model.workflows.WorkflowType;
 import org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry;
 import org.opennms.poc.ignite.worker.ignite.registries.MonitorRegistry;
 import org.opennms.poc.plugin.api.ServiceDetector;
+import org.opennms.poc.plugin.api.ServiceDetectorManager;
 import org.opennms.poc.plugin.api.ServiceMonitor;
+import org.opennms.poc.plugin.api.ServiceMonitorManager;
 
 @AllArgsConstructor
 public class PluginDetector {
@@ -20,13 +22,13 @@ public class PluginDetector {
 
     public List<PluginMetadata> detect() {
         List<PluginMetadata> detectedPlugins = new ArrayList<>();
-         Map<String, ServiceDetector> detectorPlugins = detectorRegistry.getServices();
+         Map<String, ServiceDetectorManager> detectorPlugins = detectorRegistry.getServices();
 
          detectorPlugins.forEach((name, plugin) -> {
              detectedPlugins.add(new PluginMetadata(name, WorkflowType.DETECTOR, pluginConfigScanner.getConfigs(plugin.getClass())));
          });
 
-         Map<String, ServiceMonitor> monitorPlugins = monitorRegistry.getServices();
+         Map<String, ServiceMonitorManager> monitorPlugins = monitorRegistry.getServices();
 
          monitorPlugins.forEach((name, plugin) -> {
               detectedPlugins.add(new PluginMetadata(name, WorkflowType.CONNECTOR, pluginConfigScanner.getConfigs(plugin.getClass())));

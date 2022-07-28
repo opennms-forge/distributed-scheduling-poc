@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface HorizonConfig {
-    public String name();
+    public String displayName();
     public boolean custom() default false;
 }

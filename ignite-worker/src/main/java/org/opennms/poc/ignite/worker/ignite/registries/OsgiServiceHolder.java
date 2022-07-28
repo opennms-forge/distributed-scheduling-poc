@@ -1,11 +1,10 @@
 package org.opennms.poc.ignite.worker.ignite.registries;
 
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalServiceFactory;
-import org.opennms.poc.plugin.api.ServiceDetector;
-import org.opennms.poc.plugin.api.ServiceMonitor;
+import org.opennms.poc.plugin.api.ServiceDetectorManager;
+import org.opennms.poc.plugin.api.ServiceMonitorManager;
 import org.opennms.poc.scheduler.OpennmsScheduler;
 import org.osgi.framework.BundleContext;
 
@@ -35,7 +34,7 @@ public class OsgiServiceHolder {
         OsgiServiceHolder.serviceConnectorFactoryRegistry = serviceConnectorFactoryRegistry;
     }
 
-    public static Optional<ServiceDetector> getDetector(String name) {
+    public static Optional<ServiceDetectorManager> getDetectorManager(String name) {
          return Optional.ofNullable(detectorRegistry.getService(name));
     }
 
@@ -43,7 +42,7 @@ public class OsgiServiceHolder {
         return detectorRegistry.getCount();
     }
 
-    public static Optional<ServiceMonitor> getMonitor(String name) {
+    public static Optional<ServiceMonitorManager> getMonitorManager(String name) {
         return Optional.ofNullable(monitorRegistry.getService(name));
     }
 

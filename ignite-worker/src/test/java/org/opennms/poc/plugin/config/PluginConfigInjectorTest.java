@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,9 +18,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry;
+import org.opennms.poc.plugin.api.ServiceDetectorManager;
 import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 import org.opennms.poc.plugin.api.ServiceDetector;
-import org.opennms.poc.plugin.api.ServiceDetectorRequest;
 import org.opennms.poc.plugin.api.ServiceDetectorResults;
 
 public class PluginConfigInjectorTest  {
@@ -40,9 +40,9 @@ public class PluginConfigInjectorTest  {
 
     @Test
     public void injectConfigs() {
-        TestMinionPlugin testMinionPlugin = new TestMinionPlugin("blahStringValue", 42, HorizonEnum.THREE, new MyCustomClass("blahField"), "notConfirugredValue");
+        TestMinionPluginManager testMinionPlugin = new TestMinionPluginManager("blahStringValue", 42, HorizonEnum.THREE, new MyCustomClass("blahField"), "notConfirugredValue");
         when(detectorRegistry.getService(anyString())).thenReturn(testMinionPlugin);
-        List<FieldConfigMeta> fieldConfigMeta =  annotationProcessor.getConfigs(TestMinionPlugin.class);
+        List<FieldConfigMeta> fieldConfigMeta =  annotationProcessor.getConfigs(TestMinionPluginManager.class);
         assertEquals(4,fieldConfigMeta.size());
         fieldConfigMeta.forEach(fieldConfigMeta1 -> System.out.println(fieldConfigMeta1));
 
@@ -69,23 +69,23 @@ public class PluginConfigInjectorTest  {
     @Getter
     @Setter
     @AllArgsConstructor
-    private class TestMinionPlugin implements ServiceDetector {
-        @HorizonConfig(name = "blah")
+    private class TestMinionPluginManager implements ServiceDetectorManager {
+        @HorizonConfig(displayName = "blah")
         public String blahString;
 
-        @HorizonConfig(name = "integerField")
+        @HorizonConfig(displayName = "integerField")
         public int blahInt;
 
-        @HorizonConfig(name = "anEnum")
+        @HorizonConfig(displayName = "anEnum")
         public HorizonEnum horizonEnum;
 
-        @HorizonConfig(name = "custom", custom = true)
+        @HorizonConfig(displayName = "custom", custom = true)
         public MyCustomClass customClass;
 
         private String notConfigurable;
 
         @Override
-        public CompletableFuture<ServiceDetectorResults> detect(ServiceDetectorRequest request) {
+        public ServiceDetector create(Consumer<ServiceDetectorResults> resultProcessor) {
             return null;
         }
     }

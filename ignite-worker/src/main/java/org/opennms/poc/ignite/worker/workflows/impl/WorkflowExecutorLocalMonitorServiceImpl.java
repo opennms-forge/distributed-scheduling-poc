@@ -7,6 +7,7 @@ import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalService;
 import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ServiceMonitor;
+import org.opennms.poc.plugin.api.ServiceMonitorManager;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 import org.opennms.poc.scheduler.OpennmsScheduler;
 import org.slf4j.Logger;
@@ -82,9 +83,8 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
     private ServiceMonitor lookupMonitor(Workflow workflow) {
         String pluginName = workflow.getPluginName();
 
-        Optional<ServiceMonitor> result = OsgiServiceHolder.getMonitor(pluginName);
-
-        return result.orElse(null);
+        Optional<ServiceMonitorManager> result = OsgiServiceHolder.getMonitorManager(pluginName);
+        return result.get().create(null);
     }
 
 //========================================

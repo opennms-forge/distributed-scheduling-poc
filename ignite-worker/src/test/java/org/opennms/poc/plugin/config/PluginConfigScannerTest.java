@@ -9,34 +9,34 @@ import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 
 public class PluginConfigScannerTest {
 
-    PluginConfigScanner annotationProcessor;
+    PluginConfigScanner annotationScanner;
 
     @Before
     public void setUp() throws Exception {
-        annotationProcessor = new PluginConfigScanner();
+        annotationScanner = new PluginConfigScanner();
     }
 
     @Test
     public void getConfigs() {
-        List<FieldConfigMeta> fieldConfigMeta =  annotationProcessor.getConfigs(TestMinionPlugin.class);
+        List<FieldConfigMeta> fieldConfigMeta =  annotationScanner.getConfigs(TestMinionPlugin.class);
         assertEquals(4,fieldConfigMeta.size());
         fieldConfigMeta.forEach(fieldConfigMeta1 -> System.out.println(fieldConfigMeta1));
     }
 
     private class TestMinionPlugin {
-        @HorizonConfig(name = "blah")
-        private String blahString;
+        @HorizonConfig(displayName = "blah")
+        public String blahString;
 
-        @HorizonConfig(name = "integerField")
-        private int blahInt;
+        @HorizonConfig(displayName = "integerField")
+        public int blahInt;
 
-        @HorizonConfig(name = "anEnum")
-        private HorizonEnum horizonEnum;
+        @HorizonConfig(displayName = "anEnum")
+        public HorizonEnum horizonEnum;
 
-        @HorizonConfig(name = "custom", custom = true)
-        private MyCustomClass customClass;
+        @HorizonConfig(displayName = "custom", custom = true)
+        public MyCustomClass customClass;
 
-        private String notConfigurable;
+        public String notConfigurable;
     }
 
     private class MyCustomClass {

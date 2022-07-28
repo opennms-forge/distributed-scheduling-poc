@@ -10,17 +10,17 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <bean id="snmpDetector" class="org.opennms.poc.snmp.SnmpDetector"/>
+  <bean id="snmpDetectorManager" class="org.opennms.poc.snmp.SnmpDetectorManager"/>
 
-  <service ref="snmpDetector" interface="org.opennms.poc.plugin.api.ServiceDetector">
+  <service ref="snmpDetectorManager" interface="org.opennms.poc.plugin.api.ServiceDetectorManager">
     <service-properties>
       <entry key="detector.name" value="SNMPDetector"/>
     </service-properties>
   </service>
 
-  <bean id="snmpMonitor" class="org.opennms.poc.snmp.SnmpMonitor"/>
+  <bean id="snmpMonitorManager" class="org.opennms.poc.snmp.SnmpMonitorManager"/>
 
-  <service ref="snmpMonitor" interface="org.opennms.poc.plugin.api.ServiceMonitor">
+  <service ref="snmpMonitorFactory" interface="org.opennms.poc.plugin.api.ServiceMonitorFactory">
     <service-properties>
       <entry key="monitor.name" value="SNMPMonitor"/>
     </service-properties>
