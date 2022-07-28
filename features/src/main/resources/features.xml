@@ -18,6 +18,7 @@
         <feature version="${project.version}">ignite-poc-model</feature>
         <feature version="${project.version}">poc-grpc</feature>
         <feature version="${project.version}">poc-cron</feature>
+        <feature version="${project.version}">poc-metrics</feature>
 
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
@@ -68,6 +69,7 @@
         <feature>poc-grpc-horizon</feature>
         <feature>poc-tracing-stub</feature>
         <feature>horizon-ipc-api</feature>
+        <feature>poc-metrics</feature>
 
         <bundle>mvn:org.opennms.poc.ipc.grpc/contract/${project.version}</bundle>
         <bundle>mvn:org.opennms.poc.ipc.grpc/client/${project.version}</bundle>
@@ -77,7 +79,7 @@
         <feature>jackson</feature>
         <feature>poc-grpc-horizon</feature>
         <feature>poc-grpc-client</feature>
-        <feature>metrics</feature>
+        <feature>poc-metrics</feature>
         <feature>horizon-core-lib</feature>
 
         <!-- shallow copy of horizon dependencies -->
@@ -122,6 +124,7 @@
         <feature version="${project.version}">ignite-poc-model</feature>
         <feature version="${project.version}">poc-grpc-ipc-twin</feature>
         <feature version="${project.version}">poc-grpc-client</feature>
+        <feature version="${project.version}">poc-metrics</feature>
 
         <bundle>mvn:org.opennms.poc.grpc.workflow/module/${project.version}</bundle>
         <bundle>mvn:org.opennms.poc.grpc.workflow/subscriber/${project.version}</bundle>
@@ -249,8 +252,31 @@
         <bundle>mvn:org.opennms.poc/scheduler/${project.version}</bundle>
     </feature>
 
+    <feature name="poc-metrics" version="${project.version}">
+        <feature>http</feature>
+        <feature>metrics</feature>
+        <feature>prometheus</feature>
+        <feature>prometheus-dropwizard</feature>
+        <feature>eos</feature>
+        <bundle>mvn:org.opennms.poc/metrics/${project.version}</bundle>
+    </feature>
+
     <feature name="metrics">
-        <bundle>mvn:io.dropwizard.metrics/metrics-core/3.1.2</bundle>
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/${dropwizard-metrics.version}</bundle>
+    </feature>
+
+    <feature name="prometheus">
+        <bundle>mvn:io.prometheus/simpleclient/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_common/${prometheus.version}</bundle>
+    </feature>
+
+    <feature name="prometheus-dropwizard">
+        <feature>metrics</feature>
+        <feature>prometheus</feature>
+        <bundle>mvn:io.prometheus/simpleclient_dropwizard/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_common/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_otel/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_otel_agent/${prometheus.version}</bundle>
     </feature>
 
     <feature name="rate-limited-logger" version="2.0.2" description="Rate Limited Logger">
