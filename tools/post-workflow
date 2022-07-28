@@ -1,27 +1,32 @@
 #!/bin/bash
 
-# DATA_FILE=example-workflow.empty.json
-# DATA_FILE=example-workflow.001.json
-DATA_FILE=example-workflow.002.json
-
-DATA="$(< ${DATA_FILE})"
+# WORKFLOW_DEFINITION_FILE=task-sets/example-workflow.empty.json
+# WORKFLOW_DEFINITION_FILE=task-sets/example-workflow.001.json
+WORKFLOW_DEFINITION_FILE=task-sets/example-workflow.002.json
+# WORKFLOW_DEFINITION_FILE=task-sets/task-set.8k.json
 
 HOST_PORT=localhost:8080
 
 usage()
 {
-	echo "Usage: $0 [-hv] [-H <host:port>]"
+	echo "Usage: $0 [-hv] [-H <host:port>] [-f <workflow-file>]"
 	echo
 	echo "  -h  Display this help"
+	echo "  -H  Configure the <host:port> of the URL to which the workflow will be sent"
+	echo "  -f  Read the workflow definition from the specified file (supports *.gz and *.bz2 compression)"
 	echo "  -v  Verbose curl output"
 }
 
-while getopts "hH:p:R:t:u:v" arg
+while getopts "hH:f:v" arg
 do
 	case "$arg" in
 		h)
 			usage
 			exit 0
+			;;
+
+		f)
+			WORKFLOW_DEFINITION_FILE="${OPTARG}"
 			;;
 
 		H)
@@ -39,4 +44,18 @@ do
 	esac
 done
 
-curl "${CURL_OPTS[@]}" -X POST -H 'Content-Type: application/json' --data "${DATA}" "http://${HOST_PORT}/injector/workflow"
+READ_FILE_CMD="cat"
+
+case "${WORKFLOW_DEFINITION_FILE}" in
+	*gz)
+		READ_FILE_CMD="zcat"
+		;;
+
+	*bz2)
+		READ_FILE_CMD="bzcat"
+		;;
+esac
+		
+
+"${READ_FILE_CMD}" "${WORKFLOW_DEFINITION_FILE}" | \
+	curl "${CURL_OPTS[@]}" -X POST -H 'Content-Type: application/json' --data-binary @- "http://${HOST_PORT}/injector/workflow"
