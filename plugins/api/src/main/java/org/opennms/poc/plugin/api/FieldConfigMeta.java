@@ -1,4 +1,4 @@
-package org.opennms.poc.plugin.config;
+package org.opennms.poc.plugin.api;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

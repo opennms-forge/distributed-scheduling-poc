@@ -2,9 +2,11 @@ package org.opennms.poc.ignite.model.workflows;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import org.opennms.poc.plugin.api.FieldConfigMeta;
 
 public class Workflow implements Serializable {
     private static final long serialVersionUID = 0L;
@@ -15,6 +17,7 @@ public class Workflow implements Serializable {
     private Map<String,String> parameters = new LinkedHashMap<>();
     private String uuid;
     private String cron;
+    private List<FieldConfigMeta> fieldConfigMeta;
 
     public String getDescription() {
         return description;
@@ -62,6 +65,10 @@ public class Workflow implements Serializable {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public List<FieldConfigMeta> getFieldConfigMeta() {
+        return fieldConfigMeta;
     }
 
     @Override

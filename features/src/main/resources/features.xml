@@ -93,6 +93,7 @@
     </feature>
 
     <feature name="ignite-poc-model" description="POC Model" version="${project.version}">
+        <feature version="${project.version}">plugins-api</feature>
         <bundle>mvn:org.opennms.poc/model/${project.version}</bundle>
     </feature>
 

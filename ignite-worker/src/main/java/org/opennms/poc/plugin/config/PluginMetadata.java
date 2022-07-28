@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.opennms.poc.ignite.model.workflows.WorkflowType;
+import org.opennms.poc.plugin.api.FieldConfigMeta;
 
 @AllArgsConstructor
 @Getter

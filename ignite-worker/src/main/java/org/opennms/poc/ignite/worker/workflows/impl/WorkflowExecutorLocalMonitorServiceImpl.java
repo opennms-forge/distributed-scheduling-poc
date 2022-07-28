@@ -9,6 +9,7 @@ import org.opennms.poc.plugin.api.MonitoredService;
 import org.opennms.poc.plugin.api.ServiceMonitor;
 import org.opennms.poc.plugin.api.ServiceMonitorManager;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
+import org.opennms.poc.plugin.config.PluginConfigInjector;
 import org.opennms.poc.scheduler.OpennmsScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
     private Workflow workflow;
     private OpennmsScheduler scheduler;
     private WorkflowExecutionResultProcessor resultProcessor;
+    private ServiceMonitor monitor=null;
 
     private AtomicBoolean active = new AtomicBoolean(false);
 
@@ -80,11 +82,19 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
 // Setup Internals
 //----------------------------------------
 
-    private ServiceMonitor lookupMonitor(Workflow workflow) {
+    private Optional<ServiceMonitor> lookupMonitor(Workflow workflow) {
         String pluginName = workflow.getPluginName();
 
         Optional<ServiceMonitorManager> result = OsgiServiceHolder.getMonitorManager(pluginName);
-        return result.get().create(null);
+
+        if (result.isPresent()) {
+            ServiceMonitorManager foundMonitorManager = result.get();
+
+            PluginConfigInjector.injectConfigs(foundMonitorManager, workflow.getFieldConfigMeta());
+
+            return Optional.of(foundMonitorManager.create(null));
+        }
+        else return Optional.empty();
     }
 
 //========================================
@@ -103,7 +113,12 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
 
     private void executeIteration() {
         try {
-            ServiceMonitor monitor = lookupMonitor(workflow);
+            if (monitor == null) {
+                Optional<ServiceMonitor> lazyMonitor = lookupMonitor(workflow);
+                if (lazyMonitor.isPresent()) {
+                    this.monitor = lazyMonitor.get();
+                }
+            }
             if (monitor != null) {
                 MonitoredService monitoredService = configureMonitoredService();
 

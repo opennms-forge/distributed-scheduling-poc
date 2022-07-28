@@ -4,12 +4,13 @@ import java.lang.reflect.Field;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.poc.plugin.api.FieldConfigMeta;
 
 @Slf4j
 @RequiredArgsConstructor
 public class PluginConfigInjector {
 
-    public void injectConfigs(Object target, List<FieldConfigMeta> configs) {
+    public static void injectConfigs(Object target, List<FieldConfigMeta> configs) {
 
         Class clazz = target.getClass();
 

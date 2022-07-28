@@ -5,12 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.poc.plugin.api.FieldConfigMeta;
 import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 
 @Slf4j
 public class PluginConfigScanner {
 
-    public List<FieldConfigMeta> getConfigs(Class clazz) {
+    public static List<FieldConfigMeta> getConfigs(Class clazz) {
 
         Field[] fields = clazz.getDeclaredFields();
 

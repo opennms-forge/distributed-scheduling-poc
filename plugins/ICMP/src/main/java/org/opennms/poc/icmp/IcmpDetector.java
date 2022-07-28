@@ -10,7 +10,7 @@ import org.opennms.poc.plugin.api.ServiceDetectorResults;
 @AllArgsConstructor
 public class IcmpDetector implements ServiceDetector {
     @Setter
-    private String sampleConfig;
+    public String sampleConfig;
     @Override
     public CompletableFuture<ServiceDetectorResults> detect(ServiceDetectorRequest request) {
         return null;

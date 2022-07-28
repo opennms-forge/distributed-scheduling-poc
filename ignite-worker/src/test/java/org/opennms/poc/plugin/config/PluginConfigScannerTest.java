@@ -5,20 +5,18 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.opennms.poc.plugin.api.FieldConfigMeta;
 import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 
 public class PluginConfigScannerTest {
 
-    PluginConfigScanner annotationScanner;
-
     @Before
     public void setUp() throws Exception {
-        annotationScanner = new PluginConfigScanner();
     }
 
     @Test
     public void getConfigs() {
-        List<FieldConfigMeta> fieldConfigMeta =  annotationScanner.getConfigs(TestMinionPlugin.class);
+        List<FieldConfigMeta> fieldConfigMeta =  PluginConfigScanner.getConfigs(TestMinionPlugin.class);
         assertEquals(4,fieldConfigMeta.size());
         fieldConfigMeta.forEach(fieldConfigMeta1 -> System.out.println(fieldConfigMeta1));
     }

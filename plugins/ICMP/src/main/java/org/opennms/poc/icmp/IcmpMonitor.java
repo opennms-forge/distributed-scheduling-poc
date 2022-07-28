@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.opennms.netmgt.icmp.EchoPacket;
 import org.opennms.netmgt.icmp.PingConstants;
 import org.opennms.netmgt.icmp.PingResponseCallback;
@@ -20,6 +21,9 @@ import org.opennms.poc.plugin.api.ServiceMonitorResponseImpl;
 
 @RequiredArgsConstructor
 public class IcmpMonitor extends AbstractServiceMonitor {
+
+    @Setter
+    private String moreConfig;
 
     private final PingerFactory pingerFactory;
     //TODO: double check the constant for this key, probabloy defined elsewhere already

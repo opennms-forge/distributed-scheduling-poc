@@ -20,6 +20,12 @@
     </description>
 
     <dependencies>
+<!--        //TODO: is this ok?-->
+        <dependency>
+            <groupId>org.opennms.poc.plugins</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry;
+import org.opennms.poc.plugin.api.FieldConfigMeta;
 import org.opennms.poc.plugin.api.ServiceDetectorManager;
 import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 import org.opennms.poc.plugin.api.ServiceDetector;
@@ -25,24 +26,19 @@ import org.opennms.poc.plugin.api.ServiceDetectorResults;
 
 public class PluginConfigInjectorTest  {
 
-    PluginConfigScanner annotationProcessor;
-    PluginConfigInjector pluginConfigInjector;
-
     @Mock
     DetectorRegistry detectorRegistry;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        annotationProcessor = new PluginConfigScanner();
-        pluginConfigInjector = new PluginConfigInjector();
     }
 
     @Test
     public void injectConfigs() {
         TestMinionPluginManager testMinionPlugin = new TestMinionPluginManager("blahStringValue", 42, HorizonEnum.THREE, new MyCustomClass("blahField"), "notConfirugredValue");
         when(detectorRegistry.getService(anyString())).thenReturn(testMinionPlugin);
-        List<FieldConfigMeta> fieldConfigMeta =  annotationProcessor.getConfigs(TestMinionPluginManager.class);
+        List<FieldConfigMeta> fieldConfigMeta =  PluginConfigScanner.getConfigs(TestMinionPluginManager.class);
         assertEquals(4,fieldConfigMeta.size());
         fieldConfigMeta.forEach(fieldConfigMeta1 -> System.out.println(fieldConfigMeta1));
 
@@ -57,7 +53,7 @@ public class PluginConfigInjectorTest  {
         fieldConfigMetaCustom.setValue(customClass);
 
 
-        pluginConfigInjector.injectConfigs( testMinionPlugin, Arrays.asList(fieldConfigMetaBlahString, fieldConfigMetaBlahInt, fieldConfigMetaEnum, fieldConfigMetaCustom));
+        PluginConfigInjector.injectConfigs( testMinionPlugin, Arrays.asList(fieldConfigMetaBlahString, fieldConfigMetaBlahInt, fieldConfigMetaEnum, fieldConfigMetaCustom));
 
         assertTrue(testMinionPlugin.getBlahString().equals("newBlahValue"));
         assertEquals(2, (testMinionPlugin.getBlahInt()));
