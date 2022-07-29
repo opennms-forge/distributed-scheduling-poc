@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for pod in $(kubectl get pod| grep poc-distributed | awk '{ print $1 }')
+do
+	echo "POD $pod"
+	echo "POD $pod" | sed 's,.,=,g'
+
+	kubectl exec -c poc-ignite-worker "${pod}" -- "$@"
+done
