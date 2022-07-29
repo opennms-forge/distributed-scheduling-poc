@@ -1,6 +1,5 @@
 package org.opennms.poc.ignite.worker.ignite;
 
-import lombok.AllArgsConstructor;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.Ignition;
 

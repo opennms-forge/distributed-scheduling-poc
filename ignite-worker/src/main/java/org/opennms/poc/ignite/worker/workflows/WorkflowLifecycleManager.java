@@ -9,7 +9,7 @@ import org.opennms.poc.ignite.model.workflows.Workflows;
 public interface WorkflowLifecycleManager {
 
   /**
-   * Force dployment of a given task set.
+   * Force deployment of a given task set.
    *
    * @param workflows Task set.
    * @return Number of stopped tasks.

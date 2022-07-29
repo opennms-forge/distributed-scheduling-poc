@@ -27,7 +27,7 @@
   <service ref="resultConsumer">
     <interfaces>
       <value>java.util.function.Consumer</value>
-      <value>com.codahale.metrics.MetricSet</value>
+      <value>org.opennms.poc.metrics.MetricsProvider</value>
     </interfaces>
     <service-properties>
       <entry key="message.publisher.topic" value="workflow-result" />

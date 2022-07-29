@@ -13,6 +13,11 @@
         <argument ref="blueprintBundleContext" />
     </bean>
 
+    <bean class="org.opennms.poc.metrics.internal.MetricsProviderWhiteboard" init-method="start" destroy-method="stop">
+        <argument ref="metricRegistry" />
+        <argument ref="blueprintBundleContext" />
+    </bean>
+
     <service interface="javax.servlet.http.HttpServlet">
         <service-properties>
             <entry key="osgi.http.whiteboard.context.path" value="/metrics" />

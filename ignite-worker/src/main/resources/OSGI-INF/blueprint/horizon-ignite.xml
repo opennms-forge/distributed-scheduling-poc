@@ -19,7 +19,13 @@
 
   <bean id="workflowRepository" class="org.opennms.poc.ignite.worker.workflows.WorkflowRepository"/>
 
+  <bean id="igniteMetrics" class="org.opennms.poc.ignite.worker.ignite.IgniteMetricsAdapter" init-method="start" destroy-method="stop">
+    <argument ref="identity" />
+  </bean>
+  <service ref="igniteMetrics" interface="org.opennms.poc.metrics.MetricsProvider" />
+
   <bean id="workerIgniteConfiguration" class="org.opennms.poc.ignite.worker.ignite.WorkerIgniteConfiguration">
+    <argument ref="igniteMetrics" />
     <argument value="${useKubernetes}"/>
     <argument value="${kubernetes.service-name}"/>
   </bean>
@@ -87,17 +93,17 @@
     <argument ref="serviceConnectorFactoryRegistry"/>
   </bean>
 
-  <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.MeteredWorkflowLifecycleManager">
+  <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl" destroy-method="close">
+    <property name="ignite" ref="ignite"/>
+  </bean>
+
+  <bean id="meteredWorkflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.MeteredWorkflowLifecycleManager">
     <argument ref="identity" />
-    <argument>
-      <bean class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl">
-        <property name="ignite" ref="ignite"/>
-      </bean>
-    </argument>
+    <argument ref="workflowLifecycleManager" />
   </bean>
 
   <bean id="workflowLifecycleAdapter" class="org.opennms.poc.ignite.worker.workflows.impl.TwinToWorkflowLifecycleManagerAdapter">
-    <argument ref="workflowLifecycleManager" />
+    <argument ref="meteredWorkflowLifecycleManager" />
   </bean>
 
 <!--  TODO: will we need this as an OSGi service anywhere now?-->
@@ -108,5 +114,7 @@
       <entry key="message.listener.topic" value="workflow" />
     </service-properties>
   </service>
+
+  <service ref="meteredWorkflowLifecycleManager" interface="com.codahale.metrics.MetricSet" />
 
 </blueprint>

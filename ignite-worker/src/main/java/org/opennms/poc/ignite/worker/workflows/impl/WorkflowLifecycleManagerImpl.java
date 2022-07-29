@@ -67,6 +67,10 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
         return canceledServices.size();
     }
 
+    public void close() {
+        ignite.close();
+    }
+
 //========================================
 // Internals
 //----------------------------------------
