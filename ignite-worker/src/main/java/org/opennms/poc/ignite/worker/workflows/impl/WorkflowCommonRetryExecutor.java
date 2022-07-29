@@ -1,27 +1,23 @@
 package org.opennms.poc.ignite.worker.workflows.impl;
 
 import org.opennms.poc.ignite.model.workflows.Workflow;
-import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
+import org.opennms.poc.ignite.worker.workflows.RetriableExecutor;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalService;
-import org.opennms.poc.plugin.api.ServiceConnector;
-import org.opennms.poc.plugin.api.ServiceConnectorFactory;
 import org.opennms.poc.scheduler.OpennmsScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Local implementation of the service to execute a ServiceConnector workflow.  This class runs "locally" only, so it is
- *  never serialized / deserialized; this enables the "ignite" service to be a thin implementation, reducing the chances
- *  of problems due to serialization/deserialization.
+ * Local implementation of the service to execute a workflow that implements retry handling.  This class runs "locally"
+ *  only, so it is never serialized / deserialized; this enables the "ignite" service to be a thin implementation,
+ *  reducing the chances of problems due to serialization/deserialization.
  */
-public class WorkflowExecutorLocalConnectorServiceImpl implements WorkflowExecutorLocalService {
+public class WorkflowCommonRetryExecutor implements WorkflowExecutorLocalService {
 
-    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(WorkflowExecutorLocalConnectorServiceImpl.class);
+    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(WorkflowCommonRetryExecutor.class);
 
     private Logger log = DEFAULT_LOGGER;
 
@@ -29,17 +25,19 @@ public class WorkflowExecutorLocalConnectorServiceImpl implements WorkflowExecut
 
     private Workflow workflow;
     private WorkflowExecutionResultProcessor resultProcessor;
-    private ServiceConnector serviceConnector;
+    private RetriableExecutor retriableExecutor;
     private int numRepeatFailures = 0;
 
-    public WorkflowExecutorLocalConnectorServiceImpl(
+    public WorkflowCommonRetryExecutor(
             OpennmsScheduler opennmsScheduler,
             Workflow workflow,
-            WorkflowExecutionResultProcessor resultProcessor) {
+            WorkflowExecutionResultProcessor resultProcessor,
+            RetriableExecutor retriableExecutor) {
 
         this.opennmsScheduler = opennmsScheduler;
         this.workflow = workflow;
         this.resultProcessor = resultProcessor;
+        this.retriableExecutor = retriableExecutor;
     }
 
 //========================================
@@ -47,25 +45,20 @@ public class WorkflowExecutorLocalConnectorServiceImpl implements WorkflowExecut
 //----------------------------------------
 
     @Override
-    public void start() throws Exception {
-        ServiceConnectorFactory serviceConnectorFactory = lookupServiceConnectorFactory(workflow);
-
-        if (serviceConnectorFactory != null) {
-            Map<String, Object> castMap = new HashMap<>(workflow.getParameters());
-
-            serviceConnector =
-                    serviceConnectorFactory.create(
-                            result -> resultProcessor.queueSendResult(workflow.getUuid(), result), castMap,
-                            this::handleDisconnect);
+    public void start() {
+        try {
+            retriableExecutor.init(this::handleDisconnect);
 
             attemptConnect();
+        } catch (RuntimeException rtExc) {
+            throw rtExc;
         }
     }
 
     @Override
     public void cancel() {
         opennmsScheduler.cancelTask(workflow.getUuid());
-        serviceConnector.disconnect();
+        retriableExecutor.cancel();
     }
 
 //========================================
@@ -79,7 +72,7 @@ public class WorkflowExecutorLocalConnectorServiceImpl implements WorkflowExecut
     private void attemptConnect() {
         try {
             log.info("Attempting to connect: workflow-uuid={}", workflow.getUuid());
-            serviceConnector.connect();
+            retriableExecutor.attempt();
             numRepeatFailures = 0;
         } catch (Exception exc) {
             numRepeatFailures++;
@@ -132,22 +125,5 @@ public class WorkflowExecutorLocalConnectorServiceImpl implements WorkflowExecut
             default:
                 return 30_000;
         }
-    }
-
-//========================================
-// Setup Internals
-//----------------------------------------
-
-    private ServiceConnectorFactory lookupServiceConnectorFactory(Workflow workflow) {
-        String pluginName = workflow.getPluginName();
-
-        ServiceConnectorFactory result = OsgiServiceHolder.getServiceConnectorFactoryRegistry().getService(pluginName);
-
-        if (result == null) {
-            log.error("Failed to locate connector factory for workflow: plugin-name={}; workflow-uuid={}",
-                    pluginName, workflow.getUuid());
-        }
-
-        return result;
     }
 }

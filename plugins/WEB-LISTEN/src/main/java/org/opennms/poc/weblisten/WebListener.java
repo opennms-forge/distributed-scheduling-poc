@@ -42,16 +42,12 @@ public class WebListener implements Listener {
 //----------------------------------------
 
     @Override
-    public void start() {
+    public void start() throws Exception {
         String listenHost = ParameterMap.getKeyedString(parameters, "address", "0.0.0.0");
         int listenPort = ParameterMap.getKeyedInteger(parameters, "port", 9000);
 
         server = prepareJettyServer(listenHost, listenPort);
-        try {
-            server.start();
-        } catch (Exception exception) {
-            log.error("FAILED TO START", exception);
-        }
+        server.start();
     }
 
     @Override

@@ -7,6 +7,6 @@ package org.opennms.poc.plugin.api;
  * NOTE: plugins register the ListenerFactory with the ListenerFactoryRegistry.
  */
 public interface Listener {
-    void start();
+    void start() throws Exception;
     void stop();
 }

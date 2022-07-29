@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
         // WARNING: very large numbers of these node singletons will impact startup performance notably due to the
         //  slowness with starting Ignite services one at a time.  Unfortunately, the "node singleton" cannot be started
         //  via deployAllAsync().
-        int singletonCount = deployNodeSingletonServices(workflowDefinitions);
+        List<String> singletonIds = deployNodeSingletonServices(workflowDefinitions);
 
         // Prepare the services that run on only 1 node across the cluster
         List<ServiceConfiguration> serviceConfigurationList = prepareOnePerClusterServiceConfigurations(workflowDefinitions);
@@ -60,12 +61,13 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
         ignite.services().deployAllAsync(serviceConfigurationList);
 
         // Find the set of services that are no longer needed
-        Collection<String> canceledServices = calculateServicesToUndeploy(serviceConfigurationList, serviceDescriptorList);
+        Collection<String> canceledServices =
+                calculateServicesToUndeploy(serviceConfigurationList, singletonIds, serviceDescriptorList);
         ignite.services().cancelAllAsync(canceledServices);
 
         // Log the update summary
         log.info("Completed workflow update: deploy-count={}; cancel-count={}",
-                serviceConfigurationList.size() + singletonCount,
+                serviceConfigurationList.size() + singletonIds.size(),
                 canceledServices.size());
     }
 
@@ -79,23 +81,28 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
      *
      * @param workflowDefinitions
      */
-    private int deployNodeSingletonServices(Workflows workflowDefinitions) {
+    private List<String> deployNodeSingletonServices(Workflows workflowDefinitions) {
+        List<String> deployedServices = new LinkedList<>();
+
         int count = 0;
         for (Workflow oneWorkflow : workflowDefinitions.getWorkflows()) {
             if (oneWorkflow.getType().equals(WorkflowType.LISTENER)) {
                 count++;
-                this.deployOneNodeSingletonService(oneWorkflow);
+                String serviceName = deployOneNodeSingletonService(oneWorkflow);
+                deployedServices.add(serviceName);
             }
         }
 
-        return count;
+        return deployedServices;
     }
 
-    private void deployOneNodeSingletonService(Workflow workflow) {
+    private String deployOneNodeSingletonService(Workflow workflow) {
         String serviceName = formulateServiceNameForWorkflow(workflow);
         WorkflowExecutorIgniteService workflowExecutorIgniteService = new WorkflowExecutorIgniteService(workflow);
 
         ignite.services().deployNodeSingletonAsync(serviceName, workflowExecutorIgniteService);
+
+        return serviceName;
     }
 
     private List<ServiceConfiguration> prepareOnePerClusterServiceConfigurations(Workflows workflowDefinitions) {
@@ -146,10 +153,17 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
     private Collection<String>
     calculateServicesToUndeploy(
             List<ServiceConfiguration> deployed,
+            List<String> deployedSingletonIds,
             Collection<ServiceDescriptor> serviceDescriptorList) {
 
         Set<String> deployedNames = deployed.stream().map(ServiceConfiguration::getName).collect(Collectors.toSet());
-        Set<String> existingNames = serviceDescriptorList.stream().map(ServiceDescriptor::name).collect(Collectors.toSet());
+        deployedNames.addAll(deployedSingletonIds);
+
+        Set<String> existingNames =
+                serviceDescriptorList.stream().
+                        map(ServiceDescriptor::name)
+                        .filter(name -> name.startsWith(SERVICE_NAME_PREFIX))   // Only workflow services
+                        .collect(Collectors.toSet());
 
         return Sets.difference(existingNames, deployedNames);
     }

@@ -2,8 +2,8 @@ package org.opennms.poc.ignite.worker.workflows.impl;
 
 import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
+import org.opennms.poc.ignite.worker.workflows.RetriableExecutor;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
-import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalService;
 import org.opennms.poc.plugin.api.Listener;
 import org.opennms.poc.plugin.api.ListenerFactory;
 import org.slf4j.Logger;
@@ -13,13 +13,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Local implementation of the service to execute a Listener workflow.  This class runs "locally" only, so it is never
- *  serialized / deserialized; this enables the "ignite" service to be a thin implementation, reducing the chances of
- *  problems due to serialization/deserialization.
+ * Core of the Workflow Executor for LISTENERS which implements the RetriableExecutor, focusing the logic for starting
+ *  and maintaining the listener.  Used with WorkflowCommonRetryExecutor for retry handling.
+ *
+ * NOTE: there currently is no mechanism by which a LISTENER plugin can notify of a lost listener.  If there is a need
+ *  to trigger retries, a way for the Listener to notify back of the failure must be added.
  */
-public class WorkflowExecutorLocalListenerServiceImpl implements WorkflowExecutorLocalService {
+public class WorkflowListenerRetriable implements RetriableExecutor {
 
-    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(WorkflowExecutorLocalListenerServiceImpl.class);
+    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(WorkflowListenerRetriable.class);
 
     private Logger log = DEFAULT_LOGGER;
 
@@ -27,7 +29,9 @@ public class WorkflowExecutorLocalListenerServiceImpl implements WorkflowExecuto
     private Listener listener;
     private WorkflowExecutionResultProcessor resultProcessor;
 
-    public WorkflowExecutorLocalListenerServiceImpl(Workflow workflow, WorkflowExecutionResultProcessor resultProcessor) {
+    private Runnable onDisconnect;
+
+    public WorkflowListenerRetriable(Workflow workflow, WorkflowExecutionResultProcessor resultProcessor) {
         this.workflow = workflow;
         this.resultProcessor = resultProcessor;
     }
@@ -37,7 +41,12 @@ public class WorkflowExecutorLocalListenerServiceImpl implements WorkflowExecuto
 //----------------------------------------
 
     @Override
-    public void start() throws Exception {
+    public void init(Runnable handleRetryNeeded) {
+        onDisconnect = handleRetryNeeded;
+    }
+
+    @Override
+    public void attempt() throws Exception {
         ListenerFactory listenerFactory = lookupListenerFactory(workflow);
 
         if (listenerFactory != null) {
@@ -46,12 +55,14 @@ public class WorkflowExecutorLocalListenerServiceImpl implements WorkflowExecuto
             Map<String, Object> castMap = new HashMap<>(workflow.getParameters());
 
             listener = listenerFactory.create(
-                serviceMonitorResponse -> resultProcessor.queueSendResult(workflow.getUuid(),
-                    serviceMonitorResponse), castMap);
+                    serviceMonitorResponse -> resultProcessor.queueSendResult(workflow.getUuid(),
+                            serviceMonitorResponse), castMap);
             listener.start();
         } else {
             log.warn("Listener plugin not registered; workflow will not run: plugin-name={}; workflow-id={}",
                     workflow.getPluginName(), workflow.getUuid());
+
+            throw new Exception("Listener plugin not registered: plugin-name=" + workflow.getPluginName());
         }
     }
 
