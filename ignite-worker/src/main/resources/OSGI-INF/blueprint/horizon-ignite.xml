@@ -9,8 +9,18 @@
       <cm:property name="useKubernetes" value="false"/>
       <cm:property name="kubernetes.service-name" value="poc-distributed-scheduling"/>
       <cm:property name="workflowSchedulerThreadCount" value="20"/>
+      <cm:property name="routing.uri" value="seda:registration"/>
     </cm:default-properties>
   </cm:property-placeholder>
+
+  <camel:camelContext id="minionRouting" allowUseOriginalMessage="false">
+    <camel:contextScan/>
+    <camel:template id="registrationProducer" defaultEndpoint="{{routing.uri}}"/>
+  </camel:camelContext>
+
+  <bean id="minionRouting" class="org.opennms.poc.routing.MinionRouting">
+    <argument ref="${routing.uri}"/>
+  </bean>
 
   <reference id="opennmsScheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler"/>
 
@@ -84,6 +94,7 @@
     <argument ref="workflowExecutorLocalServiceFactory"/>
     <argument ref="listenerFactoryRegistry"/>
     <argument ref="serviceConnectorFactoryRegistry"/>
+    <argument ref="registrationProducer"/>
   </bean>
 
   <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl">
