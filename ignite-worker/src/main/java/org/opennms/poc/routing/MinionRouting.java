@@ -9,7 +9,7 @@ import org.apache.camel.builder.RouteBuilder;
 public class MinionRouting extends RouteBuilder {
 
     public final String routeUri;
-    public static final String ROUTE_ID =  "minion:registration";
+    public static final String ROUTE_ID =  "MINION_REGISTRATION";
 
     public MinionRouting(String uri) {
         this.routeUri = uri;
@@ -23,6 +23,7 @@ public class MinionRouting extends RouteBuilder {
             public void process(Exchange exchange) throws Exception {
                 log.info("Got a plugin registration notice!");
                 //TODO: send message to horizon
+                //TODO: Should probably aggregate all registrations into one single message for minion registration with horizon
             }
         });
 

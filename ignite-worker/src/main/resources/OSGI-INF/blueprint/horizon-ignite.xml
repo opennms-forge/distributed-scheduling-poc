@@ -50,16 +50,6 @@
 
 <!--  ========= Detector whiteboard and plugins ==========-->
 
-<!--  <bean id="detectorRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistryImpl">-->
-<!--    <argument ref="blueprintBundleContext"/>-->
-<!--    <argument ref="ignite"/>-->
-<!--  </bean>-->
-
-<!--  <bean id="monitorRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.MonitorRegistryImpl">-->
-<!--    <argument ref="blueprintBundleContext"/>-->
-<!--    <argument ref="ignite"/>-->
-<!--  </bean>-->
-
   <bean id="resultProcessorThreadPoolExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
     <argument value="3"/>
   </bean>
