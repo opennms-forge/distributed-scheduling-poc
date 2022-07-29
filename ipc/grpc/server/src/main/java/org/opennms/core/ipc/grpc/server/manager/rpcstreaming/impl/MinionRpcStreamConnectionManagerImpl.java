@@ -60,6 +60,7 @@ public class MinionRpcStreamConnectionManagerImpl implements MinionRpcStreamConn
                 new MinionRpcStreamConnectionImpl(
                         requestObserver,
                         this::onConnectionCompleted,
+                        this::onError,
                         rpcConnectionTracker,
                         rpcRequestTracker,
                         responseHandlerExecutor,
@@ -76,17 +77,27 @@ public class MinionRpcStreamConnectionManagerImpl implements MinionRpcStreamConn
         return result;
     }
 
+  private void onError(StreamObserver<RpcRequestProto> streamObserver, Throwable throwable) {
+    log.info("Minion RPC handler reported an error");
+    MinionInfo removedMinionInfo = rpcConnectionTracker.removeConnection(streamObserver);
+
+    // Notify the MinionManager of the removal
+    if (removedMinionInfo.getId() != null) {
+      minionManager.removeMinion(removedMinionInfo.getId());
+    }
+  }
+
 //========================================
 // Internals
 //----------------------------------------
 
     private void onConnectionCompleted(StreamObserver<RpcRequestProto> streamObserver) {
-            log.info("Minion RPC handler closed");
-            MinionInfo removedMinionInfo = rpcConnectionTracker.removeConnection(streamObserver);
+        log.info("Minion RPC handler closed");
+        MinionInfo removedMinionInfo = rpcConnectionTracker.removeConnection(streamObserver);
 
-            // Notify the MinionManager of the removal
-            if (removedMinionInfo.getId() != null) {
-                minionManager.removeMinion(removedMinionInfo.getId());
-            }
+        // Notify the MinionManager of the removal
+        if (removedMinionInfo.getId() != null) {
+            minionManager.removeMinion(removedMinionInfo.getId());
+        }
     }
 }

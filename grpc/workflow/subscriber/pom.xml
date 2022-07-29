@@ -43,8 +43,17 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.poc</groupId>
+            <artifactId>metrics</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
         </dependency>
     </dependencies>
 

@@ -15,6 +15,7 @@ import org.apache.ignite.kubernetes.configuration.KubernetesConnectionConfigurat
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
+import org.apache.ignite.spi.metric.MetricExporterSpi;
 import org.opennms.poc.ignite.worker.ignite.classloader.CompoundClassLoader;
 import org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl;
 
@@ -24,9 +25,9 @@ import java.util.Arrays;
 @AllArgsConstructor
 public class WorkerIgniteConfiguration {
 
-    private boolean useKubernetes;
-
-    private String kubernetesServiceName;
+    private final MetricExporterSpi metricExporterSpi;
+    private final boolean useKubernetes;
+    private final String kubernetesServiceName;
 
     public IgniteConfiguration prepareIgniteConfiguration() {
         IgniteConfiguration igniteConfiguration = new IgniteConfiguration();
@@ -45,6 +46,7 @@ public class WorkerIgniteConfiguration {
         configureCache(igniteConfiguration, WorkflowLifecycleManagerImpl.WORKFLOW_SERVICE_CACHE_NAME);
 
         configureClassLoader(igniteConfiguration);
+        igniteConfiguration.setMetricExporterSpi(metricExporterSpi);
 
         return igniteConfiguration;
     }

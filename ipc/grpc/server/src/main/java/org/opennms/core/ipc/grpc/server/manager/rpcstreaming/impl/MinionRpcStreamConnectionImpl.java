@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import io.grpc.stub.StreamObserver;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
@@ -31,6 +32,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
 
     private final StreamObserver<RpcRequestProto> streamObserver;
     private final Consumer<StreamObserver<RpcRequestProto>> onCompleted;
+    private final BiConsumer<StreamObserver<RpcRequestProto>, Throwable> onError;
     private final RpcConnectionTracker rpcConnectionTracker;
     private final RpcRequestTracker rpcRequestTracker;
     private final ExecutorService responseHandlerExecutor;
@@ -39,6 +41,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
     public MinionRpcStreamConnectionImpl(
             StreamObserver<RpcRequestProto> streamObserver,
             Consumer<StreamObserver<RpcRequestProto>> onCompleted,
+            BiConsumer<StreamObserver<RpcRequestProto>, Throwable> onError,
             RpcConnectionTracker rpcConnectionTracker,
             RpcRequestTracker rpcRequestTracker,
             ExecutorService responseHandlerExecutor,
@@ -47,6 +50,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
 
         this.streamObserver = streamObserver;
         this.onCompleted = onCompleted;
+        this.onError = onError;
         this.rpcConnectionTracker = rpcConnectionTracker;
         this.rpcRequestTracker = rpcRequestTracker;
         this.responseHandlerExecutor = responseHandlerExecutor;
@@ -89,7 +93,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
 
     @Override
     public void handleRpcStreamInboundError(Throwable thrown) {
-        log.error("Error in rpc streaming", thrown);
+        onError.accept(streamObserver, thrown);
     }
 
     @Override

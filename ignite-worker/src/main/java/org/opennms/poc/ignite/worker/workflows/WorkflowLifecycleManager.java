@@ -1,10 +1,19 @@
 package org.opennms.poc.ignite.worker.workflows;
 
-import org.opennms.poc.ignite.grpc.whiteboard.api.MessageListener;
 import org.opennms.poc.ignite.model.workflows.Workflows;
 
 /**
- * Watcher for Workflow definitions responsible to manage worker lifecycles to ensure all Workflows are processed.
+ * Responsible for management of task lifecycle.
+ * Ensure all elements from workflows/task set are processed.
  */
-public interface WorkflowLifecycleManager extends MessageListener<Workflows> {
+public interface WorkflowLifecycleManager {
+
+  /**
+   * Force deployment of a given task set.
+   *
+   * @param workflows Task set.
+   * @return Number of stopped tasks.
+   */
+  int deploy(Workflows workflows);
+
 }

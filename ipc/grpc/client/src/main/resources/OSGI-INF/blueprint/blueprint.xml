@@ -25,7 +25,7 @@
         <argument value="minion" />
     </bean>
 
-    <bean id="minionClient" class="org.opennms.core.ipc.grpc.client.MinionGrpcClient" init-method="start">
+    <bean id="minionClient" class="org.opennms.core.ipc.grpc.client.MinionGrpcClient" init-method="start" destroy-method="close">
         <argument ref="minionIdentity"/>
         <argument ref="configAdmin"/>
         <argument ref="metricRegistry"/>

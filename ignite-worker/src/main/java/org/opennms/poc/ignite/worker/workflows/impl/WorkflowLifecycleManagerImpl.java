@@ -38,12 +38,7 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
 //----------------------------------------
 
     @Override
-    public Class<Workflows> getType() {
-        return Workflows.class;
-    }
-
-    @Override
-    public void accept(Workflows workflowDefinitions) {
+    public int deploy(Workflows workflowDefinitions) {
 
         // Take the snapshot of currently running services.
         Collection<ServiceDescriptor> serviceDescriptorList = ignite.services().serviceDescriptors();
@@ -62,13 +57,18 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
 
         // Find the set of services that are no longer needed
         Collection<String> canceledServices =
-                calculateServicesToUndeploy(serviceConfigurationList, singletonIds, serviceDescriptorList);
+            calculateServicesToUndeploy(serviceConfigurationList, singletonIds, serviceDescriptorList);
         ignite.services().cancelAllAsync(canceledServices);
 
         // Log the update summary
         log.info("Completed workflow update: deploy-count={}; cancel-count={}",
-                serviceConfigurationList.size() + singletonIds.size(),
-                canceledServices.size());
+            serviceConfigurationList.size() + singletonIds.size(),
+            canceledServices.size());
+        return canceledServices.size();
+    }
+
+    public void close() {
+        ignite.close();
     }
 
 //========================================
@@ -108,16 +108,16 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
     private List<ServiceConfiguration> prepareOnePerClusterServiceConfigurations(Workflows workflowDefinitions) {
         List<ServiceConfiguration> serviceConfigurationList =
             workflowDefinitions.getWorkflows()
-                    .stream()
-                    .filter(this::isWorkflowOnePerCluster)
-                    .map((workflow) -> {
-                            WorkflowExecutorIgniteService workflowExecutorIgniteService = new WorkflowExecutorIgniteService(workflow);
-                            ServiceConfiguration serviceConfiguration = prepareServiceConfiguration(workflow, workflowExecutorIgniteService);
+                .stream()
+                .filter(this::isWorkflowOnePerCluster)
+                .map((workflow) -> {
+                        WorkflowExecutorIgniteService workflowExecutorIgniteService = new WorkflowExecutorIgniteService(workflow);
+                        ServiceConfiguration serviceConfiguration = prepareServiceConfiguration(workflow, workflowExecutorIgniteService);
 
-                            return serviceConfiguration;
-                        }
-                    )
-                    .collect(Collectors.toList());
+                        return serviceConfiguration;
+                    }
+                )
+                .collect(Collectors.toList());
 
         return serviceConfigurationList;
     }
@@ -152,18 +152,18 @@ public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
 
     private Collection<String>
     calculateServicesToUndeploy(
-            List<ServiceConfiguration> deployed,
-            List<String> deployedSingletonIds,
-            Collection<ServiceDescriptor> serviceDescriptorList) {
+        List<ServiceConfiguration> deployed,
+        List<String> deployedSingletonIds,
+        Collection<ServiceDescriptor> serviceDescriptorList) {
 
         Set<String> deployedNames = deployed.stream().map(ServiceConfiguration::getName).collect(Collectors.toSet());
         deployedNames.addAll(deployedSingletonIds);
 
         Set<String> existingNames =
-                serviceDescriptorList.stream().
-                        map(ServiceDescriptor::name)
-                        .filter(name -> name.startsWith(SERVICE_NAME_PREFIX))   // Only workflow services
-                        .collect(Collectors.toSet());
+            serviceDescriptorList.stream().
+                map(ServiceDescriptor::name)
+                .filter(name -> name.startsWith(SERVICE_NAME_PREFIX))   // Only workflow services
+                .collect(Collectors.toSet());
 
         return Sets.difference(existingNames, deployedNames);
     }
