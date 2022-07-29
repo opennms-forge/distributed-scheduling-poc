@@ -92,6 +92,7 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
 
             PluginConfigInjector.injectConfigs(foundMonitorManager, workflow.getFieldConfigMeta());
 
+            //TODO: what parameters (if any) to pass on creation? Probably none since we want to inject everything from schema.
             return Optional.of(foundMonitorManager.create(null));
         }
         else return Optional.empty();

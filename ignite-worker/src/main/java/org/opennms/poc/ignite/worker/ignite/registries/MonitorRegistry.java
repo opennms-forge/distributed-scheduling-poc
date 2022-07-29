@@ -6,6 +6,6 @@ import org.opennms.poc.plugin.api.ServiceMonitorManager;
 public interface MonitorRegistry {
 
     ServiceMonitorManager getService(String type);
-    int getCount();
+    int getServiceCount();
     Map<String, ServiceMonitorManager> getServices();
 }

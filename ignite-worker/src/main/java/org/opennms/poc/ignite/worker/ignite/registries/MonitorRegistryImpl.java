@@ -9,30 +9,16 @@ import org.opennms.poc.plugin.api.ServiceMonitorManager;
 import org.osgi.framework.BundleContext;
 
 @Slf4j
-public class MonitorRegistryImpl extends KeyedWhiteboard<String, ServiceMonitorManager> implements MonitorRegistry {
+public class MonitorRegistryImpl extends AlertingPluginRegistry<String, ServiceMonitorManager> implements MonitorRegistry {
 
     public static final String PLUGIN_IDENTIFIER = "monitor.name";
 
     public MonitorRegistryImpl(BundleContext bundleContext) {
-        super(bundleContext, ServiceMonitorManager.class, (svc, props) -> props.getProperty(PLUGIN_IDENTIFIER));
-    }
-
-    @Override
-    public int getCount() {
-        return getServiceCount();
+        super(bundleContext, ServiceMonitorManager.class,PLUGIN_IDENTIFIER);
     }
 
     @Override
     public Map<String, ServiceMonitorManager> getServices() {
         return super.asMap();
-    }
-
-    @Override
-    protected String addService(ServiceMonitorManager service, ServiceProperties props) {
-        String retVal = super.addService(service, props);
-
-        // TODO: Notify horizon of new plugin registration
-
-        return retVal;
     }
 }

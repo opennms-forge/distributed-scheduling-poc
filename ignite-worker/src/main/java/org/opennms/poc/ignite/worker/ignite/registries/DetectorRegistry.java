@@ -6,6 +6,6 @@ import org.opennms.poc.plugin.api.ServiceDetectorManager;
 public interface DetectorRegistry {
 
     ServiceDetectorManager getService(String type);
-    int getCount();
+    int getServiceCount();
     Map<String, ServiceDetectorManager> getServices();
 }

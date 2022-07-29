@@ -39,7 +39,7 @@ public class OsgiServiceHolder {
     }
 
     public static int getRegisteredDetectorCount() {
-        return detectorRegistry.getCount();
+        return detectorRegistry.getServiceCount();
     }
 
     public static Optional<ServiceMonitorManager> getMonitorManager(String name) {
@@ -47,7 +47,7 @@ public class OsgiServiceHolder {
     }
 
     public static int getRegisteredMonitorCount() {
-        return monitorRegistry.getCount();
+        return monitorRegistry.getServiceCount();
     }
 
     public static OpennmsScheduler getOpennmsScheduler() {
