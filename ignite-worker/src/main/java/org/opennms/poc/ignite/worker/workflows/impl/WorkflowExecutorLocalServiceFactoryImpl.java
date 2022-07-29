@@ -40,10 +40,12 @@ public class WorkflowExecutorLocalServiceFactoryImpl implements WorkflowExecutor
                 return new WorkflowExecutorLocalMonitorServiceImpl(scheduler, workflow, resultProcessor);
 
             case LISTENER:
-                return new WorkflowExecutorLocalListenerServiceImpl(workflow, resultProcessor);
+                WorkflowListenerRetriable listenerService = new WorkflowListenerRetriable(workflow, resultProcessor);
+                return new WorkflowCommonRetryExecutor(scheduler, workflow, resultProcessor, listenerService);
 
             case CONNECTOR:
-                return new WorkflowExecutorLocalConnectorServiceImpl(scheduler, workflow, resultProcessor);
+                WorkflowConnectorRetriable connectorService = new WorkflowConnectorRetriable(workflow, resultProcessor);
+                return new WorkflowCommonRetryExecutor(scheduler, workflow, resultProcessor, connectorService);
 
             default:
                 throw new RuntimeException("unrecognized workflow type " + workflow.getType());
