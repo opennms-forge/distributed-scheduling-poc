@@ -20,7 +20,7 @@
 
   <bean id="snmpMonitorManager" class="org.opennms.poc.snmp.SnmpMonitorManager"/>
 
-  <service ref="snmpMonitorFactory" interface="org.opennms.poc.plugin.api.ServiceMonitorFactory">
+  <service ref="snmpMonitorManager" interface="org.opennms.poc.plugin.api.ServiceMonitorManager">
     <service-properties>
       <entry key="monitor.name" value="SNMPMonitor"/>
     </service-properties>
