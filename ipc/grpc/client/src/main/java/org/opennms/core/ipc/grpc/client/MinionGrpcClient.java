@@ -319,6 +319,21 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
         }
     }
 
+    public void close() {
+        if (rpcStream != null) {
+            rpcStream.onCompleted();
+            rpcStream = null;
+        }
+        if (sinkStream != null) {
+            sinkStream.onCompleted();
+            sinkStream = null;
+        }
+        if (channel != null) {
+            channel.shutdown();
+            channel = null;
+        }
+    }
+
     private void sendBlockingSinkMessage(SinkMessage sinkMessage) {
         boolean succeeded = sendSinkMessage(sinkMessage);
         if (succeeded) {
