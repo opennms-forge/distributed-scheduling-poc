@@ -28,11 +28,18 @@
 
 package org.opennms.core.ipc.grpc.server;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Message;
+import io.grpc.BindableService;
+import io.grpc.ServerInterceptor;
+import io.grpc.ServerInterceptors;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -54,6 +61,8 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.core.grpc.common.GrpcIpcServer;
+import org.opennms.core.grpc.interceptor.InterceptorFactory;
+import org.opennms.core.grpc.interceptor.MeteringServerInterceptor;
 import org.opennms.core.ipc.grpc.server.manager.LocationIndependentRpcClientFactory;
 import org.opennms.core.ipc.grpc.server.manager.MinionManager;
 import org.opennms.core.ipc.grpc.server.manager.RpcConnectionTracker;
@@ -101,6 +110,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsGrpcServer.class);
     private final GrpcIpcServer grpcIpcServer;
+    private final List<InterceptorFactory> interceptors;
     private String location;
     private Identity identity;
     private Properties properties;
@@ -128,9 +138,13 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 //----------------------------------------
 
     public OpennmsGrpcServer(GrpcIpcServer grpcIpcServer) {
-        this.grpcIpcServer = grpcIpcServer;
+        this(grpcIpcServer, Collections.emptyList());
     }
 
+    public OpennmsGrpcServer(GrpcIpcServer grpcIpcServer, List<InterceptorFactory> interceptors) {
+        this.grpcIpcServer = grpcIpcServer;
+        this.interceptors = interceptors;
+    }
 
 //========================================
 // Lifecycle
@@ -138,13 +152,21 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     public void start() throws IOException {
         try (MDCCloseable mdc = MDC.putCloseable("prefix", RpcClientFactory.LOG_PREFIX)) {
-            grpcIpcServer.startServer(new MinionRSTransportAdapter(
+
+            MinionRSTransportAdapter adapter = new MinionRSTransportAdapter(
                 minionRpcStreamConnectionManager::startRpcStreaming,
                 this.outgoingMessageHandler,
                 this.incomingRpcHandler,
                 this::processSinkStreamingCall
-            ));
+            );
 
+            BindableService service = adapter;
+            if (!interceptors.isEmpty()) {
+                for (InterceptorFactory interceptorFactory : interceptors) {
+                    service = interceptorFactory.create(service);
+                }
+            }
+            grpcIpcServer.startServer(service);
             LOG.info("Added RPC/Sink Service to OpenNMS IPC Grpc Server");
         }
     }

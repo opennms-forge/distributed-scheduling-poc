@@ -1,4 +1,4 @@
-package org.opennms.poc.ignite.grpc.server.internal;
+package org.opennms.core.grpc.interceptor;
 
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -21,12 +21,11 @@ public class DelegatingInterceptor implements ServerInterceptor {
 
     for (ServerInterceptor interceptor : interceptors) {
       interceptor.interceptCall(call, headers, new ServerCallHandler<ReqT, RespT>() {
-          @Override
-          public Listener<ReqT> startCall(ServerCall<ReqT, RespT> call, Metadata headers) {
-            return listener;
-          }
+        @Override
+        public Listener<ReqT> startCall(ServerCall<ReqT, RespT> call, Metadata headers) {
+          return listener;
         }
-      );
+      });
     }
 
     return listener;

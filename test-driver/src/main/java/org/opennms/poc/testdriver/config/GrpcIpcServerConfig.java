@@ -1,10 +1,12 @@
 package org.opennms.poc.testdriver.config;
 
+import java.util.Arrays;
 import org.opennms.core.grpc.common.GrpcIpcServer;
 import org.opennms.core.grpc.common.GrpcIpcServerBuilder;
 import org.opennms.core.grpc.common.GrpcIpcUtils;
 import org.opennms.core.ipc.grpc.server.GrpcServerConstants;
 import org.springframework.beans.factory.annotation.Value;
+import org.opennms.core.grpc.interceptor.LoggingInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,6 +26,8 @@ public class GrpcIpcServerConfig {
         Properties properties = new Properties();
         properties.setProperty(GrpcIpcUtils.GRPC_MAX_INBOUND_SIZE, Long.toString(maxMessageSize));
 
-        return new GrpcIpcServerBuilder(properties, 8990, "PT10S");
+        return new GrpcIpcServerBuilder(properties, 8990, "PT10S", Arrays.asList(
+            new LoggingInterceptor()
+        ));
     }
 }

@@ -1,14 +1,17 @@
 package org.opennms.poc.testdriver.config;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Value;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import org.opennms.core.grpc.common.GrpcIpcServer;
+import org.opennms.core.grpc.interceptor.MeteringInterceptorFactory;
 import org.opennms.core.ipc.grpc.server.OpennmsGrpcServer;
 import org.opennms.core.ipc.grpc.server.manager.LocationIndependentRpcClientFactory;
 import org.opennms.core.ipc.grpc.server.manager.MinionManager;
@@ -26,12 +29,16 @@ import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults;
 import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults.WorkflowResult;
 import org.opennms.poc.testdriver.workflow.ResultCollector;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import orh.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
 
 @Configuration
 public class GrpcServerConfig {
+
+    @Autowired
+    private MetricRegistry metricRegistry;
 
     @Bean
     MinionManager minionManager() {
@@ -40,7 +47,9 @@ public class GrpcServerConfig {
 
     @Bean
     public OpennmsGrpcServer opennmsServer(GrpcIpcServer serverBuilder, GrpcTwinPublisher publisher, MinionManager minionManager, ResultCollector resultCollector) throws Exception {
-        OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder);
+        OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder, Arrays.asList(
+            new MeteringInterceptorFactory(metricRegistry)
+        ));
 
         RpcConnectionTracker rpcConnectionTracker = new RpcConnectionTrackerImpl();
         RpcRequestTracker rpcRequestTracker = new RpcRequestTrackerImpl();

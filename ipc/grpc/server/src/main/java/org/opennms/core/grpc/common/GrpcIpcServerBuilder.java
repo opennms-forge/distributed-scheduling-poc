@@ -30,18 +30,22 @@ package org.opennms.core.grpc.common;
 
 import io.grpc.BindableService;
 import io.grpc.Server;
+import io.grpc.ServerInterceptor;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
+import org.opennms.core.grpc.interceptor.DelegatingInterceptor;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +55,7 @@ public class GrpcIpcServerBuilder implements GrpcIpcServer {
     private static final Logger LOG = LoggerFactory.getLogger(GrpcIpcServerBuilder.class);
 
     private Properties properties;
+    private final List<ServerInterceptor> interceptors;
     private NettyServerBuilder serverBuilder;
     private Server server;
     private final int port;
@@ -61,18 +66,25 @@ public class GrpcIpcServerBuilder implements GrpcIpcServer {
     private Set<BindableService> services = new HashSet<>();
 
     public GrpcIpcServerBuilder(ConfigurationAdmin configAdmin, int port, String delay) {
-        this(GrpcIpcUtils.getPropertiesFromConfig(configAdmin, GrpcIpcUtils.GRPC_SERVER_PID), port, delay);
+        this(GrpcIpcUtils.getPropertiesFromConfig(configAdmin, GrpcIpcUtils.GRPC_SERVER_PID), port, delay, Collections.emptyList());
     }
 
     public GrpcIpcServerBuilder(Properties properties, int port, String delay) {
+        this(properties, port, delay, Collections.emptyList());
+    }
+
+    public GrpcIpcServerBuilder(Properties properties, int port, String delay, List<ServerInterceptor> interceptors) {
         this.port = port;
         this.delay = Duration.parse(delay);
         this.properties = properties;
+        this.interceptors = interceptors;
     }
+
 
     @Override
     public synchronized void startServer(BindableService bindableService) throws IOException {
         initializeServerFromConfig();
+
         if (!services.contains(bindableService)) {
             serverBuilder.addService(bindableService);
             services.add(bindableService);
@@ -96,8 +108,10 @@ public class GrpcIpcServerBuilder implements GrpcIpcServer {
         if (serverBuilder == null) {
             int maxInboundMessageSize = PropertiesUtils.getProperty(properties, GrpcIpcUtils.GRPC_MAX_INBOUND_SIZE, GrpcIpcUtils.DEFAULT_MESSAGE_SIZE);
             boolean tlsEnabled = PropertiesUtils.getProperty(properties, GrpcIpcUtils.TLS_ENABLED, false);
+
             serverBuilder = NettyServerBuilder.forAddress(new InetSocketAddress(this.port))
-                    .maxInboundMessageSize(maxInboundMessageSize);
+                .maxInboundMessageSize(maxInboundMessageSize)
+                .intercept(new DelegatingInterceptor(interceptors));
             if (tlsEnabled) {
                 SslContextBuilder sslContextBuilder = GrpcIpcUtils.getSslContextBuilder(properties);
                 if (sslContextBuilder != null) {
