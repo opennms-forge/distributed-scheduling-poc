@@ -15,7 +15,7 @@ import org.opennms.horizon.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.ipc.sink.api.SyncDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import orh.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
+import org.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
 
 public class ResultsConsumer implements Consumer<Results> {
 

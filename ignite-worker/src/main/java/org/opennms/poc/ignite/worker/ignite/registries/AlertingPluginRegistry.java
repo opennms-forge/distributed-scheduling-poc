@@ -15,24 +15,24 @@ import org.osgi.framework.BundleContext;
 @Slf4j
 public class AlertingPluginRegistry<K, S> extends KeyedWhiteboard<K, S>  {
     private final ProducerTemplate producerTemplate;
-    private final String id;
 
     public AlertingPluginRegistry(BundleContext bundleContext, Class<S> serviceType, String id, ProducerTemplate producerTemplate) {
         super(bundleContext, serviceType, (svc, props) -> props.getProperty(id));
-        this.id = id;
         this.producerTemplate = producerTemplate;
     }
 
     @Override
     protected K addService(S service, ServiceProperties props) {
-        K retVal = super.addService(service, props);
+        K serviceId = super.addService(service, props);
 
-        List<FieldConfigMeta> fieldConfigMetaList = PluginConfigScanner.getConfigs(service.getClass());
-        //TODO: make this is the impl class, not the interface
-        log.info("################# Performing scan on service {}", service.getClass());
-        PluginMetadata pluginMetadata = new PluginMetadata(props.getProperty(id), WorkflowType.DETECTOR, fieldConfigMetaList);
-        producerTemplate.sendBody(pluginMetadata);
+        if (serviceId != null) {
+            List<FieldConfigMeta> fieldConfigMetaList = PluginConfigScanner.getConfigs(getServiceType());
+            //TODO: make this is the impl class, not the interface
+            log.info("################# Performing scan on service {}", getServiceType());
+            PluginMetadata pluginMetadata = new PluginMetadata(serviceId.toString(), WorkflowType.DETECTOR, fieldConfigMetaList);
+            producerTemplate.sendBody(pluginMetadata);
+        }
 
-        return retVal;
+        return serviceId;
     }
 }

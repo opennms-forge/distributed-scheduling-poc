@@ -1,17 +1,16 @@
-package orh.opennms.poc.ignite.grpc.workflow;
+package org.opennms.poc.plugin.config;
 
 import org.opennms.horizon.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
-import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WorkflowSinkModule implements SinkModule<WorkflowResults, WorkflowResults> {
+public class PluginConfigSinkModule implements SinkModule<PluginConfigMessage, PluginConfigMessage> {
 
   public static final String MODULE_ID = "workflows";
-  private final Logger logger = LoggerFactory.getLogger(WorkflowSinkModule.class);
+  private final Logger logger = LoggerFactory.getLogger(PluginConfigSinkModule.class);
 
   @Override
   public String getId() {
@@ -24,9 +23,10 @@ public class WorkflowSinkModule implements SinkModule<WorkflowResults, WorkflowR
   }
 
   @Override
-  public byte[] marshal(WorkflowResults resultsMessage) {
+  public byte[] marshal(PluginConfigMessage resultsMessage) {
     try {
-      return resultsMessage.toByteArray();
+//      return resultsMessage.toByteArray();
+      return null;
     } catch (Exception e) {
       logger.warn("Error while marshalling message {}.", resultsMessage, e);
       return new byte[0];
@@ -34,9 +34,9 @@ public class WorkflowSinkModule implements SinkModule<WorkflowResults, WorkflowR
   }
 
   @Override
-  public WorkflowResults unmarshal(byte[] bytes) {
+  public PluginConfigMessage unmarshal(byte[] bytes) {
     try {
-      return WorkflowResults.parseFrom(bytes);
+      return PluginConfigMessage.parseFrom(bytes);
     } catch (Exception e) {
       logger.warn("Error while unmarshalling message.", e);
       return null;
@@ -44,17 +44,17 @@ public class WorkflowSinkModule implements SinkModule<WorkflowResults, WorkflowR
   }
 
   @Override
-  public byte[] marshalSingleMessage(WorkflowResults resultsMessage) {
+  public byte[] marshalSingleMessage(PluginConfigMessage resultsMessage) {
     return marshal(resultsMessage);
   }
 
   @Override
-  public WorkflowResults unmarshalSingleMessage(byte[] bytes) {
+  public PluginConfigMessage unmarshalSingleMessage(byte[] bytes) {
     return unmarshal(bytes);
   }
 
   @Override
-  public AggregationPolicy<WorkflowResults, WorkflowResults, ?> getAggregationPolicy() {
+  public AggregationPolicy<PluginConfigMessage, PluginConfigMessage, ?> getAggregationPolicy() {
     return new IdentityAggregationPolicy<>();
   }
 

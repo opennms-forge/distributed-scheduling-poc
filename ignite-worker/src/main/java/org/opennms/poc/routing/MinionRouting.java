@@ -1,26 +1,28 @@
 package org.opennms.poc.routing;
 
+import java.util.Arrays;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.processor.aggregate.AbstractListAggregationStrategy;
 import org.opennms.horizon.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.ipc.sink.api.SyncDispatcher;
-import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults;
+import org.opennms.poc.plugin.config.FieldConfigMeta;
+import org.opennms.poc.plugin.config.PluginConfigMessage;
+import org.opennms.poc.plugin.config.PluginConfigMessage.Builder;
+import org.opennms.poc.plugin.config.PluginConfigMessage.PluginConfigMeta;
+import org.opennms.poc.plugin.config.PluginConfigSinkModule;
 import org.opennms.poc.plugin.config.PluginMetadata;
-import orh.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
+//import org.opennms.poc.plugin.config.PluginConfigMessage;
 
 @Slf4j
 public class MinionRouting extends RouteBuilder {
 
     private final String routeUri;
     public static final String ROUTE_ID =  "MINION_REGISTRATION";
-//    private final SyncDispatcher<PluginConfig> dispatcher;
+    private final SyncDispatcher<PluginConfigMessage> dispatcher;
 
 
     //TODO: make this configurable
@@ -28,7 +30,7 @@ public class MinionRouting extends RouteBuilder {
 
     public MinionRouting(String uri, MessageDispatcherFactory messageDispatcherFactory) {
         this.routeUri = uri;
-//        dispatcher = messageDispatcherFactory.createSyncDispatcher(new WorkflowSinkModule());
+        dispatcher = messageDispatcherFactory.createSyncDispatcher(new PluginConfigSinkModule());
     }
 
     @Override
@@ -44,10 +46,29 @@ public class MinionRouting extends RouteBuilder {
 
                     log.info("Got {} configs", pluginMetadataList.size());
 
-                    // now get the builder for the protobuf message and contruct it from the PluginMetadata
+                    // now get the builder for the protobuf message and construct it from the PluginMetadata
 
-//                    PluginConfig pluginConfig = ????
-//                    dispatcher.send(pluginConfig);
+                    Builder messageBuilder = PluginConfigMessage.newBuilder();
+
+                    pluginMetadataList.forEach(pluginMetadata -> {
+                        PluginConfigMeta.Builder pluginConfigMetaBuilder = PluginConfigMeta.newBuilder().
+                                setPluginName(pluginMetadata.getPluginName()).
+                                setPluginType(pluginMetadata.getPluginType().toString());
+                        pluginMetadata.getFieldConfigs().forEach(fieldConfig -> {
+                                pluginConfigMetaBuilder.addConfigs(
+                                    FieldConfigMeta.newBuilder().
+                                        setJavaType(fieldConfig.getJavaType()).
+                                        setIsEnum(fieldConfig.isEnum()).
+                                        setCustom(fieldConfig.isCustom()).
+                                        setDisplayName(fieldConfig.getDisplayName()).
+                                        addAllEnumValues((Iterable<String>) Arrays.stream(fieldConfig.getEnumConstants()).iterator()).
+                                        setDeclaredFieldName(fieldConfig.getDeclaredFieldName()).
+                                        build());
+                            }
+                        );
+                        messageBuilder.addPluginconfigs(pluginConfigMetaBuilder.build());
+                    });
+                    dispatcher.send(messageBuilder.build());
                 });
 
         //TODO: we may need dead letter handling here if comms to horizon haven't spun up yet.
