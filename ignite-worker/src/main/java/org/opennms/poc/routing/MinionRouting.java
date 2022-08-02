@@ -15,7 +15,6 @@ import org.opennms.poc.plugin.config.PluginConfigMessage.Builder;
 import org.opennms.poc.plugin.config.PluginConfigMessage.PluginConfigMeta;
 import org.opennms.poc.plugin.config.PluginConfigSinkModule;
 import org.opennms.poc.plugin.config.PluginMetadata;
-//import org.opennms.poc.plugin.config.PluginConfigMessage;
 
 @Slf4j
 public class MinionRouting extends RouteBuilder {
@@ -50,10 +49,12 @@ public class MinionRouting extends RouteBuilder {
 
                     Builder messageBuilder = PluginConfigMessage.newBuilder();
 
+                    //  iterate over each of the plugins that sent a config
                     pluginMetadataList.forEach(pluginMetadata -> {
                         PluginConfigMeta.Builder pluginConfigMetaBuilder = PluginConfigMeta.newBuilder().
                                 setPluginName(pluginMetadata.getPluginName()).
                                 setPluginType(pluginMetadata.getPluginType().toString());
+                        // iterate over each field in the plugin config
                         pluginMetadata.getFieldConfigs().forEach(fieldConfig -> {
                                 pluginConfigMetaBuilder.addConfigs(
                                     FieldConfigMeta.newBuilder().
@@ -61,6 +62,7 @@ public class MinionRouting extends RouteBuilder {
                                         setIsEnum(fieldConfig.isEnum()).
                                         setCustom(fieldConfig.isCustom()).
                                         setDisplayName(fieldConfig.getDisplayName()).
+                                            //TODO: make sure this can handle null, maybe change the field itself to a List
                                         addAllEnumValues((Iterable<String>) Arrays.stream(fieldConfig.getEnumConstants()).iterator()).
                                         setDeclaredFieldName(fieldConfig.getDeclaredFieldName()).
                                         build());

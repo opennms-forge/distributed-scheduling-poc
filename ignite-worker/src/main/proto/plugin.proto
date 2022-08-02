@@ -27,8 +27,6 @@
  *******************************************************************************/
 syntax = "proto3";
 
-//import "google/protobuf/any.proto";
-
 package plugin;
 option java_multiple_files = true;
 option java_package = "org.opennms.poc.plugin.config";
