@@ -31,6 +31,7 @@ package org.opennms.core.ipc.twin.grpc.publisher;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 import com.google.common.collect.LinkedListMultimap;
@@ -44,7 +45,6 @@ import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.core.grpc.common.GrpcIpcServer;
 import org.opennms.core.grpc.common.GrpcIpcUtils;
-import org.opennms.core.ipc.twin.api.TwinStrategy;
 import org.opennms.core.ipc.twin.common.AbstractTwinPublisher;
 import org.opennms.core.ipc.twin.common.LocalTwinSubscriber;
 import org.opennms.core.ipc.twin.common.TwinRequest;
@@ -115,10 +115,16 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     static class AdapterObserver implements StreamObserver<TwinResponseProto> {
 
+        private final Logger logger = LoggerFactory.getLogger(AdapterObserver.class);
         private final StreamObserver<CloudToMinionMessage> delegate;
+        private Runnable completionCallback;
 
         AdapterObserver(StreamObserver<CloudToMinionMessage> delegate) {
             this.delegate = delegate;
+        }
+
+        public void setCompletionCallback(Runnable completion) {
+            this.completionCallback = completion;
         }
 
         @Override
@@ -128,18 +134,36 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
         @Override
         public void onError(Throwable t) {
-
+            logger.warn("Error while processing a stream data", t);
         }
 
         @Override
         public void onCompleted() {
-
+            completionCallback.run();
         }
 
         private CloudToMinionMessage map(TwinResponseProto value) {
             return CloudToMinionMessage.newBuilder()
                 .setTwinResponse(value)
                 .build();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof AdapterObserver)) {
+                return false;
+            }
+            AdapterObserver that = (AdapterObserver) o;
+            return Objects.equals(delegate, that.delegate) && Objects.equals(
+                completionCallback, that.completionCallback);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(delegate, completionCallback);
         }
     }
 
@@ -153,6 +177,10 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
                     sinkStreamsByLocation.remove(minionHeader.getLocation(), sinkStream);
                 }
                 AdapterObserver delegate = new AdapterObserver(responseObserver);
+                delegate.setCompletionCallback(() -> {
+                    sinkStreamsByLocation.remove(minionHeader.getLocation(), delegate);
+                    sinkStreamsBySystemId.remove(minionHeader.getSystemId());
+                });
                 sinkStreamsByLocation.put(minionHeader.getLocation(), delegate);
                 sinkStreamsBySystemId.put(minionHeader.getSystemId(), delegate);
 
