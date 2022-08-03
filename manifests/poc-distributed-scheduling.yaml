@@ -152,6 +152,8 @@ spec:
           env:
             - name: management_endpoints_web_exposure_include
               value: "*"
+            - name: server_connection_timeout
+              value: "300000"
           ports:
             - containerPort: 8080
             - containerPort: 8990
@@ -164,6 +166,7 @@ metadata:
 data:
   grpc-config: |
     host=poc-test-driver
+    max.message.size=104857600
   opennms-identity: |
     identity.id=${env:HOSTNAME:-UNKNOWN}
     identity.location=${env:LOCATION:-cloud}

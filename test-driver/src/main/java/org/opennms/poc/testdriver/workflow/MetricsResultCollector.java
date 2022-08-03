@@ -6,6 +6,8 @@ import com.codahale.metrics.DefaultSettableGauge;
 import com.codahale.metrics.MetricRegistry;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.opennms.poc.ignite.grpc.workflow.contract.WorkflowResults.WorkflowResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,7 @@ public class MetricsResultCollector implements ResultCollector {
       Object responseTime = resultMap.get("response.time");
       if (responseTime instanceof Number) {
         Double pingTime = ((Number) responseTime).doubleValue();
-        metricRegistry.timer(name(name, "timer.response.time")).update(Duration.ofMillis(pingTime.longValue()));
+        metricRegistry.timer(name(name, "timer.response.time")).update(pingTime.longValue(), TimeUnit.MICROSECONDS);
       }
     }
 

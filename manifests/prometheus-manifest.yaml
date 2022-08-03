@@ -63,8 +63,8 @@ data:
             labels:
               pushgateway_instance: metricfire
       - job_name: 'kubernetes-service-endpoints'
-        scrape_interval: 5s
-        scrape_timeout: 2s
+        scrape_interval: 15s
+        scrape_timeout: 14s
         kubernetes_sd_configs:
           - role: endpoints
         relabel_configs:

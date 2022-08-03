@@ -1,0 +1,11 @@
+#!/bin/bash
+
+KIND_CONTAINER_ID_LIST="$(docker exec kind-control-plane crictl ps | awk '/poc-ignite-worker/ { print $1 }')"
+
+set -- ${KIND_CONTAINER_ID_LIST}
+
+TARGET_CONTAINER_ID="$1"
+
+docker exec kind-control-plane \
+	crictl exec "${TARGET_CONTAINER_ID}" \
+		curl -s -X POST --data-ascii "SAMPLE-DATA" http://localhost:9999/send-listener-sample
