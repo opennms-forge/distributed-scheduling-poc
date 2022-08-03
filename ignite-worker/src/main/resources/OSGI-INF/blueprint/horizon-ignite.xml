@@ -13,7 +13,7 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <camel:camelContext id="minionRouting" allowUseOriginalMessage="false">
+  <camel:camelContext id="minionRoutingContext" allowUseOriginalMessage="false">
     <camel:contextScan/>
     <camel:template id="registrationProducer" defaultEndpoint="{{routing.uri}}"/>
   </camel:camelContext>

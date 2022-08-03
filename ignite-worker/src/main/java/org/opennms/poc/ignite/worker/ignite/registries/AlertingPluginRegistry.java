@@ -2,7 +2,6 @@ package org.opennms.poc.ignite.worker.ignite.registries;
 
 import com.savoirtech.eos.pattern.whiteboard.KeyedWhiteboard;
 import com.savoirtech.eos.util.ServiceProperties;
-import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.ProducerTemplate;
