@@ -1,0 +1,24 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns:camel="http://camel.apache.org/schema/blueprint"
+  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <cm:property-placeholder persistent-id="org.opennms.poc.ignite.worker" update-strategy="reload">
+    <cm:default-properties>
+      <cm:property name="routing.uri" value="seda:registration"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <camel:camelContext id="minionRoutingContext" allowUseOriginalMessage="false">
+    <camel:contextScan/>
+    <camel:template id="registrationProducer" defaultEndpoint="{{routing.uri}}"/>
+  </camel:camelContext>
+
+  <bean id="alertingService" class = "org.opennms.poc.alerting.AlertingServiceImpl">
+    <argument ref="registrationProducer"/>
+  </bean>
+
+  <service ref="alertingService" interface="org.opennms.poc.alerting.AlertingService"/>
+
+</blueprint>

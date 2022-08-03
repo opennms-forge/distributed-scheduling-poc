@@ -4,20 +4,21 @@ import com.savoirtech.eos.pattern.whiteboard.KeyedWhiteboard;
 import com.savoirtech.eos.util.ServiceProperties;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.ProducerTemplate;
+import org.opennms.poc.alerting.AlertingService;
 import org.opennms.poc.ignite.model.workflows.WorkflowType;
 import org.opennms.poc.plugin.api.FieldConfigMeta;
 import org.opennms.poc.plugin.config.PluginConfigScanner;
-import org.opennms.poc.plugin.config.PluginMetadata;
+import org.opennms.poc.ignite.model.workflows.PluginMetadata;
 import org.osgi.framework.BundleContext;
 
 @Slf4j
 public class AlertingPluginRegistry<K, S> extends KeyedWhiteboard<K, S>  {
-    private final ProducerTemplate producerTemplate;
+    private final AlertingService alertingService;
 
-    public AlertingPluginRegistry(BundleContext bundleContext, Class<S> serviceType, String id, ProducerTemplate producerTemplate) {
+    public AlertingPluginRegistry(BundleContext bundleContext, Class<S> serviceType, String id, AlertingService alertingService) {
         super(bundleContext, serviceType, (svc, props) -> props.getProperty(id));
-        this.producerTemplate = producerTemplate;
+        this.alertingService = alertingService;
+        super.start();
     }
 
     @Override
@@ -25,13 +26,16 @@ public class AlertingPluginRegistry<K, S> extends KeyedWhiteboard<K, S>  {
         K serviceId = super.addService(service, props);
 
         if (serviceId != null) {
-            List<FieldConfigMeta> fieldConfigMetaList = PluginConfigScanner.getConfigs(getServiceType());
-            //TODO: make this is the impl class, not the interface
-            log.info("################# Performing scan on service {}", getServiceType());
+            List<FieldConfigMeta> fieldConfigMetaList = PluginConfigScanner.getConfigs(service.getClass());
+            log.info("Performing scan on service {}", service.getClass());
             PluginMetadata pluginMetadata = new PluginMetadata(serviceId.toString(), WorkflowType.DETECTOR, fieldConfigMetaList);
-            producerTemplate.sendBody(pluginMetadata);
+            alertingService.notifyOfPluginRegistration(pluginMetadata);
         }
 
         return serviceId;
+    }
+
+    @Override
+    public void start() {
     }
 }

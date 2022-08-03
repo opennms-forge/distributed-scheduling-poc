@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
+import org.opennms.poc.ignite.model.workflows.PluginMetadata;
 import org.opennms.poc.ignite.model.workflows.WorkflowType;
 import org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry;
 import org.opennms.poc.ignite.worker.ignite.registries.MonitorRegistry;
-import org.opennms.poc.plugin.api.ServiceDetector;
 import org.opennms.poc.plugin.api.ServiceDetectorManager;
-import org.opennms.poc.plugin.api.ServiceMonitor;
 import org.opennms.poc.plugin.api.ServiceMonitorManager;
 
 @AllArgsConstructor

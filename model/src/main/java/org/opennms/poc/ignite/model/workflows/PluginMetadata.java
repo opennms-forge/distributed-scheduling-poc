@@ -1,4 +1,4 @@
-package org.opennms.poc.plugin.config;
+package org.opennms.poc.ignite.model.workflows;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

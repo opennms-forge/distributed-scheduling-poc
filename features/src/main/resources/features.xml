@@ -11,6 +11,7 @@
     </feature>
 
     <feature name="ignite-poc" version="${project.version}">
+        <feature>camel-blueprint</feature>
         <feature>camel-core</feature>
         <feature version="${project.version}">guava</feature>
         <feature>cxf-jackson</feature>
@@ -22,6 +23,7 @@
         <feature version="${project.version}">poc-cron</feature>
         <feature version="${project.version}">poc-metrics</feature>
 
+        <bundle>mvn:org.opennms.poc/alerting/${project.version}</bundle>
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
     </feature>

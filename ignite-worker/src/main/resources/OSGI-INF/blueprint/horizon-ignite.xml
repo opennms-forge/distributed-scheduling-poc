@@ -13,19 +13,17 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <camel:camelContext id="minionRoutingContext" allowUseOriginalMessage="false">
-    <camel:contextScan/>
-    <camel:template id="registrationProducer" defaultEndpoint="{{routing.uri}}"/>
-  </camel:camelContext>
-
-  <bean id="minionRouting" class="org.opennms.poc.routing.MinionRouting">
-    <argument ref="${routing.uri}"/>
-  </bean>
-
   <reference id="identity" interface="org.opennms.horizon.core.identity.Identity"/>
   <reference id="opennmsScheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler"/>
+  <reference id="messageDispatcherFactory" interface="org.opennms.horizon.ipc.sink.api.MessageDispatcherFactory" />
+
+  <bean id="minionRouting" class="org.opennms.poc.routing.MinionRouting">
+    <argument value="${routing.uri}"/>
+    <argument ref="messageDispatcherFactory"/>
+  </bean>
 
   <reference id="resultPublisher" interface="java.util.function.Consumer" filter="(message.publisher.topic=workflow-result)" />
+  <reference id="alertingService" interface="org.opennms.poc.alerting.AlertingService"/>
 
   <bean id="workflowRepository" class="org.opennms.poc.ignite.worker.workflows.WorkflowRepository"/>
 
@@ -91,7 +89,7 @@
     <argument ref="workflowExecutorLocalServiceFactory"/>
     <argument ref="listenerFactoryRegistry"/>
     <argument ref="serviceConnectorFactoryRegistry"/>
-    <argument ref="registrationProducer"/>
+    <argument ref="alertingService"/>
   </bean>
 
   <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl" destroy-method="close">

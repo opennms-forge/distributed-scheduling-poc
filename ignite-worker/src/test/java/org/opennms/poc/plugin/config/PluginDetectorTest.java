@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opennms.poc.ignite.model.workflows.PluginMetadata;
 import org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry;
 import org.opennms.poc.ignite.worker.ignite.registries.MonitorRegistry;
 import org.opennms.poc.plugin.api.MonitoredService;

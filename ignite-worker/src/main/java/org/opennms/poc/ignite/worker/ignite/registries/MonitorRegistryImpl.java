@@ -1,11 +1,8 @@
 package org.opennms.poc.ignite.worker.ignite.registries;
 
-import com.savoirtech.eos.pattern.whiteboard.KeyedWhiteboard;
-import com.savoirtech.eos.util.ServiceProperties;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.ProducerTemplate;
-import org.opennms.poc.plugin.api.ServiceDetectorManager;
+import org.opennms.poc.alerting.AlertingService;
 import org.opennms.poc.plugin.api.ServiceMonitorManager;
 import org.osgi.framework.BundleContext;
 
@@ -14,8 +11,8 @@ public class MonitorRegistryImpl extends AlertingPluginRegistry<String, ServiceM
 
     public static final String PLUGIN_IDENTIFIER = "monitor.name";
 
-    public MonitorRegistryImpl(BundleContext bundleContext, ProducerTemplate producerTemplate) {
-        super(bundleContext, ServiceMonitorManager.class,PLUGIN_IDENTIFIER, producerTemplate);
+    public MonitorRegistryImpl(BundleContext bundleContext, AlertingService alertingService) {
+        super(bundleContext, ServiceMonitorManager.class,PLUGIN_IDENTIFIER, alertingService);
     }
 
     @Override

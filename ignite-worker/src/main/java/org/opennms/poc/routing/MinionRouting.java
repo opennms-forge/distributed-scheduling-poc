@@ -14,7 +14,7 @@ import org.opennms.poc.plugin.config.PluginConfigMessage;
 import org.opennms.poc.plugin.config.PluginConfigMessage.Builder;
 import org.opennms.poc.plugin.config.PluginConfigMessage.PluginConfigMeta;
 import org.opennms.poc.plugin.config.PluginConfigSinkModule;
-import org.opennms.poc.plugin.config.PluginMetadata;
+import org.opennms.poc.ignite.model.workflows.PluginMetadata;
 
 @Slf4j
 public class MinionRouting extends RouteBuilder {

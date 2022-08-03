@@ -63,7 +63,8 @@
         <module>test-driver</module>
         <module>tracing</module>
         <module>metrics</module>
-        <!-- <module>docker-it</module> -->
+      <module>alerting</module>
+      <!-- <module>docker-it</module> -->
     </modules>
 
     <dependencyManagement>

@@ -2,7 +2,7 @@ package org.opennms.poc.ignite.worker.ignite.registries;
 
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.ProducerTemplate;
+import org.opennms.poc.alerting.AlertingService;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalServiceFactory;
 import org.opennms.poc.plugin.api.ServiceDetectorManager;
 import org.opennms.poc.plugin.api.ServiceMonitorManager;
@@ -24,11 +24,11 @@ public class OsgiServiceHolder {
             WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory,
             ListenerFactoryRegistry listenerFactoryRegistry,
             ServiceConnectorFactoryRegistryImpl serviceConnectorFactoryRegistry,
-            ProducerTemplate producerTemplate) {
+            AlertingService alertingService) {
 
         log.info("Creating an instance of the StaticDetectorRegistry for initialization. Don't do this twice!");
-        detectorRegistry = new DetectorRegistryImpl(bundleContext, producerTemplate);
-        monitorRegistry = new MonitorRegistryImpl(bundleContext, producerTemplate);
+        detectorRegistry = new DetectorRegistryImpl(bundleContext, alertingService);
+        monitorRegistry = new MonitorRegistryImpl(bundleContext, alertingService);
 
         OsgiServiceHolder.opennmsScheduler = opennmsScheduler;
         OsgiServiceHolder.workflowExecutorLocalServiceFactory = workflowExecutorLocalServiceFactory;
