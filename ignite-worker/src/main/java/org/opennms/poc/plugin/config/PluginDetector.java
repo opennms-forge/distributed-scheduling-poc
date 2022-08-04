@@ -14,10 +14,10 @@ import org.opennms.poc.plugin.api.ServiceMonitorManager;
 @AllArgsConstructor
 public class PluginDetector {
 
-    MonitorRegistry monitorRegistry;
-    DetectorRegistry detectorRegistry;
-    PluginConfigScanner pluginConfigScanner;
-    PluginConfigInjector pluginConfigInjector;
+    private final MonitorRegistry monitorRegistry;
+    private final DetectorRegistry detectorRegistry;
+    private final PluginConfigScanner pluginConfigScanner;
+    private final PluginConfigInjector pluginConfigInjector;
 
     public List<PluginMetadata> detect() {
         List<PluginMetadata> detectedPlugins = new ArrayList<>();

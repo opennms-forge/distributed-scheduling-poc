@@ -6,6 +6,7 @@ import org.opennms.poc.ignite.worker.workflows.RetriableExecutor;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
 import org.opennms.poc.plugin.api.ServiceConnector;
 import org.opennms.poc.plugin.api.ServiceConnectorFactory;
+import org.opennms.poc.plugin.config.PluginDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +24,15 @@ public class WorkflowConnectorRetriable implements RetriableExecutor {
 
     private Workflow workflow;
     private WorkflowExecutionResultProcessor resultProcessor;
+    private final PluginDetector pluginDetector;
     private ServiceConnector serviceConnector;
 
     private Runnable onDisconnect;
 
-    public WorkflowConnectorRetriable(Workflow workflow, WorkflowExecutionResultProcessor resultProcessor) {
+    public WorkflowConnectorRetriable(Workflow workflow, WorkflowExecutionResultProcessor resultProcessor, PluginDetector pluginDetector) {
         this.workflow = workflow;
         this.resultProcessor = resultProcessor;
+        this.pluginDetector = pluginDetector;
     }
 
 //========================================

@@ -17,7 +17,6 @@ public class Workflow implements Serializable {
     private Map<String,String> parameters = new LinkedHashMap<>();
     private String uuid;
     private String cron;
-    private List<FieldConfigMeta> fieldConfigMeta;
 
     public String getDescription() {
         return description;
@@ -65,10 +64,6 @@ public class Workflow implements Serializable {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public List<FieldConfigMeta> getFieldConfigMeta() {
-        return fieldConfigMeta;
     }
 
     @Override

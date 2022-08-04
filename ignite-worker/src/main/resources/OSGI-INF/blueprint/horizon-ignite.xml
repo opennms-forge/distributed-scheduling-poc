@@ -68,21 +68,41 @@
     <argument ref="blueprintBundleContext"/>
   </bean>
 
+  <!-- plugin configuration framework -->
+  <bean id="detectorRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistryImpl">
+    <argument ref="blueprintBundleContext" />
+    <argument ref="alertingService" />
+  </bean>
+  <bean id="monitorRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.MonitorRegistryImpl">
+    <argument ref="blueprintBundleContext" />
+    <argument ref="alertingService" />
+  </bean>
+  <bean id="pluginConfigInjector" class="org.opennms.poc.plugin.config.PluginConfigInjector" />
+  <bean id="pluginConfigScanner" class="org.opennms.poc.plugin.config.PluginConfigScanner" />
+  <bean id="pluginDetector" class="org.opennms.poc.plugin.config.PluginDetector">
+    <argument ref="monitorRegistry" />
+    <argument ref="detectorRegistry" />
+    <argument ref="pluginConfigScanner" />
+    <argument ref="pluginConfigInjector" />
+  </bean>
+  <!-- /plugin configuration framework -->
+
   <bean id="workflowExecutorLocalServiceFactory"
         class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowExecutorLocalServiceFactoryImpl">
 
     <argument ref="opennmsScheduler"/>
     <argument ref="workflowExecutionResultProcessor"/>
+    <argument ref="pluginDetector" />
   </bean>
 
 <!--  Creating an instance here just to get the static fields set, but we don't really need to reference this instance -->
   <bean id="osgiServiceHolder" class="org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder">
-    <argument ref="blueprintBundleContext"/>
     <argument ref="opennmsScheduler"/>
+    <argument ref="monitorRegistry" />
+    <argument ref="detectorRegistry" />
     <argument ref="workflowExecutorLocalServiceFactory"/>
     <argument ref="listenerFactoryRegistry"/>
     <argument ref="serviceConnectorFactoryRegistry"/>
-    <argument ref="alertingService"/>
   </bean>
 
   <bean id="workflowLifecycleManager" class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl" destroy-method="close">

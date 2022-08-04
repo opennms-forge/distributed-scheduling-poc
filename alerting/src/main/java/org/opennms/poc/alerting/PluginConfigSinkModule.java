@@ -26,8 +26,7 @@ public class PluginConfigSinkModule implements SinkModule<PluginConfigMessage, P
   @Override
   public byte[] marshal(PluginConfigMessage resultsMessage) {
     try {
-//      return resultsMessage.toByteArray();
-      return null;
+      return resultsMessage.toByteArray();
     } catch (Exception e) {
       logger.warn("Error while marshalling message {}.", resultsMessage, e);
       return new byte[0];
