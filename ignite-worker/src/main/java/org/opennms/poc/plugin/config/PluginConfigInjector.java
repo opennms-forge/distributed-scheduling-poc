@@ -14,21 +14,22 @@ public class PluginConfigInjector {
 
         Class clazz = target.getClass();
 
-        configs.forEach(config -> {
-            try {
-                Field f = clazz.getDeclaredField(config.getDeclaredFieldName());
+        if (configs != null) {
+            configs.forEach(config -> {
+                try {
+                    Field f = clazz.getDeclaredField(config.getDeclaredFieldName());
 
-                if (config.getJavaType().equals(f.getType().getName())) {
-                    f.set(target, config.getValue());
+                    if (config.getJavaType().equals(f.getType().getName())) {
+                        f.set(target, config.getValue());
+                    } else {
+                        log.error("Field types don't match!");
+                    }
+                } catch (NoSuchFieldException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
                 }
-                else {
-                    log.error("Field types don't match!");
-                }
-            } catch (NoSuchFieldException e) {
-                throw new RuntimeException(e);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        });
+            });
+        }
     }
 }
