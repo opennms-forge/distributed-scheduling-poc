@@ -19,16 +19,16 @@ public class OsgiServiceHolder {
     private static WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory;
 
     public OsgiServiceHolder(
-            BundleContext bundleContext,
             OpennmsScheduler opennmsScheduler,
+            MonitorRegistry monitorRegistry,
+            DetectorRegistry detectorRegistry,
             WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory,
             ListenerFactoryRegistry listenerFactoryRegistry,
-            ServiceConnectorFactoryRegistryImpl serviceConnectorFactoryRegistry,
-            AlertingService alertingService) {
+            ServiceConnectorFactoryRegistryImpl serviceConnectorFactoryRegistry) {
 
         log.info("Creating an instance of the StaticDetectorRegistry for initialization. Don't do this twice!");
-        detectorRegistry = new DetectorRegistryImpl(bundleContext, alertingService);
-        monitorRegistry = new MonitorRegistryImpl(bundleContext, alertingService);
+        OsgiServiceHolder.detectorRegistry = detectorRegistry;
+        OsgiServiceHolder.monitorRegistry = monitorRegistry;
 
         OsgiServiceHolder.opennmsScheduler = opennmsScheduler;
         OsgiServiceHolder.workflowExecutorLocalServiceFactory = workflowExecutorLocalServiceFactory;
