@@ -6,8 +6,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import com.google.gson.Gson;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -19,17 +20,20 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistry;
 import org.opennms.poc.plugin.api.FieldConfigMeta;
-import org.opennms.poc.plugin.api.ServiceDetectorManager;
-import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 import org.opennms.poc.plugin.api.ServiceDetector;
+import org.opennms.poc.plugin.api.ServiceDetectorManager;
 import org.opennms.poc.plugin.api.ServiceDetectorResults;
+import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 
 public class PluginConfigInjectorTest  {
 
     @Mock
     DetectorRegistry detectorRegistry;
 
+    Gson gson = new Gson();
+
     PluginConfigScanner scanner = new PluginConfigScanner();
+    PluginConfigInjector injector = new PluginConfigInjector(scanner);
 
     @Before
     public void setUp() throws Exception {
@@ -44,18 +48,10 @@ public class PluginConfigInjectorTest  {
         assertEquals(4,fieldConfigMeta.size());
         fieldConfigMeta.forEach(fieldConfigMeta1 -> System.out.println(fieldConfigMeta1));
 
-        FieldConfigMeta fieldConfigMetaBlahString = new FieldConfigMeta("blah", "blahString","java.lang.String");
-        fieldConfigMetaBlahString.setValue("newBlahValue");
-        FieldConfigMeta fieldConfigMetaBlahInt = new FieldConfigMeta("integerField", "blahInt","int");
-        fieldConfigMetaBlahInt.setValue(Integer.valueOf(2));
-        FieldConfigMeta fieldConfigMetaEnum = new FieldConfigMeta("anEnum", "horizonEnum","org.opennms.poc.plugin.config.PluginConfigInjectorTest$HorizonEnum");
-        fieldConfigMetaEnum.setValue(HorizonEnum.TWO);
         MyCustomClass customClass = new MyCustomClass("ewww");
-        FieldConfigMeta fieldConfigMetaCustom = new FieldConfigMeta("custom", "customClass","org.opennms.poc.plugin.config.PluginConfigInjectorTest$MyCustomClass");
-        fieldConfigMetaCustom.setValue(customClass);
+        Map<String, String> values = Map.of("blahString", "newBlahValue", "blahInt", "2", "horizonEnum", "TWO", "customClass", gson.toJson(customClass));
 
-
-        PluginConfigInjector.injectConfigs( testMinionPlugin, Arrays.asList(fieldConfigMetaBlahString, fieldConfigMetaBlahInt, fieldConfigMetaEnum, fieldConfigMetaCustom));
+        injector.injectConfigs(testMinionPlugin, values);
 
         assertTrue(testMinionPlugin.getBlahString().equals("newBlahValue"));
         assertEquals(2, (testMinionPlugin.getBlahInt()));

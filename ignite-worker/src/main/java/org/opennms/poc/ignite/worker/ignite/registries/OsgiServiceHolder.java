@@ -2,12 +2,10 @@ package org.opennms.poc.ignite.worker.ignite.registries;
 
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.poc.alerting.AlertingService;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalServiceFactory;
 import org.opennms.poc.plugin.api.ServiceDetectorManager;
 import org.opennms.poc.plugin.api.ServiceMonitorManager;
 import org.opennms.poc.scheduler.OpennmsScheduler;
-import org.osgi.framework.BundleContext;
 
 @Slf4j
 public class OsgiServiceHolder {

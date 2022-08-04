@@ -5,10 +5,10 @@ import com.savoirtech.eos.util.ServiceProperties;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.poc.alerting.AlertingService;
+import org.opennms.poc.ignite.model.workflows.PluginMetadata;
 import org.opennms.poc.ignite.model.workflows.WorkflowType;
 import org.opennms.poc.plugin.api.FieldConfigMeta;
 import org.opennms.poc.plugin.config.PluginConfigScanner;
-import org.opennms.poc.ignite.model.workflows.PluginMetadata;
 import org.osgi.framework.BundleContext;
 
 @Slf4j

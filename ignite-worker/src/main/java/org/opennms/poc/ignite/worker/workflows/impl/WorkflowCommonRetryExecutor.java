@@ -1,5 +1,6 @@
 package org.opennms.poc.ignite.worker.workflows.impl;
 
+import java.util.concurrent.TimeUnit;
 import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.worker.workflows.RetriableExecutor;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
@@ -7,8 +8,6 @@ import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalService;
 import org.opennms.poc.scheduler.OpennmsScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Local implementation of the service to execute a workflow that implements retry handling.  This class runs "locally"

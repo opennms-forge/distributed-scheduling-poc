@@ -1,17 +1,15 @@
 package org.opennms.poc.ignite.worker.workflows.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
 import org.opennms.poc.ignite.worker.workflows.RetriableExecutor;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
 import org.opennms.poc.plugin.api.Listener;
 import org.opennms.poc.plugin.api.ListenerFactory;
-import org.opennms.poc.plugin.config.PluginDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Core of the Workflow Executor for LISTENERS which implements the RetriableExecutor, focusing the logic for starting
@@ -29,14 +27,12 @@ public class WorkflowListenerRetriable implements RetriableExecutor {
     private Workflow workflow;
     private Listener listener;
     private WorkflowExecutionResultProcessor resultProcessor;
-    private final PluginDetector pluginDetector;
 
     private Runnable onDisconnect;
 
-    public WorkflowListenerRetriable(Workflow workflow, WorkflowExecutionResultProcessor resultProcessor, PluginDetector pluginDetector) {
+    public WorkflowListenerRetriable(Workflow workflow, WorkflowExecutionResultProcessor resultProcessor) {
         this.workflow = workflow;
         this.resultProcessor = resultProcessor;
-        this.pluginDetector = pluginDetector;
     }
 
 //========================================

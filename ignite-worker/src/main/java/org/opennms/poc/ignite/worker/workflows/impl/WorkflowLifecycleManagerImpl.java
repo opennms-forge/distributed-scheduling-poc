@@ -1,6 +1,11 @@
 package org.opennms.poc.ignite.worker.workflows.impl;
 
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.ignite.Ignite;
@@ -13,12 +18,6 @@ import org.opennms.poc.ignite.model.workflows.Workflows;
 import org.opennms.poc.ignite.worker.workflows.WorkflowLifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class WorkflowLifecycleManagerImpl implements WorkflowLifecycleManager {
 

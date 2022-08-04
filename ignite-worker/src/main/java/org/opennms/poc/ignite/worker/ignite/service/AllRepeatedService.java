@@ -1,11 +1,10 @@
 package org.opennms.poc.ignite.worker.ignite.service;
 
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.resources.IgniteInstanceResource;
 import org.apache.ignite.services.Service;
-
-import java.util.UUID;
 
 @Slf4j
 public class AllRepeatedService implements Service {

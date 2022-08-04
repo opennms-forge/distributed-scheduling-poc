@@ -11,6 +11,7 @@
     </feature>
 
     <feature name="ignite-poc" version="${project.version}" >
+        <feature>camel-gson</feature>
         <feature>camel-blueprint</feature>
         <feature>camel-core</feature>
         <feature version="${project.version}">guava</feature>

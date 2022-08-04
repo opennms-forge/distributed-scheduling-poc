@@ -1,15 +1,14 @@
 package org.opennms.poc.ignite.worker.queue.impl;
 
-import lombok.Setter;
-import org.opennms.poc.ignite.worker.queue.AsyncProcessingQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import lombok.Setter;
+import org.opennms.poc.ignite.worker.queue.AsyncProcessingQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * In-memory asynchronous queue implementation.  Requires a ThreadPoolExecutor and Consumer to be injected to process

@@ -1,5 +1,6 @@
 package org.opennms.poc.ignite.worker.ignite;
 
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.ignite.Ignite;
@@ -18,8 +19,6 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMultic
 import org.apache.ignite.spi.metric.MetricExporterSpi;
 import org.opennms.poc.ignite.worker.ignite.classloader.CompoundClassLoader;
 import org.opennms.poc.ignite.worker.workflows.impl.WorkflowLifecycleManagerImpl;
-
-import java.util.Arrays;
 
 @Data
 @AllArgsConstructor

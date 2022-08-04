@@ -12,6 +12,7 @@ import org.opennms.poc.plugin.api.ServiceDetectorManager;
 import org.opennms.poc.plugin.api.ServiceMonitorManager;
 
 @AllArgsConstructor
+@Deprecated
 public class PluginDetector {
 
     private final MonitorRegistry monitorRegistry;
@@ -56,7 +57,7 @@ public class PluginDetector {
             if (target != null) {
                 // blech!!!
                 Object finalTarget = target;
-                pluginConfigInjector.injectConfigs(finalTarget, pluginMetadata.getFieldConfigs());
+                pluginConfigInjector.injectConfigs(finalTarget, null);
             }
         });
     }
