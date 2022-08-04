@@ -10,13 +10,15 @@ import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 
 public class PluginConfigScannerTest {
 
+    PluginConfigScanner scanner = new PluginConfigScanner();
+
     @Before
     public void setUp() throws Exception {
     }
 
     @Test
     public void getConfigs() {
-        List<FieldConfigMeta> fieldConfigMeta =  PluginConfigScanner.getConfigs(TestMinionPlugin.class);
+        List<FieldConfigMeta> fieldConfigMeta =  scanner.getConfigs(TestMinionPlugin.class);
         assertEquals(4,fieldConfigMeta.size());
         fieldConfigMeta.forEach(fieldConfigMeta1 -> System.out.println(fieldConfigMeta1));
     }

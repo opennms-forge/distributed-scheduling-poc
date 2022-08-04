@@ -11,7 +11,7 @@ import org.opennms.poc.plugin.api.annotations.HorizonConfig;
 @Slf4j
 public class PluginConfigScanner {
 
-    public static List<FieldConfigMeta> getConfigs(Class clazz) {
+    public List<FieldConfigMeta> getConfigs(Class clazz) {
 
         Field[] fields = clazz.getDeclaredFields();
 

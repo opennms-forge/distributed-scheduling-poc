@@ -29,6 +29,8 @@ public class PluginConfigInjectorTest  {
     @Mock
     DetectorRegistry detectorRegistry;
 
+    PluginConfigScanner scanner = new PluginConfigScanner();
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
@@ -38,7 +40,7 @@ public class PluginConfigInjectorTest  {
     public void injectConfigs() {
         TestMinionPluginManager testMinionPlugin = new TestMinionPluginManager("blahStringValue", 42, HorizonEnum.THREE, new MyCustomClass("blahField"), "notConfirugredValue");
         when(detectorRegistry.getService(anyString())).thenReturn(testMinionPlugin);
-        List<FieldConfigMeta> fieldConfigMeta =  PluginConfigScanner.getConfigs(TestMinionPluginManager.class);
+        List<FieldConfigMeta> fieldConfigMeta =  scanner.getConfigs(TestMinionPluginManager.class);
         assertEquals(4,fieldConfigMeta.size());
         fieldConfigMeta.forEach(fieldConfigMeta1 -> System.out.println(fieldConfigMeta1));
 

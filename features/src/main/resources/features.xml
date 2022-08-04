@@ -10,22 +10,26 @@
         <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
     </feature>
 
-    <feature name="ignite-poc" version="${project.version}">
+    <feature name="ignite-poc" version="${project.version}" >
         <feature>camel-blueprint</feature>
         <feature>camel-core</feature>
         <feature version="${project.version}">guava</feature>
         <feature>cxf-jackson</feature>
         <feature version="${project.version}">ignite</feature>
         <feature>aries-blueprint</feature>
+        <feature version="${project.version}" dependency="true">alerting</feature>
         <feature version="${project.version}">eos</feature>
         <feature version="${project.version}">ignite-poc-model</feature>
         <feature version="${project.version}">poc-grpc</feature>
         <feature version="${project.version}">poc-cron</feature>
         <feature version="${project.version}">poc-metrics</feature>
 
-        <bundle>mvn:org.opennms.poc/alerting/${project.version}</bundle>
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
+    </feature>
+
+    <feature name="alerting" description="Plugin registration alerting" version="${project.version}">
+        <bundle>mvn:org.opennms.poc/alerting/${project.version}</bundle>
     </feature>
 
     <feature name="eos" description="Savoirtech EOS Whiteboard" version="${project.version}">

@@ -14,6 +14,7 @@ import org.osgi.framework.BundleContext;
 @Slf4j
 public class AlertingPluginRegistry<K, S> extends KeyedWhiteboard<K, S>  {
     private final AlertingService alertingService;
+    private static PluginConfigScanner scanner = new PluginConfigScanner();
 
     public AlertingPluginRegistry(BundleContext bundleContext, Class<S> serviceType, String id, AlertingService alertingService) {
         super(bundleContext, serviceType, (svc, props) -> props.getProperty(id));
@@ -26,7 +27,7 @@ public class AlertingPluginRegistry<K, S> extends KeyedWhiteboard<K, S>  {
         K serviceId = super.addService(service, props);
 
         if (serviceId != null) {
-            List<FieldConfigMeta> fieldConfigMetaList = PluginConfigScanner.getConfigs(service.getClass());
+            List<FieldConfigMeta> fieldConfigMetaList = scanner.getConfigs(service.getClass());
             log.info("Performing scan on service {}", service.getClass());
             PluginMetadata pluginMetadata = new PluginMetadata(serviceId.toString(), WorkflowType.DETECTOR, fieldConfigMetaList);
             alertingService.notifyOfPluginRegistration(pluginMetadata);
@@ -37,5 +38,6 @@ public class AlertingPluginRegistry<K, S> extends KeyedWhiteboard<K, S>  {
 
     @Override
     public void start() {
+
     }
 }

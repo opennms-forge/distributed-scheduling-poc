@@ -1,4 +1,4 @@
-package org.opennms.poc.routing;
+package org.opennms.poc.alerting;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,11 +9,10 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.processor.aggregate.AbstractListAggregationStrategy;
 import org.opennms.horizon.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.ipc.sink.api.SyncDispatcher;
-import org.opennms.poc.plugin.config.FieldConfigMeta;
-import org.opennms.poc.plugin.config.PluginConfigMessage;
-import org.opennms.poc.plugin.config.PluginConfigMessage.Builder;
-import org.opennms.poc.plugin.config.PluginConfigMessage.PluginConfigMeta;
-import org.opennms.poc.plugin.config.PluginConfigSinkModule;
+import org.opennms.poc.alerting.proto.FieldConfigMeta;
+import org.opennms.poc.alerting.proto.PluginConfigMessage;
+import org.opennms.poc.alerting.proto.PluginConfigMessage.Builder;
+import org.opennms.poc.alerting.proto.PluginConfigMessage.PluginConfigMeta;
 import org.opennms.poc.ignite.model.workflows.PluginMetadata;
 
 @Slf4j
@@ -44,6 +43,7 @@ public class MinionRouting extends RouteBuilder {
                     List<PluginMetadata> pluginMetadataList = exchange.getIn().getBody(List.class);
 
                     log.info("Got {} configs", pluginMetadataList.size());
+                    log.info("PluginMetadata {}", pluginMetadataList);
 
                     // now get the builder for the protobuf message and construct it from the PluginMetadata
 
@@ -56,16 +56,18 @@ public class MinionRouting extends RouteBuilder {
                                 setPluginType(pluginMetadata.getPluginType().toString());
                         // iterate over each field in the plugin config
                         pluginMetadata.getFieldConfigs().forEach(fieldConfig -> {
-                                pluginConfigMetaBuilder.addConfigs(
-                                    FieldConfigMeta.newBuilder().
-                                        setJavaType(fieldConfig.getJavaType()).
-                                        setIsEnum(fieldConfig.isEnum()).
-                                        setCustom(fieldConfig.isCustom()).
-                                        setDisplayName(fieldConfig.getDisplayName()).
-                                            //TODO: make sure this can handle null, maybe change the field itself to a List
-                                        addAllEnumValues((Iterable<String>) Arrays.stream(fieldConfig.getEnumConstants()).iterator()).
-                                        setDeclaredFieldName(fieldConfig.getDeclaredFieldName()).
-                                        build());
+                            FieldConfigMeta.Builder fieldConfigMetaBuilder = FieldConfigMeta.newBuilder().
+                                    setJavaType(fieldConfig.getJavaType()).
+                                    setIsEnum(fieldConfig.isEnum()).
+                                    setCustom(fieldConfig.isCustom()).
+                                    setDisplayName(fieldConfig.getDisplayName()).
+                                    setDeclaredFieldName(fieldConfig.getDeclaredFieldName());
+
+                                if (fieldConfig.getEnumConstants() != null) {
+                                    fieldConfigMetaBuilder.addAllEnumValues((Iterable<String>) Arrays.stream(fieldConfig.getEnumConstants()).iterator());
+                                }
+                                
+                                pluginConfigMetaBuilder.addConfigs(fieldConfigMetaBuilder.build());
                             }
                         );
                         messageBuilder.addPluginconfigs(pluginConfigMetaBuilder.build());

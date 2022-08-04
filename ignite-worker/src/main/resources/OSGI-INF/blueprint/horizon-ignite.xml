@@ -15,13 +15,6 @@
 
   <reference id="identity" interface="org.opennms.horizon.core.identity.Identity"/>
   <reference id="opennmsScheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler"/>
-  <reference id="messageDispatcherFactory" interface="org.opennms.horizon.ipc.sink.api.MessageDispatcherFactory" />
-
-  <bean id="minionRouting" class="org.opennms.poc.routing.MinionRouting">
-    <argument value="${routing.uri}"/>
-    <argument ref="messageDispatcherFactory"/>
-  </bean>
-
   <reference id="resultPublisher" interface="java.util.function.Consumer" filter="(message.publisher.topic=workflow-result)" />
   <reference id="alertingService" interface="org.opennms.poc.alerting.AlertingService"/>
 

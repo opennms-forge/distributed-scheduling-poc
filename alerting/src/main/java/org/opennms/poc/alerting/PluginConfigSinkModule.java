@@ -1,9 +1,10 @@
-package org.opennms.poc.plugin.config;
+package org.opennms.poc.alerting;
 
 import org.opennms.horizon.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
+import org.opennms.poc.alerting.proto.PluginConfigMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
