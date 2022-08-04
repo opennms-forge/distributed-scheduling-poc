@@ -1,9 +1,11 @@
 package org.opennms.poc.ignite.worker.ignite.registries;
 
-import org.opennms.poc.plugin.api.ServiceMonitor;
+import java.util.Map;
+import org.opennms.poc.plugin.api.ServiceMonitorManager;
 
 public interface MonitorRegistry {
 
-    ServiceMonitor getService(String type);
-    int getCount();
+    ServiceMonitorManager getService(String type);
+    int getServiceCount();
+    Map<String, ServiceMonitorManager> getServices();
 }

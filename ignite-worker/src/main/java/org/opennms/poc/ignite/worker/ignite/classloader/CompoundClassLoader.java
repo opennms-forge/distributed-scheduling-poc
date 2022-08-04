@@ -1,7 +1,5 @@
 package org.opennms.poc.ignite.worker.ignite.classloader;
 
-import org.opennms.poc.ignite.worker.ignite.WorkerIgniteConfiguration;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -9,6 +7,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.opennms.poc.ignite.worker.ignite.WorkerIgniteConfiguration;
 
 /**
  * Combined class loader which delegates lookup to dynamic list of class loaders which can change over time.

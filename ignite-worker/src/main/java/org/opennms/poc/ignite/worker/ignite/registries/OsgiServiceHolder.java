@@ -1,13 +1,11 @@
 package org.opennms.poc.ignite.worker.ignite.registries;
 
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalServiceFactory;
-import org.opennms.poc.plugin.api.ServiceDetector;
-import org.opennms.poc.plugin.api.ServiceMonitor;
+import org.opennms.poc.plugin.api.ServiceDetectorManager;
+import org.opennms.poc.plugin.api.ServiceMonitorManager;
 import org.opennms.poc.scheduler.OpennmsScheduler;
-import org.osgi.framework.BundleContext;
 
 @Slf4j
 public class OsgiServiceHolder {
@@ -19,15 +17,16 @@ public class OsgiServiceHolder {
     private static WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory;
 
     public OsgiServiceHolder(
-            BundleContext bundleContext,
             OpennmsScheduler opennmsScheduler,
+            MonitorRegistry monitorRegistry,
+            DetectorRegistry detectorRegistry,
             WorkflowExecutorLocalServiceFactory workflowExecutorLocalServiceFactory,
             ListenerFactoryRegistry listenerFactoryRegistry,
             ServiceConnectorFactoryRegistryImpl serviceConnectorFactoryRegistry) {
 
         log.info("Creating an instance of the StaticDetectorRegistry for initialization. Don't do this twice!");
-        detectorRegistry = new DetectorRegistryImpl(bundleContext);
-        monitorRegistry = new MonitorRegistryImpl(bundleContext);
+        OsgiServiceHolder.detectorRegistry = detectorRegistry;
+        OsgiServiceHolder.monitorRegistry = monitorRegistry;
 
         OsgiServiceHolder.opennmsScheduler = opennmsScheduler;
         OsgiServiceHolder.workflowExecutorLocalServiceFactory = workflowExecutorLocalServiceFactory;
@@ -35,20 +34,20 @@ public class OsgiServiceHolder {
         OsgiServiceHolder.serviceConnectorFactoryRegistry = serviceConnectorFactoryRegistry;
     }
 
-    public static Optional<ServiceDetector> getDetector(String name) {
+    public static Optional<ServiceDetectorManager> getDetectorManager(String name) {
          return Optional.ofNullable(detectorRegistry.getService(name));
     }
 
     public static int getRegisteredDetectorCount() {
-        return detectorRegistry.getCount();
+        return detectorRegistry.getServiceCount();
     }
 
-    public static Optional<ServiceMonitor> getMonitor(String name) {
+    public static Optional<ServiceMonitorManager> getMonitorManager(String name) {
         return Optional.ofNullable(monitorRegistry.getService(name));
     }
 
     public static int getRegisteredMonitorCount() {
-        return monitorRegistry.getCount();
+        return monitorRegistry.getServiceCount();
     }
 
     public static OpennmsScheduler getOpennmsScheduler() {

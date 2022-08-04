@@ -1,6 +1,5 @@
 <blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
-  xmlns:camel="http://camel.apache.org/schema/blueprint"
   xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
   xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
@@ -9,13 +8,14 @@
       <cm:property name="useKubernetes" value="false"/>
       <cm:property name="kubernetes.service-name" value="poc-distributed-scheduling"/>
       <cm:property name="workflowSchedulerThreadCount" value="20"/>
+      <cm:property name="routing.uri" value="seda:registration"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
   <reference id="identity" interface="org.opennms.horizon.core.identity.Identity"/>
   <reference id="opennmsScheduler" interface="org.opennms.poc.scheduler.OpennmsScheduler"/>
-
   <reference id="resultPublisher" interface="java.util.function.Consumer" filter="(message.publisher.topic=workflow-result)" />
+  <reference id="alertingService" interface="org.opennms.poc.alerting.AlertingService"/>
 
   <bean id="workflowRepository" class="org.opennms.poc.ignite.worker.workflows.WorkflowRepository"/>
 
@@ -47,16 +47,6 @@
 
 <!--  ========= Detector whiteboard and plugins ==========-->
 
-<!--  <bean id="detectorRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistryImpl">-->
-<!--    <argument ref="blueprintBundleContext"/>-->
-<!--    <argument ref="ignite"/>-->
-<!--  </bean>-->
-
-<!--  <bean id="monitorRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.MonitorRegistryImpl">-->
-<!--    <argument ref="blueprintBundleContext"/>-->
-<!--    <argument ref="ignite"/>-->
-<!--  </bean>-->
-
   <bean id="resultProcessorThreadPoolExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
     <argument value="3"/>
   </bean>
@@ -77,17 +67,40 @@
     <argument ref="blueprintBundleContext"/>
   </bean>
 
+  <!-- plugin configuration framework -->
+  <bean id="detectorRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.DetectorRegistryImpl">
+    <argument ref="blueprintBundleContext" />
+    <argument ref="alertingService" />
+  </bean>
+  <bean id="monitorRegistry" class="org.opennms.poc.ignite.worker.ignite.registries.MonitorRegistryImpl">
+    <argument ref="blueprintBundleContext" />
+    <argument ref="alertingService" />
+  </bean>
+  <bean id="pluginConfigScanner" class="org.opennms.poc.plugin.config.PluginConfigScanner" />
+  <bean id="pluginConfigInjector" class="org.opennms.poc.plugin.config.PluginConfigInjector">
+    <argument ref="pluginConfigScanner"/>
+  </bean>
+<!--  <bean id="pluginDetector" class="org.opennms.poc.plugin.config.PluginDetector">-->
+<!--    <argument ref="monitorRegistry" />-->
+<!--    <argument ref="detectorRegistry" />-->
+<!--    <argument ref="pluginConfigScanner" />-->
+<!--    <argument ref="pluginConfigInjector" />-->
+<!--  </bean>-->
+  <!-- /plugin configuration framework -->
+
   <bean id="workflowExecutorLocalServiceFactory"
         class="org.opennms.poc.ignite.worker.workflows.impl.WorkflowExecutorLocalServiceFactoryImpl">
 
     <argument ref="opennmsScheduler"/>
     <argument ref="workflowExecutionResultProcessor"/>
+    <argument ref="pluginConfigInjector"/>
   </bean>
 
 <!--  Creating an instance here just to get the static fields set, but we don't really need to reference this instance -->
   <bean id="osgiServiceHolder" class="org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder">
-    <argument ref="blueprintBundleContext"/>
     <argument ref="opennmsScheduler"/>
+    <argument ref="monitorRegistry" />
+    <argument ref="detectorRegistry" />
     <argument ref="workflowExecutorLocalServiceFactory"/>
     <argument ref="listenerFactoryRegistry"/>
     <argument ref="serviceConnectorFactoryRegistry"/>

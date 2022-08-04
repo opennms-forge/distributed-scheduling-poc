@@ -1,7 +1,5 @@
 package org.opennms.poc.ignite.worker.workflows;
 
-import org.opennms.poc.ignite.model.workflows.Workflow;
-
 public interface RetriableExecutor {
     /**
      * Initialize the executor for the workflow.

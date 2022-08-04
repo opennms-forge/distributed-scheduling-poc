@@ -32,7 +32,7 @@ import org.opennms.poc.testdriver.workflow.ResultCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import orh.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
+import org.opennms.poc.ignite.grpc.workflow.WorkflowSinkModule;
 
 @Configuration
 public class GrpcServerConfig {

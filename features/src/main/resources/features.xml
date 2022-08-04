@@ -3,17 +3,22 @@
 <!--    <repository>mvn:org.apache.ignite/ignite-osgi-karaf/2.12.0/xml/features</repository>-->
     <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/${aries.jax.rs.whiteboard.version}/xml</repository>
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
+    <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
 
     <feature name="guava" description="Google Guava" version="${project.version}">
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
     </feature>
 
-    <feature name="ignite-poc" version="${project.version}">
+    <feature name="ignite-poc" version="${project.version}" >
+        <feature>camel-gson</feature>
+        <feature>camel-blueprint</feature>
+        <feature>camel-core</feature>
         <feature version="${project.version}">guava</feature>
         <feature>cxf-jackson</feature>
         <feature version="${project.version}">ignite</feature>
         <feature>aries-blueprint</feature>
+        <feature version="${project.version}" dependency="true">alerting</feature>
         <feature version="${project.version}">eos</feature>
         <feature version="${project.version}">ignite-poc-model</feature>
         <feature version="${project.version}">poc-grpc</feature>
@@ -22,6 +27,10 @@
 
         <bundle>mvn:org.opennms.poc/ignite-worker/${project.version}</bundle>
         <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
+    </feature>
+
+    <feature name="alerting" description="Plugin registration alerting" version="${project.version}">
+        <bundle>mvn:org.opennms.poc/alerting/${project.version}</bundle>
     </feature>
 
     <feature name="eos" description="Savoirtech EOS Whiteboard" version="${project.version}">
@@ -95,6 +104,7 @@
     </feature>
 
     <feature name="ignite-poc-model" description="POC Model" version="${project.version}">
+        <feature version="${project.version}">plugins-api</feature>
         <bundle>mvn:org.opennms.poc/model/${project.version}</bundle>
     </feature>
 

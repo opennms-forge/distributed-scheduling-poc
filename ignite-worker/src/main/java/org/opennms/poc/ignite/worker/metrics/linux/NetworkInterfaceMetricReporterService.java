@@ -1,6 +1,5 @@
 package org.opennms.poc.ignite.worker.metrics.linux;
 
-import lombok.extern.slf4j.Slf4j;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service that runs in the background and reports interface metrics every few seconds via logging (5 seconds by default).

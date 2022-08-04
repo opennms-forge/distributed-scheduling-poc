@@ -1,4 +1,4 @@
-package orh.opennms.poc.ignite.grpc.workflow;
+package org.opennms.poc.ignite.grpc.workflow;
 
 import org.opennms.horizon.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.ipc.sink.api.AggregationPolicy;

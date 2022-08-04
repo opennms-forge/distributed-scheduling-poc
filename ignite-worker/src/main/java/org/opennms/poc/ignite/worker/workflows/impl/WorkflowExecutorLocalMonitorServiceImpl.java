@@ -1,17 +1,5 @@
 package org.opennms.poc.ignite.worker.workflows.impl;
 
-import org.opennms.horizon.core.lib.IPAddress;
-import org.opennms.poc.ignite.model.workflows.Workflow;
-import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
-import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
-import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalService;
-import org.opennms.poc.plugin.api.MonitoredService;
-import org.opennms.poc.plugin.api.ServiceMonitor;
-import org.opennms.poc.plugin.api.ServiceMonitorResponse;
-import org.opennms.poc.scheduler.OpennmsScheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -20,6 +8,19 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.opennms.horizon.core.lib.IPAddress;
+import org.opennms.poc.ignite.model.workflows.Workflow;
+import org.opennms.poc.ignite.worker.ignite.registries.OsgiServiceHolder;
+import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
+import org.opennms.poc.ignite.worker.workflows.WorkflowExecutorLocalService;
+import org.opennms.poc.plugin.api.MonitoredService;
+import org.opennms.poc.plugin.api.ServiceMonitor;
+import org.opennms.poc.plugin.api.ServiceMonitorManager;
+import org.opennms.poc.plugin.api.ServiceMonitorResponse;
+import org.opennms.poc.plugin.config.PluginConfigInjector;
+import org.opennms.poc.scheduler.OpennmsScheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Local implementation of the service to execute a Monitor workflow.  This class runs "locally" only, so it is never
@@ -35,13 +36,17 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
     private Workflow workflow;
     private OpennmsScheduler scheduler;
     private WorkflowExecutionResultProcessor resultProcessor;
+    private final PluginConfigInjector pluginConfigInjector;
+    private ServiceMonitor monitor=null;
 
     private AtomicBoolean active = new AtomicBoolean(false);
 
-    public WorkflowExecutorLocalMonitorServiceImpl(OpennmsScheduler scheduler, Workflow workflow, WorkflowExecutionResultProcessor resultProcessor) {
+    public WorkflowExecutorLocalMonitorServiceImpl(OpennmsScheduler scheduler, Workflow workflow,
+        WorkflowExecutionResultProcessor resultProcessor, PluginConfigInjector pluginConfigInjector) {
         this.workflow = workflow;
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
+        this.pluginConfigInjector = pluginConfigInjector;
     }
 
 //========================================
@@ -79,12 +84,20 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
 // Setup Internals
 //----------------------------------------
 
-    private ServiceMonitor lookupMonitor(Workflow workflow) {
+    private Optional<ServiceMonitor> lookupMonitor(Workflow workflow) {
         String pluginName = workflow.getPluginName();
 
-        Optional<ServiceMonitor> result = OsgiServiceHolder.getMonitor(pluginName);
+        Optional<ServiceMonitorManager> result = OsgiServiceHolder.getMonitorManager(pluginName);
 
-        return result.orElse(null);
+        if (result.isPresent()) {
+            ServiceMonitorManager foundMonitorManager = result.get();
+
+            pluginConfigInjector.injectConfigs(foundMonitorManager, workflow.getParameters());
+
+            //TODO: what parameters (if any) to pass on creation? Probably none since we want to inject everything from schema.
+            return Optional.of(foundMonitorManager.create(null));
+        }
+        else return Optional.empty();
     }
 
 //========================================
@@ -103,7 +116,12 @@ public class WorkflowExecutorLocalMonitorServiceImpl implements WorkflowExecutor
 
     private void executeIteration() {
         try {
-            ServiceMonitor monitor = lookupMonitor(workflow);
+            if (monitor == null) {
+                Optional<ServiceMonitor> lazyMonitor = lookupMonitor(workflow);
+                if (lazyMonitor.isPresent()) {
+                    this.monitor = lazyMonitor.get();
+                }
+            }
             if (monitor != null) {
                 MonitoredService monitoredService = configureMonitoredService();
 

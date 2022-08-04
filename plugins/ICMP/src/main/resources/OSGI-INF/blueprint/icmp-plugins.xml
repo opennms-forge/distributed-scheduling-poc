@@ -11,19 +11,19 @@
 
   <bean id="pingerFactory" class="org.opennms.netmgt.icmp.jna.JnaPingerFactory"/>
 
-  <bean id="icmpDetector" class="org.opennms.poc.icmp.IcmpDetector"/>
+  <bean id="icmpDetectorManager" class="org.opennms.poc.icmp.IcmpDetectorManager"/>
 
-  <service ref="icmpDetector" interface="org.opennms.poc.plugin.api.ServiceDetector">
+  <service ref="icmpDetectorManager" interface="org.opennms.poc.plugin.api.ServiceDetectorManager">
     <service-properties>
       <entry key="detector.name" value="ICMPDetector"/>
     </service-properties>
   </service>
 
-  <bean id="icmpMonitor" class="org.opennms.poc.icmp.IcmpMonitor">
+  <bean id="icmpMonitorManager" class="org.opennms.poc.icmp.IcmpMonitorManager">
     <argument ref="pingerFactory"/>
   </bean>
 
-  <service ref="icmpMonitor" interface="org.opennms.poc.plugin.api.ServiceMonitor">
+  <service ref="icmpMonitorManager" interface="org.opennms.poc.plugin.api.ServiceMonitorManager">
     <service-properties>
       <entry key="monitor.name" value="ICMPMonitor"/>
     </service-properties>

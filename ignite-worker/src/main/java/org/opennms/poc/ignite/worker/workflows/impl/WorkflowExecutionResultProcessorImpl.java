@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 import lombok.Setter;
 import org.opennms.poc.ignite.model.workflows.Result;
@@ -13,8 +14,6 @@ import org.opennms.poc.ignite.worker.workflows.WorkflowExecutionResultProcessor;
 import org.opennms.poc.plugin.api.ServiceMonitorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class WorkflowExecutionResultProcessorImpl implements WorkflowExecutionResultProcessor {
 

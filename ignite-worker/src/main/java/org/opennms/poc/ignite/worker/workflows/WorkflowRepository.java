@@ -1,12 +1,10 @@
 package org.opennms.poc.ignite.worker.workflows;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opennms.poc.ignite.model.workflows.Workflow;
 import org.opennms.poc.ignite.model.workflows.Workflows;
 
